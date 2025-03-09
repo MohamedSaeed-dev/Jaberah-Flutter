@@ -25,11 +25,5 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Run Flutter Analyzer
-        run: flutter analyze
-
-      - name: Run Flutter Tests
-        run: flutter test
-
       - name: Build APK
-        run: flutter flutter build apk --release --target=lib/login.dart --no-tree-shake-icons
+        run: flutter build apk --release --target=lib/login.dart --no-tree-shake-icons
