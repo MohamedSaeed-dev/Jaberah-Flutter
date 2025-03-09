@@ -1,0 +1,70 @@
+gradle-wrapper.jar
+/.gradle
+/captures/
+/gradlew
+/gradlew.bat
+/local.properties
+GeneratedPluginRegistrant.java
+
+# Remember to never publicly share your keystore.
+# See https://flutter.dev/to/reference-keystore
+key.properties
+**/*.keystore
+**/*.jks
+
+# Flutter/Dart specific ignores
+.dart_tool/
+.packages
+build/
+ios/Pods/
+android/.gradle/
+android/app/debug.keystore
+
+# IntelliJ / VS Code settings
+.idea/
+.vscode/
+
+# Logs & Generated Files
+*.log
+pubspec.lock
+*.iml
+
+# Xcode specific ignores
+ios/.symlinks/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/App.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/ephemeral/
+
+# Fastlane specific files
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+
+# MacOS
+macos/Pods/
+macos/.flutter-plugins
+macos/.flutter-plugins-dependencies
+macos/.metadata
+macos/.symlinks/
+
+# Web
+web/.dart_tool/
+web/.firebase/
+web/.flutter-plugins
+web/.flutter-plugins-dependencies
+web/.metadata
+
+# Linux
+linux/flutter/ephemeral/
+linux/.flutter-plugins
+linux/.flutter-plugins-dependencies
+
+# Windows
+windows/flutter/ephemeral/
+windows/.flutter-plugins
+windows/.flutter-plugins-dependencies
+
+# Firebase/Environment files (if used)
+firebase_options.dart
+.env

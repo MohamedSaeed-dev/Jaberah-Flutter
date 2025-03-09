@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "807398615940",
+    "project_id": "jaberahnotifications",
+    "storage_bucket": "jaberahnotifications.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:807398615940:android:d0c4a77b0b6a7f5f120bd1",
+        "android_client_info": {
+          "package_name": "com.example.jaberah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAD73ct9v5wZXB6ze6USTsYtjcIyHY4AHs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
