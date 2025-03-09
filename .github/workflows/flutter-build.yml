@@ -27,3 +27,10 @@ jobs:
 
       - name: Build APK
         run: flutter build apk --release --target=lib/login.dart --no-tree-shake-icons
+      
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Flutter-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+
