@@ -193,7 +193,7 @@ class TeachersController extends GetxController {
   Future updateTeacher({required String id}) async {
     try {
       isLoadingOperation.value = true;
-      var response = await _apiClient.dio.put("$teachersURL/$id", data: {
+      var response = await _apiClient.dio.put("/$teachersURL/$id", data: {
         "teacherName": nameEditController.value.text,
         "phoneNumber": phoneEditController.value.text,
         "groupsId": selectedGroupsEdit,
@@ -202,7 +202,7 @@ class TeachersController extends GetxController {
         Get.back();
         successSnackBar('تم تحديث بيانات المعلم بنجاح');
         selectedGroupsEdit.clear();
-        getTeachers();
+        await getTeachers();
       } else {
         messageSnackBar(response.data["message"]);
       }
