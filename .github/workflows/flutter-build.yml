@@ -20,17 +20,33 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.1'  # Specify the desired Flutter version
+          flutter-version: '3.27.1'
 
       - name: Install Dependencies
         run: flutter pub get
 
       - name: Build APK
         run: flutter build apk --release --target=lib/login.dart --no-tree-shake-icons
-      
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Flutter-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
 
+      - name: Upload APK to Dropbox
+        uses: deka0106/upload-to-dropbox@v2
+        with:
+          dropbox_access_token: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
+          src: build/app/outputs/flutter-apk/app-release.apk
+          dest: /path/to/your/dropbox/folder/app-release.apk
+
+      - name: Create Dropbox Sharable Link
+        run: |
+          curl -X POST https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings \
+            --header "Authorization: Bearer ${{ secrets.DROPBOX_ACCESS_TOKEN }}" \
+            --header "Content-Type: application/json" \
+            --data "{\"path\": \"/path/to/your/dropbox/folder/app-release.apk\"}"
+        id: create_link
+
+      - name: Update Database with Sharable Link
+        uses: fjogeleit/http-request-action@v1
+        with:
+          url: 'https://jaberah.runasp.net/api/versions?url=${{ steps.create_link.outputs.body }}'
+          method: 'PUT'
+          headers: |
+            accept: */*
