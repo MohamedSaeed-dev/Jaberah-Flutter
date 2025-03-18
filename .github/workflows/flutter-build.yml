@@ -25,22 +25,36 @@ jobs:
       - name: Install Dependencies
         run: flutter pub get
 
+      - name: Extract App Version
+        id: extract_version
+        run: |
+          # Extract the version from pubspec.yaml
+          version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d "+" -f 1)
+          echo "App version is $version"
+          # Set it as an output so it can be used later
+          echo "::set-output name=version::$version"
+
       - name: Build APK
         run: flutter build apk --release --target=lib/login.dart --no-tree-shake-icons
+
+      - name: Rename APK
+        run: |
+          # Rename the APK file using the extracted version
+          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/jaberah-${{ steps.extract_version.outputs.version }}.apk
 
       - name: Generate Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Flutter-APK
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/jaberah-${{ steps.extract_version.outputs.version }}.apk
 
       - name: Upload APK to Dropbox
         id: upload_to_dropbox
         uses: deka0106/upload-to-dropbox@v2
         with:
           dropbox_access_token: ${{ secrets.DROPBOX_ACCESS_TOKEN }}
-          src: build/app/outputs/flutter-apk/app-release.apk
-          dest: /jaberah.apk
+          src: build/app/outputs/flutter-apk/jaberah-${{ steps.extract_version.outputs.version }}.apk
+          dest: /jaberah-${{ steps.extract_version.outputs.version }}.apk
 
       - name: Get Sharable Link from Dropbox
         id: get_sharable_link
@@ -48,16 +62,16 @@ jobs:
           response=$(curl -X POST https://api.dropboxapi.com/2/files/get_temporary_link \
             -H "Authorization: Bearer ${{ secrets.DROPBOX_ACCESS_TOKEN }}" \
             -H "Content-Type: application/json" \
-            -d '{"path": "/jaberah.apk"}')
+            -d '{"path": "/jaberah-${{ steps.extract_version.outputs.version }}.apk"}')
           # Extract the link from the JSON response
           link=$(echo $response | jq -r '.link')
           echo "Sharable link: $link"
           echo "::set-output name=link::$link"
 
-      - name: Update Database with Sharable Link
+      - name: Update Version
         uses: fjogeleit/http-request-action@v1
         with:
-          url: '${{secrets.BACKEND_API}}?url=${{ steps.get_sharable_link.outputs.link }}'
+          url: '${{secrets.BACKEND_API}}?url=${{ steps.get_sharable_link.outputs.link }}&version=${{steps.extract_version.outputs.version}}'
           method: 'PUT'
           headers: |
             accept: */*
