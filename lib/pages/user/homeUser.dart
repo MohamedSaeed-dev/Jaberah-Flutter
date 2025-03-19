@@ -127,7 +127,7 @@ class HomePageUser extends StatelessWidget {
                   ListTile(
                     leading: const Icon(Icons.logout),
                     title: const Text('تسجيل الخروج'),
-                    onTap: () {
+                    onTap: () async {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
@@ -151,15 +151,17 @@ class HomePageUser extends StatelessWidget {
                                   Get.back();
                                 },
                               ),
-                              TextButton(
-                                child: const Text(
-                                  'تسجيل الخروج',
-                                  style: TextStyle(color: Colors.red),
-                                ),
-                                onPressed: () async {
-                                  await authController.logout();
-                                },
-                              ),
+                              Obx(() => TextButton(
+                                    child: Text(
+                                      authController.isLoadingLogout.value
+                                          ? 'جاري تسجيل الخروج...'
+                                          : 'تسجيل الخروج',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                    onPressed: () async {
+                                      await authController.logout();
+                                    },
+                                  )),
                             ],
                           );
                         },
@@ -169,26 +171,79 @@ class HomePageUser extends StatelessWidget {
                 ],
               ),
               Container(
-                margin: EdgeInsets.only(bottom: 15),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                alignment: Alignment.bottomCenter,
+                padding: const EdgeInsets.all(10),
+                child: Column(
                   children: [
-                    Text("للتواصل مع الدعم؟"),
-                    IconButton(
-                        onPressed: () async {
-                          if (await canLaunchUrl(
-                              Uri.parse("https://wa.me/+966574195965"))) {
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("للتواصل مع الدعم؟"),
+                        IconButton(
+                          onPressed: () async {
+                            if (await canLaunchUrl(
+                                Uri.parse("https://wa.me/+966574195965"))) {
+                              await launchUrl(
+                                  Uri.parse("https://wa.me/+966574195965"),
+                                  mode: LaunchMode.externalApplication);
+                            } else {
+                              messageSnackBar("حدث خطأ، اعد المحاولة");
+                            }
+                          },
+                          icon: const Icon(Icons.phone),
+                        ),
+                      ],
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        if (versionController
+                            .versionData.value.isUpdateAvailable) {
+                          if (await canLaunchUrl(Uri.parse(
+                              versionController.versionData.value.url))) {
                             await launchUrl(
-                                Uri.parse("https://wa.me/+966574195965"),
+                                Uri.parse(
+                                    versionController.versionData.value.url),
                                 mode: LaunchMode.externalApplication);
-                          } else {
-                            messageSnackBar("حدث خطأ، اعد المحاولة");
                           }
-                        },
-                        icon: Icon(Icons.phone))
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Obx(() => Text(
+                                "الإصدار الحالي: ${versionController.currentVersion.value}",
+                                style: TextStyle(
+                                  color: versionController
+                                          .versionData.value.isUpdateAvailable
+                                      ? Colors.blue
+                                      : Colors.black,
+                                  fontWeight: versionController
+                                          .versionData.value.isUpdateAvailable
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                                ),
+                              )),
+                          Obx(() {
+                            if (versionController
+                                .versionData.value.isUpdateAvailable) {
+                              return Container(
+                                margin: const EdgeInsets.only(left: 10),
+                                width: 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                              );
+                            }
+                            return SizedBox();
+                          }),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),

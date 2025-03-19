@@ -98,8 +98,10 @@ class AuthController extends GetxController {
     }
   }
 
+var isLoadingLogout = false.obs;
   Future<void> logout() async {
     isLoggedIn.value = false;
+    isLoadingLogout.value = true;
     await _firebaseMessaging.deleteToken();
     await _firebaseMessaging.unsubscribeFromTopic("public");
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -112,7 +114,8 @@ class AuthController extends GetxController {
 
     Get.find<UserNameController>().name.value =
         ''; // Only use Get.find for UserNameController
-
+    isLoadingLogout.value = false;
+    Get.offAll(() => Login());
     Get.snackbar(
       '',
       '',
@@ -129,7 +132,6 @@ class AuthController extends GetxController {
         ),
       ),
     );
-    Get.offAll(() => Login());
   }
 
   Future<AuthController> checkLoginStatus() async {

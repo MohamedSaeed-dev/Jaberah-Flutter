@@ -16,6 +16,8 @@ class VersionsController extends GetxController {
     url: '',
   ).obs;
 
+  var currentVersion = ''.obs;
+
   @override
   void onInit() {
     checkVersion();
@@ -24,38 +26,75 @@ class VersionsController extends GetxController {
 
   Future<void> checkVersion() async {
     try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      int? lastCheckedTime = prefs.getInt('last_version_check');
+
+      int currentTime = DateTime.now().millisecondsSinceEpoch;
+      int oneDayInMillis = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+      // Check if the last check was more than 24 hours ago
+      if (lastCheckedTime != null &&
+          (currentTime - lastCheckedTime) < oneDayInMillis) {
+        return;
+      }
+
+      // Store the current timestamp as the last checked time
+      await prefs.setInt('last_version_check', currentTime);
+
+      // Fetch the app version
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
+      currentVersion.value = packageInfo.version;
       var response =
           await _apiClient.dio.get("/versions?version=${packageInfo.version}");
+
       if (response.statusCode == 200) {
         versionData.value = VersionData.fromJson(response.data);
         await handleUpdateDialog();
       }
     } catch (e) {
-      print(e);
+      print("Error checking version: $e");
     }
   }
 
   Future<void> handleUpdateDialog() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    int? lastDismissedTime = prefs.getInt('last_update_dismissed');
+    // If a required update is needed, force the user to update
+    if (versionData.value.isUpdateRequired) {
+      showRequiredUpdateDialog();
+      return;
+    }
 
-    // Check if update is required
+    // If an optional update is available
     if (versionData.value.isUpdateAvailable) {
-      // If last dismissed time exists, check if 6 hours have passed
-      if (lastDismissedTime != null) {
-        int currentTime = DateTime.now().millisecondsSinceEpoch;
-        if (currentTime - lastDismissedTime < 6 * 60 * 60 * 1000) {
-          return; // Don't show dialog again yet
-        }
-      }
-
-      // Show update dialog
-      showUpdateDialog();
+      showOptionalUpdateDialog();
     }
   }
 
-  void showUpdateDialog() {
+  void showRequiredUpdateDialog() {
+    Get.dialog(
+      PopScope(
+        canPop: false, // Prevent closing the dialog
+        child: AlertDialog(
+          title: const Text('تحديث مطلوب'),
+          content: const Text(
+              'يجب تحديث التطبيق للوصول إلى أحدث الميزات والتحسينات. لا يمكنك استخدام التطبيق بدون التحديث.'),
+          actions: [
+            TextButton(
+              onPressed: () async {
+                if (await canLaunchUrl(Uri.parse(versionData.value.url))) {
+                  await launchUrl(Uri.parse(versionData.value.url),
+                      mode: LaunchMode.externalApplication);
+                }
+              },
+              child: const Text('تحديث الآن'),
+            ),
+          ],
+        ),
+      ),
+      barrierDismissible: false, // Prevent dismissal by tapping outside
+    );
+  }
+
+  void showOptionalUpdateDialog() {
     Get.dialog(
       AlertDialog(
         title: const Text('تحديث متاح'),
@@ -63,9 +102,6 @@ class VersionsController extends GetxController {
         actions: [
           TextButton(
             onPressed: () async {
-              SharedPreferences prefs = await SharedPreferences.getInstance();
-              await prefs.setInt('last_update_dismissed',
-                  DateTime.now().millisecondsSinceEpoch);
               Get.back(); // Close dialog
             },
             child: const Text('لاحقًا'),
@@ -111,11 +147,11 @@ class VersionData {
 
   Map<String, dynamic> toJson() {
     return {
-      'latestVersion': this.latestVersion,
-      'minRequiredVersion': this.minRequiredVersion,
-      'isUpdateRequired': this.isUpdateRequired,
-      'isUpdateAvailable': this.isUpdateAvailable,
-      'url': this.url,
+      'latestVersion': latestVersion,
+      'minRequiredVersion': minRequiredVersion,
+      'isUpdateRequired': isUpdateRequired,
+      'isUpdateAvailable': isUpdateAvailable,
+      'url': url,
     };
   }
 }

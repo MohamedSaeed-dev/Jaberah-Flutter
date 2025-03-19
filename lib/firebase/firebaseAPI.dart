@@ -103,7 +103,8 @@ class FirebaseAPI {
     _firebaseMessaging.onTokenRefresh.listen((token) async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var id = prefs.getString("id");
-      if (id != null) await updateToken(id, token);
+      var accessToken = prefs.getString('accessToken');
+      if (id != null && accessToken != null) await updateToken(id, token);
     });
     initPushNotification();
     initLocalNotifications();
@@ -142,14 +143,16 @@ class FirebaseAPI {
 
   Future<void> updateToken(String userId, String token) async {
     try {
-      var response = await _apiClient.dio.patch(refreshFCMTokenURL, data: {
+      var response = await _apiClient.dio.patch("/$refreshFCMTokenURL", data: {
         "userId": userId,
         "token": token,
       }).timeout(const Duration(seconds: 20));
       if (response.statusCode != 200) {
+        print(response.data);
         messageSnackBar("الرجاء اعادة تشغيل التطبيق");
       }
     } catch (e) {
+      print(e);
       messageSnackBar("الرجاء اعادة تشغيل التطبيق");
     }
   }
