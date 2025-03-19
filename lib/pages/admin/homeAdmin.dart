@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/notificationsAdminController.dart';
 import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
+import 'package:jaberah/controllers/versionsController.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/admin/groups/groups.dart';
 import 'package:jaberah/pages/admin/notificationsAdmin.dart';
@@ -23,7 +24,7 @@ class HomePageAdmin extends StatelessWidget {
   final UserNameController userNameController = Get.put(UserNameController());
   final NotificationsAdminController notificationController =
       Get.put(NotificationsAdminController());
-
+  final VersionsController versionController = Get.put(VersionsController());
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -32,22 +33,25 @@ class HomePageAdmin extends StatelessWidget {
         if (didPop) return;
 
         bool exitApp = await Get.dialog(
-          AlertDialog(
-            title: Text('الخروج من التطبيق'),
-            content: Text('هل أنت متأكد انك تريد الخروج من التطبيق؟'),
-            actions: [
-              TextButton(
-                onPressed: () => Get.back(result: false),
-                child: Text('إلغاء'),
+              AlertDialog(
+                title: Text('الخروج من التطبيق'),
+                content: Text('هل أنت متأكد انك تريد الخروج من التطبيق؟'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Get.back(result: false),
+                    child: Text('إلغاء'),
+                  ),
+                  TextButton(
+                    onPressed: () => Get.back(result: true),
+                    child: Text(
+                      'الخروج',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
               ),
-              TextButton(
-                onPressed: () => Get.back(result: true),
-                child: Text('الخروج', style: TextStyle(color: Colors.red),),
-              ),
-            ],
-          ),
-        ) ??
-        false;
+            ) ??
+            false;
         if (exitApp) {
           exit(0);
         }

@@ -17,6 +17,7 @@ void main() async {
   await Firebase.initializeApp();
   await FirebaseAPI().initNotifications();
   Get.put(ConnectivityController());
+  // check version
   final authController = Get.put<AuthController>(AuthController());
   await authController
       .checkLoginStatus(); // Wait for checkLoginStatus to complete
