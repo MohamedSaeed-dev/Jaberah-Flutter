@@ -56,8 +56,8 @@ class GroupsController extends GetxController {
         Get.back();
         groupNameController.value.text = 'حلقة ';
         selectedTeacherId.value = null;
-        successSnackBar("تم اضافة الحلقة بنجاح");
         await getGroups();
+        successSnackBar("تم اضافة الحلقة بنجاح");
       } else {
         messageSnackBar(response.data["message"]);
       }
@@ -82,6 +82,8 @@ class GroupsController extends GetxController {
         List<dynamic> result = response.data;
         teachersForGeneralUse.value =
             result.map((item) => TeachersForGeneralUse.fromJson(item)).toList();
+        teachersForGeneralUse.insert(
+            0, TeachersForGeneralUse(id: null,teacherName:  "بدون معلم"));
       } else {
         messageSnackBar(response.data["message"]);
       }

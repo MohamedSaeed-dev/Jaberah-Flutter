@@ -9,30 +9,33 @@ class Groups extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
         actions: [
           PopupMenuButton(
             iconColor: Colors.black,
             itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                child: StatefulBuilder(
-                  builder: (context, setState) {
-                    return Obx(() => CheckboxListTile(
-                          title: Text('بدون معلمين'),
-                          value: groupsController.withoutTeacher.value,
-                          onChanged: (bool? value) async {
-                            groupsController.withoutTeacher.value = value!;
-                            await groupsController.getGroups();
-                          },
-                          controlAffinity: ListTileControlAffinity.leading,
-                        ));
-                  },
+              return [
+                PopupMenuItem(
+                  child: StatefulBuilder(
+                    builder: (context, setState) {
+                      return Obx(() => CheckboxListTile(
+                            title: Text('بدون معلمين'),
+                            value: groupsController.withoutTeacher.value,
+                            onChanged: (bool? value) async {
+                              groupsController.withoutTeacher.value = value!;
+                              await groupsController.getGroups();
+                            },
+                            controlAffinity: ListTileControlAffinity.leading,
+                          ));
+                    },
+                  ),
                 ),
-              ),
-            ];
-          }),
+              ];
+            },
+          ),
         ],
         leading: IconButton(
             onPressed: () {
@@ -58,35 +61,31 @@ class Groups extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   CircularProgressIndicator(),
-                  Text(
-                    "جاري تحميل الحلقات...",
-                    style: TextStyle(fontSize: 20),
-                  ),
+                  SizedBox(height: 10),
+                  Text("جاري تحميل الحلقات...", style: TextStyle(fontSize: 20)),
                 ],
               ),
             );
-          } else if (groupsController.groups.isEmpty &&
-              !groupsController.isLoading.value) {
+          } else if (groupsController.groups.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.hourglass_empty),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text("لاتوجد بيانات", style: TextStyle(fontSize: 20))
+                  Icon(Icons.hourglass_empty, size: 50),
+                  SizedBox(height: 10),
+                  Text("لاتوجد بيانات", style: TextStyle(fontSize: 20)),
                 ],
               ),
             );
           } else {
             return GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of columns
-                crossAxisSpacing: 10, // Horizontal spacing between cards
-                mainAxisSpacing: 10, // Vertical spacing between cards
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: screenWidth > 600 ? 3 : 2, // Adjust for tablets
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: screenWidth > 600 ? 1.2 : 1,
               ),
-              itemCount: groupsController.groups.length, // Number of cards
+              itemCount: groupsController.groups.length,
               itemBuilder: (context, index) {
                 var data = groupsController.groups[index];
                 return _buildGroupCard(
@@ -120,15 +119,11 @@ class Groups extends StatelessWidget {
           'إضافة حلقة',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        icon: const Icon(
-          Icons.add,
-          color: Colors.black,
-        ),
+        icon: const Icon(Icons.add, color: Colors.black),
       ),
     );
   }
 
-  // Build Group Card
   Widget _buildGroupCard({
     required BuildContext context,
     required String title,
@@ -149,42 +144,15 @@ class Groups extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "المعلم : $teacher",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "الفترة : $period",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "عدد الطلاب: $numberStd",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
+              Text(title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              SizedBox(height: 10),
+              Text("المعلم : $teacher", textAlign: TextAlign.center),
+              SizedBox(height: 10),
+              Text("الفترة : $period", textAlign: TextAlign.center),
+              SizedBox(height: 10),
+              Text("عدد الطلاب: $numberStd", textAlign: TextAlign.center),
             ],
           ),
         ),
@@ -192,111 +160,107 @@ class Groups extends StatelessWidget {
     );
   }
 
-  // Show dialog to add new group
   void _showAddGroupDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('إضافة حلقة جديدة'),
-          content: Form(
-            key: _formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextFormField(
-                  controller: groupsController.groupNameController.value,
-                  decoration: const InputDecoration(
-                      labelText: 'اسم الحلقة', border: OutlineInputBorder()),
-                  validator: (value) {
-                    final arabicRegex =
-                        RegExp(r'^[\u0621-\u064A\u0660-\u0669\s]+$');
-                    if (value!.isEmpty)
-                      return 'يرجى إدخال اسم الحلقة';
-                    else if (!arabicRegex.hasMatch(value))
-                      return 'اسم الحلقة يجب ان يكون عربياً';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                Obx(() => DropdownButtonFormField<String>(
-                      value: groupsController.period.value,
-                      hint: Text(
-                        'اختر الفترة',
-                        style: TextStyle(color: Colors.grey[700], fontSize: 16),
-                      ),
-                      items: [
-                        DropdownMenuItem(
-                          value: 'صباحية',
-                          child: Text('صباحية', style: TextStyle(fontSize: 16)),
-                        ),
-                        DropdownMenuItem(
-                          value: 'مسائية',
-                          child: Text('مسائية', style: TextStyle(fontSize: 16)),
-                        ),
-                      ],
-                      onChanged: (value) {
-                        groupsController.period.value = value!;
-                      },
+        return Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("إضافة حلقة جديدة",
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 20),
+                    TextFormField(
+                      controller: groupsController.groupNameController.value,
                       decoration: InputDecoration(
-                          labelText: 'الفترة', border: OutlineInputBorder()),
-                    )),
-                const SizedBox(height: 20),
-                _buildTeachersDropdown(),
-              ],
+                          labelText: 'اسم الحلقة',
+                          border: OutlineInputBorder()),
+                      validator: (value) {
+                        final arabicRegex =
+                            RegExp(r'^[\u0621-\u064A\u0660-\u0669\s]+$');
+                        if (value!.isEmpty)
+                          return 'يرجى إدخال اسم الحلقة';
+                        else if (!arabicRegex.hasMatch(value))
+                          return 'اسم الحلقة يجب ان يكون عربياً';
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 20),
+                    Obx(() => DropdownButtonFormField<String>(
+                          value: groupsController.period.value,
+                          items: [
+                            DropdownMenuItem(
+                              value: 'صباحية',
+                              child: Text('صباحية'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'مسائية',
+                              child: Text('مسائية'),
+                            ),
+                          ],
+                          onChanged: (value) {
+                            groupsController.period.value = value!;
+                          },
+                          decoration: InputDecoration(
+                              labelText: 'الفترة',
+                              border: OutlineInputBorder()),
+                        )),
+                    SizedBox(height: 20),
+                    _buildTeachersDropdown(),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Get.back();
+                          },
+                          child: const Text('إلغاء'),
+                        ),
+                        Obx(() => TextButton(
+                              onPressed: groupsController.isLoading.value
+                                  ? null
+                                  : () async {
+                                      if (_formKey.currentState!.validate()) {
+                                        await groupsController.addGroup();
+                                      }
+                                    },
+                              child: Text(groupsController.isLoading.value
+                                  ? 'جاري الإضافة...'
+                                  : ' إضافة الحلقة'),
+                            )),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text('إلغاء'),
-            ),
-            TextButton(
-              onPressed: groupsController.isLoading.value
-                  ? null
-                  : () async {
-                      if (_formKey.currentState!.validate()) {
-                        await groupsController.addGroup();
-                      }
-                    },
-              child: Obx(() => Text(groupsController.isLoading.value
-                  ? 'جاري الإضافة...'
-                  : ' إضافة الحلقة')),
-            ),
-          ],
         );
       },
     );
   }
 
   Widget _buildTeachersDropdown() {
-    groupsController.teachersForGeneralUse
-        .insert(0,TeachersForGeneralUse(id: null, teacherName: "بدون معلم"));
-    return Obx(() => InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'المعلم',
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              isExpanded: true,
-              value: groupsController.selectedTeacherId.value,
-              onChanged: (value) {
-                groupsController.selectedTeacherId.value = value!;
-              },
-              items: groupsController.teachersForGeneralUse.map((teacher) {
-                return DropdownMenuItem(
-                  value: teacher.id,
-                  child: Text(teacher.teacherName),
-                );
-              }).toList(),
-            ),
-          ),
+    return Obx(() => DropdownButtonFormField(
+          value: groupsController.selectedTeacherId.value,
+          onChanged: (value) {
+            groupsController.selectedTeacherId.value = value!;
+          },
+          items: groupsController.teachersForGeneralUse.map((teacher) {
+            return DropdownMenuItem(
+                value: teacher.id, child: Text(teacher.teacherName));
+          }).toList(),
+          decoration: InputDecoration(border: OutlineInputBorder()),
         ));
   }
 }

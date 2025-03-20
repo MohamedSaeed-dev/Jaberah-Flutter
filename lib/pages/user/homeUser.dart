@@ -61,190 +61,192 @@ class HomePageUser extends StatelessWidget {
           backgroundColor: const Color.fromARGB(255, 63, 181, 108),
         ),
         drawer: Drawer(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                children: [
-                  DrawerHeader(
-                    decoration: const BoxDecoration(
-                      color: Color.fromARGB(255, 63, 181, 108),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: AssetImage('assets/profile.png'),
-                          radius: 40,
-                        ),
-                        Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Obx(() => Text(
-                                    userNameController.name.value,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                    ),
-                                  )),
-                              IconButton(
-                                onPressed: () async {
-                                  var result =
-                                      await Get.to(() => TeacherInfo());
-                                  if (result != null) {
-                                    userNameController.name.value = result;
-                                    SharedPreferences prefs =
-                                        await SharedPreferences.getInstance();
-                                    await prefs.setString('name', result);
-                                  }
-                                },
-                                icon: Icon(Icons.edit),
-                                color: Colors.white,
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  if (!authController.isAdmin.value)
-                    ListTile(
-                      leading: const Icon(Icons.notification_important),
-                      title: const Text('الإشعارات'),
-                      onTap: () {
-                        Get.to(() => NotificationsUser());
-                      },
-                    ),
-                  if (authController.isAdmin.value)
-                    ListTile(
-                      leading: const Icon(Icons.admin_panel_settings_sharp),
-                      title: const Text('قسم الإدارة'),
-                      onTap: () {
-                        Get.off(() => HomePageAdmin());
-                      },
-                    ),
-                  ListTile(
-                    leading: const Icon(Icons.logout),
-                    title: const Text('تسجيل الخروج'),
-                    onTap: () async {
-                      showDialog(
-                        context: context,
-                        builder: (BuildContext context) {
-                          return AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            title: const Text(
-                              'تأكيد تسجيل الخروج؟',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            content: const Text(
-                                'هل أنت متأكد أنك تريد تسجيل الخروج؟'),
-                            actions: [
-                              TextButton(
-                                child: const Text(
-                                  'إلغاء',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                                onPressed: () {
-                                  Get.back();
-                                },
-                              ),
-                              Obx(() => TextButton(
-                                    child: Text(
-                                      authController.isLoadingLogout.value
-                                          ? 'جاري تسجيل الخروج...'
-                                          : 'تسجيل الخروج',
-                                      style: TextStyle(color: Colors.red),
-                                    ),
-                                    onPressed: () async {
-                                      await authController.logout();
-                                    },
-                                  )),
-                            ],
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ],
-              ),
-              Container(
-                alignment: Alignment.bottomCenter,
-                padding: const EdgeInsets.all(10),
-                child: Column(
+          child: Container(
+            padding: EdgeInsets.only(bottom: 30),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text("للتواصل مع الدعم؟"),
-                        IconButton(
-                          onPressed: () async {
-                            if (await canLaunchUrl(
-                                Uri.parse("https://wa.me/+966574195965"))) {
-                              await launchUrl(
-                                  Uri.parse("https://wa.me/+966574195965"),
-                                  mode: LaunchMode.externalApplication);
-                            } else {
-                              messageSnackBar("حدث خطأ، اعد المحاولة");
-                            }
-                          },
-                          icon: const Icon(Icons.phone),
-                        ),
-                      ],
-                    ),
-                    GestureDetector(
-                      onTap: () async {
-                        if (versionController
-                            .versionData.value.isUpdateAvailable) {
-                          if (await canLaunchUrl(Uri.parse(
-                              versionController.versionData.value.url))) {
-                            await launchUrl(
-                                Uri.parse(
-                                    versionController.versionData.value.url),
-                                mode: LaunchMode.externalApplication);
-                          }
-                        }
-                      },
-                      child: Row(
+                    DrawerHeader(
+                      decoration: const BoxDecoration(
+                        color: Color.fromARGB(255, 63, 181, 108),
+                      ),
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Obx(() => Text(
-                                "الإصدار الحالي: ${versionController.currentVersion.value}",
-                                style: TextStyle(
-                                  color: versionController
-                                          .versionData.value.isUpdateAvailable
-                                      ? Colors.blue
-                                      : Colors.black,
-                                  fontWeight: versionController
-                                          .versionData.value.isUpdateAvailable
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
+                          CircleAvatar(
+                            backgroundImage: AssetImage('assets/profile.png'),
+                            radius: 40,
+                          ),
+                          Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Obx(() => Text(
+                                      userNameController.name.value,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                      ),
+                                    )),
+                                IconButton(
+                                  onPressed: () async {
+                                    var result =
+                                        await Get.to(() => TeacherInfo());
+                                    if (result != null) {
+                                      userNameController.name.value = result;
+                                      SharedPreferences prefs =
+                                          await SharedPreferences.getInstance();
+                                      await prefs.setString('name', result);
+                                    }
+                                  },
+                                  icon: Icon(Icons.edit),
+                                  color: Colors.white,
                                 ),
-                              )),
-                          Obx(() {
-                            if (versionController
-                                .versionData.value.isUpdateAvailable) {
-                              return Container(
-                                margin: const EdgeInsets.only(left: 10),
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                              );
-                            }
-                            return SizedBox();
-                          }),
+                              ],
+                            ),
+                          )
                         ],
                       ),
                     ),
+                    if (!authController.isAdmin.value)
+                      ListTile(
+                        leading: const Icon(Icons.notification_important),
+                        title: const Text('الإشعارات'),
+                        onTap: () {
+                          Get.to(() => NotificationsUser());
+                        },
+                      ),
+                    if (authController.isAdmin.value)
+                      ListTile(
+                        leading: const Icon(Icons.admin_panel_settings_sharp),
+                        title: const Text('قسم الإدارة'),
+                        onTap: () {
+                          Get.off(() => HomePageAdmin());
+                        },
+                      ),
+                    ListTile(
+                      leading: const Icon(Icons.logout),
+                      title: const Text('تسجيل الخروج'),
+                      onTap: () async {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              title: const Text(
+                                'تأكيد تسجيل الخروج؟',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              content: const Text(
+                                  'هل أنت متأكد أنك تريد تسجيل الخروج؟'),
+                              actions: [
+                                TextButton(
+                                  child: const Text(
+                                    'إلغاء',
+                                    style: TextStyle(color: Colors.black),
+                                  ),
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                ),
+                                Obx(() => TextButton(
+                                      child: Text(
+                                        authController.isLoadingLogout.value
+                                            ? 'جاري تسجيل الخروج...'
+                                            : 'تسجيل الخروج',
+                                        style: TextStyle(color: Colors.red),
+                                      ),
+                                      onPressed: () async {
+                                        await authController.logout();
+                                      },
+                                    )),
+                              ],
+                            );
+                          },
+                        );
+                      },
+                    ),
                   ],
                 ),
-              ),
-            ],
+                Container(
+                  alignment: Alignment.bottomCenter,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("للتواصل مع الدعم؟"),
+                          IconButton(
+                            onPressed: () async {
+                              if (await canLaunchUrl(
+                                  Uri.parse("https://wa.me/+966574195965"))) {
+                                await launchUrl(
+                                    Uri.parse("https://wa.me/+966574195965"),
+                                    mode: LaunchMode.externalApplication);
+                              } else {
+                                messageSnackBar("حدث خطأ، اعد المحاولة");
+                              }
+                            },
+                            icon: const Icon(Icons.phone),
+                          ),
+                        ],
+                      ),
+                      Container(
+                        alignment: Alignment.bottomCenter,
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: GestureDetector(
+                          onTap: () async {
+                            if (versionController
+                                .versionData.value.isUpdateAvailable) {
+                              if (await canLaunchUrl(Uri.parse(
+                                  versionController.versionData.value.url))) {
+                                await launchUrl(
+                                    Uri.parse(
+                                        versionController.versionData.value.url),
+                                    mode: LaunchMode.externalApplication);
+                              }
+                            }
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Obx(() => Text(
+                                    "الإصدار الحالي: ${versionController.currentVersion.value}",
+                                    style: TextStyle(
+                                      color: versionController
+                                              .versionData.value.isUpdateAvailable
+                                          ? Colors.blue
+                                          : Colors.black,
+                                      fontWeight: versionController
+                                              .versionData.value.isUpdateAvailable
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  )),
+                              Obx(() {
+                                if (versionController
+                                    .versionData.value.isUpdateAvailable) {
+                                  return Icon(
+                                    Icons.update,
+                                    color: Colors.red,
+                                  );
+                                }
+                                return SizedBox();
+                              }),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         body: Stack(

@@ -1,6 +1,11 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
+import 'package:jaberah/models/global/snackbars.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -16,32 +21,16 @@ class VersionsController extends GetxController {
     url: '',
   ).obs;
 
-  var currentVersion = ''.obs;
-
   @override
   void onInit() {
     checkVersion();
     super.onInit();
   }
 
+  var currentVersion = ''.obs;
+
   Future<void> checkVersion() async {
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      int? lastCheckedTime = prefs.getInt('last_version_check');
-
-      int currentTime = DateTime.now().millisecondsSinceEpoch;
-      int oneDayInMillis = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
-
-      // Check if the last check was more than 24 hours ago
-      if (lastCheckedTime != null &&
-          (currentTime - lastCheckedTime) < oneDayInMillis) {
-        return;
-      }
-
-      // Store the current timestamp as the last checked time
-      await prefs.setInt('last_version_check', currentTime);
-
-      // Fetch the app version
       PackageInfo packageInfo = await PackageInfo.fromPlatform();
       currentVersion.value = packageInfo.version;
       var response =
@@ -51,8 +40,14 @@ class VersionsController extends GetxController {
         versionData.value = VersionData.fromJson(response.data);
         await handleUpdateDialog();
       }
+    } on SocketException catch (_) {
+      socketSnackBar();
+    } on TimeoutException catch (_) {
+      timeoutSnackBar();
+    } on DioException catch (e) {
+      messageSnackBar(e.response!.data["message"] ?? "حدث خطأ ما");
     } catch (e) {
-      print("Error checking version: $e");
+      catchSnackBar();
     }
   }
 
