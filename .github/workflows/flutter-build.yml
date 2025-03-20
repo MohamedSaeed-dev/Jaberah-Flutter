@@ -63,21 +63,20 @@ jobs:
             --header "Content-Type: application/octet-stream" \
             --data-binary @build/app/outputs/flutter-apk/jaberah-${VERSION}.apk
 
-      - name: Get Permanent Direct Download Link from Dropbox
+      - name: Get Permanent Sharable Link from Dropbox
         id: get_sharable_link
         run: |
           response=$(curl -X POST https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings \
             -H "Authorization: Bearer $DROPBOX_ACCESS_TOKEN" \
             -H "Content-Type: application/json" \
             -d "{\"path\": \"/jaberah-${VERSION}.apk\", \"settings\": {\"requested_visibility\": \"public\"}}")
-          link=$(echo $response | jq -r '.url' | sed 's/?dl=0/?raw=1/' | sed 's/?dl=1/?raw=1/')
-          echo "DIRECT_DOWNLOAD_LINK=$link" >> $GITHUB_ENV
+          link=$(echo $response | jq -r '.url' | sed 's/?dl=0/?dl=1/')
+          echo "SHAREABLE_LINK=$link" >> $GITHUB_ENV
 
       - name: Update Version in Backend
         uses: fjogeleit/http-request-action@v1
         with:
-          url: '${{ secrets.BACKEND_API }}?url=${{ env.DIRECT_DOWNLOAD_LINK }}&version=${{ env.VERSION }}'
+          url: '${{ secrets.BACKEND_API }}?url=${{ env.SHAREABLE_LINK }}&version=${{ env.VERSION }}'
           method: 'PUT'
           headers: |
             accept: */*
-
