@@ -84,9 +84,6 @@ jobs:
             link=$(echo $response | jq -r '.url')
           fi
       
-          # Step 3: Replace "dl=0" with "dl=1" in the link
-          link=$(echo $link | sed 's/[?&]dl=0/[&]dl=1/')
-      
           # Step 4: Save the shareable link as a GitHub environment variable
           echo "SHAREABLE_LINK=$link" >> $GITHUB_ENV
 
