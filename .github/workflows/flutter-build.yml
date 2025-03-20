@@ -28,25 +28,21 @@ jobs:
       - name: Extract App Version
         id: extract_version
         run: |
-          # Extract the version from pubspec.yaml
           version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d "+" -f 1)
           echo "App version is $version"
-          # Set it as an output so it can be used later
-          echo "::set-output name=version::$version"
+          echo "VERSION=$version" >> $GITHUB_ENV
 
       - name: Build APK
         run: flutter build apk --release --target=lib/login.dart --no-tree-shake-icons
 
       - name: Rename APK
-        run: |
-          # Rename the APK file using the extracted version
-          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/jaberah-${{ steps.extract_version.outputs.version }}.apk
+        run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/jaberah-${VERSION}.apk
 
       - name: Generate Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Flutter-APK
-          path: build/app/outputs/flutter-apk/jaberah-${{ steps.extract_version.outputs.version }}.apk
+          path: build/app/outputs/flutter-apk/jaberah-${VERSION}.apk
 
       - name: Refresh Dropbox Access Token
         id: refresh_dropbox_token
@@ -55,34 +51,32 @@ jobs:
             -u "${{ secrets.DROPBOX_CLIENT_ID }}:${{ secrets.DROPBOX_CLIENT_SECRET }}" \
             -d grant_type=refresh_token \
             -d refresh_token=${{ secrets.DROPBOX_REFRESH_TOKEN }})
-          # Extract the new access token from the JSON response
           access_token=$(echo "$response" | jq -r '.access_token')
-          echo "New access token: $access_token"
-          echo "::set-output name=access_token::$access_token"
+          echo "DROPBOX_ACCESS_TOKEN=$access_token" >> $GITHUB_ENV
 
-      - name: Upload APK to Dropbox
+      - name: Upload APK to Dropbox (Overwrite if Exists)
         id: upload_to_dropbox
-        uses: deka0106/upload-to-dropbox@v2
-        with:
-          dropbox_access_token: ${{ steps.refresh_dropbox_token.outputs.access_token }}
-          src: build/app/outputs/flutter-apk/jaberah-${{ steps.extract_version.outputs.version }}.apk
-          dest: /jaberah-${{ steps.extract_version.outputs.version }}.apk
+        run: |
+          curl -X POST https://content.dropboxapi.com/2/files/upload \
+            --header "Authorization: Bearer $DROPBOX_ACCESS_TOKEN" \
+            --header "Dropbox-API-Arg: {\"path\": \"/jaberah-${VERSION}.apk\", \"mode\": \"overwrite\"}" \
+            --header "Content-Type: application/octet-stream" \
+            --data-binary @build/app/outputs/flutter-apk/jaberah-${VERSION}.apk
 
       - name: Get Permanent Sharable Link from Dropbox
         id: get_sharable_link
         run: |
           response=$(curl -X POST https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings \
-            -H "Authorization: Bearer ${{ secrets.DROPBOX_ACCESS_TOKEN }}" \
+            -H "Authorization: Bearer $DROPBOX_ACCESS_TOKEN" \
             -H "Content-Type: application/json" \
-            -d '{"path": "/jaberah.apk", "settings": {"requested_visibility": "public"}}')
+            -d "{\"path\": \"/jaberah-${VERSION}.apk\", \"settings\": {\"requested_visibility\": \"public\"}}")
           link=$(echo $response | jq -r '.url' | sed 's/?dl=0/?dl=1/')
-          echo "Permanent link: $link"
-          echo "::set-output name=link::$link"
+          echo "SHAREABLE_LINK=$link" >> $GITHUB_ENV
 
-      - name: Update Version
+      - name: Update Version in Backend
         uses: fjogeleit/http-request-action@v1
         with:
-          url: '${{ secrets.BACKEND_API }}?url=${{ steps.get_sharable_link.outputs.link }}&version=${{ steps.extract_version.outputs.version }}'
+          url: '${{ secrets.BACKEND_API }}?url=${{ env.SHAREABLE_LINK }}&version=${{ env.VERSION }}'
           method: 'PUT'
           headers: |
             accept: */*
