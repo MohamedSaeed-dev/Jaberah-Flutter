@@ -66,13 +66,31 @@ jobs:
       - name: Get Permanent Sharable Link from Dropbox
         id: get_sharable_link
         run: |
-          response=$(curl -X POST https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings \
+          # Step 1: Check if a shared link already exists
+          response=$(curl -X POST https://api.dropboxapi.com/2/sharing/list_shared_links \
             -H "Authorization: Bearer $DROPBOX_ACCESS_TOKEN" \
             -H "Content-Type: application/json" \
-            -d "{\"path\": \"/jaberah-${VERSION}.apk\", \"settings\": {\"requested_visibility\": \"public\"}}")
-          link=$(echo $response | jq -r '.url')
-          link="${link}&dl=1"
+            -d "{\"path\": \"/jaberah-${VERSION}.apk\"}")
+          
+          # Step 2: If a link exists, extract it, otherwise create a new link
+          link=$(echo $response | jq -r '.links[0].url')
+      
+          if [ "$link" == "null" ]; then
+            # No link exists, create a new shared link
+            response=$(curl -X POST https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings \
+              -H "Authorization: Bearer $DROPBOX_ACCESS_TOKEN" \
+              -H "Content-Type: application/json" \
+              -d "{\"path\": \"/jaberah-${VERSION}.apk\", \"settings\": {\"requested_visibility\": \"public\"}}")
+            link=$(echo $response | jq -r '.url')
+          fi
+      
+          # Step 3: Replace "dl=0" with "dl=1" in the link
+          link=$(echo $link | sed 's/[?&]dl=0/[&]dl=1/')
+      
+          # Step 4: Save the shareable link as a GitHub environment variable
           echo "SHAREABLE_LINK=$link" >> $GITHUB_ENV
+
+
 
 
       - name: Update Version in Backend
