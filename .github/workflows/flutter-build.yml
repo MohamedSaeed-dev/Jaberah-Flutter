@@ -93,7 +93,11 @@ jobs:
       - name: Update Version in Backend
         uses: fjogeleit/http-request-action@v1
         with:
-          url: '${{ secrets.BACKEND_API }}?url=${{ env.SHAREABLE_LINK }}&version=${{ env.VERSION }}'
+          url: '${{ secrets.BACKEND_API }}?version=${{ env.VERSION }}'
           method: 'PUT'
           headers: |
             accept: */*
+            Content-Type: application/x-www-form-urlencoded
+          body: |
+            url=${{ env.SHAREABLE_LINK }}
+
