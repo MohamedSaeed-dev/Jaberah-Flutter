@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
@@ -11,6 +12,7 @@ import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/admin/notificationsAdmin.dart';
 import 'package:jaberah/pages/user/notificationsUser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Future<void> handlerBackgroundMessage(RemoteMessage message) async {
   // Handle data-only messages in background
@@ -37,21 +39,34 @@ Future<void> handlerBackgroundMessage(RemoteMessage message) async {
             AndroidFlutterLocalNotificationsPlugin>();
     await androidPlatform?.createNotificationChannel(androidChannel);
 
-    localNotifications.show(
-      message.hashCode,
-      message.notification?.title ?? 'اشعار جديد',
-      message.notification?.body,
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          androidChannel.id,
-          androidChannel.name,
-          channelDescription: androidChannel.description,
-          importance: androidChannel.importance,
-          icon: 'ic_launcher',
-        ),
-      ),
-      payload: jsonEncode(message.toMap()),
-    );
+    final notification = message.notification;
+    if (notification != null) {
+      String? topic = message.data['topic'];
+      if (topic != null) {
+        if (topic == "public") {
+          localNotifications.show(
+            message.hashCode,
+            message.notification?.title ?? 'اشعار جديد',
+            message.notification?.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                androidChannel.id,
+                androidChannel.name,
+                channelDescription: androidChannel.description,
+                importance: androidChannel.importance,
+                icon: 'ic_launcher',
+              ),
+            ),
+            payload: jsonEncode(message.toMap()),
+          );
+        } else if (topic == "newVersion") {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString("newVersion", message.data['version']);
+          prefs.setString("url", message.data['url']);
+          prefs.setString("minRequired", message.data["minRequired"]);
+        }
+      }
+    }
   }
 }
 
@@ -120,23 +135,33 @@ class FirebaseAPI {
     FirebaseMessaging.instance.getInitialMessage().then(handleMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
     FirebaseMessaging.onBackgroundMessage(handlerBackgroundMessage);
-    FirebaseMessaging.onMessage.listen((message) {
+    FirebaseMessaging.onMessage.listen((message) async {
       final notification = message.notification;
       if (notification != null) {
-        _localNotifications.show(
-            notification.hashCode,
-            notification.title ?? 'اشعار جديد',
-            notification.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                _androidChannel.id,
-                _androidChannel.name,
-                channelDescription: _androidChannel.description,
-                importance: _androidChannel.importance,
-                icon: 'ic_launcher',
-              ),
-            ),
-            payload: jsonEncode(message.toMap()));
+        String? topic = message.data['topic'];
+        if (topic != null) {
+          if (topic == "public") {
+            _localNotifications.show(
+                notification.hashCode,
+                notification.title ?? 'اشعار جديد',
+                notification.body,
+                NotificationDetails(
+                  android: AndroidNotificationDetails(
+                    _androidChannel.id,
+                    _androidChannel.name,
+                    channelDescription: _androidChannel.description,
+                    importance: _androidChannel.importance,
+                    icon: 'ic_launcher',
+                  ),
+                ),
+                payload: jsonEncode(message.toMap()));
+          } else if (topic == "newVersion") {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.setString("newVersion", message.data['version']);
+            prefs.setString("url", message.data['url']);
+            prefs.setString("minRequired", message.data["minRequired"]);
+          }
+        }
       }
     });
   }
@@ -148,12 +173,37 @@ class FirebaseAPI {
         "token": token,
       }).timeout(const Duration(seconds: 20));
       if (response.statusCode != 200) {
-        print(response.data);
         messageSnackBar("الرجاء اعادة تشغيل التطبيق");
       }
     } catch (e) {
-      print(e);
       messageSnackBar("الرجاء اعادة تشغيل التطبيق");
     }
   }
+}
+
+void showOptionalUpdateDialog(String url) {
+  Get.dialog(
+    AlertDialog(
+      title: const Text('تحديث متاح'),
+      content: const Text('يوجد تحديث جديد، هل ترغب في التحديث الآن؟'),
+      actions: [
+        TextButton(
+          onPressed: () async {
+            Get.back(); // Close dialog
+          },
+          child: const Text('لاحقًا'),
+        ),
+        TextButton(
+          onPressed: () async {
+            if (await canLaunchUrl(Uri.parse(url))) {
+              await launchUrl(Uri.parse(url),
+                  mode: LaunchMode.externalApplication);
+            }
+          },
+          child: const Text('تحديث الآن'),
+        ),
+      ],
+    ),
+    barrierDismissible: false, // Prevent dismissal by tapping outside
+  );
 }

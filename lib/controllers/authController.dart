@@ -49,6 +49,7 @@ class AuthController extends GetxController {
         if (!isAdmin.value) {
           await _firebaseMessaging.subscribeToTopic("public");
         }
+        await _firebaseMessaging.subscribeToTopic("newVersion");
         isLoggedIn.value = true;
         Get.snackbar(
           '',
@@ -98,12 +99,13 @@ class AuthController extends GetxController {
     }
   }
 
-var isLoadingLogout = false.obs;
+  var isLoadingLogout = false.obs;
   Future<void> logout() async {
     isLoggedIn.value = false;
     isLoadingLogout.value = true;
     await _firebaseMessaging.deleteToken();
     await _firebaseMessaging.unsubscribeFromTopic("public");
+    await _firebaseMessaging.unsubscribeFromTopic("newVersion");
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
 
