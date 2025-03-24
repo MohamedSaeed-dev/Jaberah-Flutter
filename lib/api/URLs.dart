@@ -5,7 +5,7 @@ const local_asp = "http://10.0.2.2:5291/api";
 const server_asp = "https://jaberah.runasp.net/api";
 const IP = "http://192.168.1.20:9632";
 
-const baseUrl =server_asp;
+const baseUrl = server_asp;
 
 const loginURL = "auth/login";
 
@@ -34,8 +34,7 @@ const monthlyReportURL = "reports/monthly-report";
 const semesterReportURL = "reports/semester-report";
 
 const bestStudentReportURL = "reports/best-students-report";
-const bestStudentForGroupReportURL =
-    "reports/best-students-for-group-report";
+const bestStudentForGroupReportURL = "reports/best-students-for-group-report";
 
 const followStudentsURL = "follow-students";
 const followStudentsForGroup = "$followStudentsURL/groups";

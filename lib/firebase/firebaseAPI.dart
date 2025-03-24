@@ -14,73 +14,31 @@ import 'package:jaberah/pages/user/notificationsUser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+@pragma('vm:entry-point')
 Future<void> handlerBackgroundMessage(RemoteMessage message) async {
-  // Handle data-only messages in background
-  if (message.notification != null) {
-    const androidChannel = AndroidNotificationChannel(
-      'high_importance_channel',
-      'High Importance Notifications',
-      description: 'This channel is used for important notifications.',
-      importance: Importance.max,
-    );
+  String? topic = message.data['topic'];
 
-    final localNotifications = FlutterLocalNotificationsPlugin();
-    const androidSettings = AndroidInitializationSettings('ic_launcher');
-    const iOSSettings = DarwinInitializationSettings();
-    const initializationSettings = InitializationSettings(
-      android: androidSettings,
-      iOS: iOSSettings,
-    );
-
-    await localNotifications.initialize(initializationSettings);
-
-    final androidPlatform =
-        localNotifications.resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>();
-    await androidPlatform?.createNotificationChannel(androidChannel);
-
-    final notification = message.notification;
-    if (notification != null) {
-      String? topic = message.data['topic'];
-      if (topic != null) {
-        if (topic == "public") {
-          localNotifications.show(
-            message.hashCode,
-            message.notification?.title ?? 'اشعار جديد',
-            message.notification?.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                androidChannel.id,
-                androidChannel.name,
-                channelDescription: androidChannel.description,
-                importance: androidChannel.importance,
-                icon: 'ic_launcher',
-              ),
-            ),
-            payload: jsonEncode(message.toMap()),
-          );
-        } else if (topic == "newVersion") {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setString("newVersion", message.data['version']);
-          prefs.setString("url", message.data['url']);
-          prefs.setString("minRequired", message.data["minRequired"]);
-        }
-      }
-    }
+  if (topic == "newVersion") {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setString("newVersion", message.data['version']);
+    prefs.setString("url", message.data['url']);
+    prefs.setString("minRequired", message.data["minRequired"]);
   }
 }
 
 class FirebaseAPI {
   final _firebaseMessaging = FirebaseMessaging.instance;
   final ApiClient _apiClient = Get.find();
+
   final _androidChannel = const AndroidNotificationChannel(
-    'high_importance_channel',
-    'High Importance Notifications',
-    description: 'This channel is used for important notifications.',
-    importance: Importance.max,
+    'default_channel',
+    'Default Channel',
+    description: 'Used for general notifications',
+    importance: Importance.defaultImportance,
   );
 
-  final _localNotifications = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin _localNotifications =
+      FlutterLocalNotificationsPlugin();
 
   void handleMessage(RemoteMessage? message) {
     if (message != null) {
@@ -115,12 +73,14 @@ class FirebaseAPI {
 
   Future<void> initNotifications() async {
     await _firebaseMessaging.requestPermission();
+
     _firebaseMessaging.onTokenRefresh.listen((token) async {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       var id = prefs.getString("id");
       var accessToken = prefs.getString('accessToken');
       if (id != null && accessToken != null) await updateToken(id, token);
     });
+
     initPushNotification();
     initLocalNotifications();
   }
@@ -132,35 +92,37 @@ class FirebaseAPI {
       badge: true,
       sound: true,
     );
+
     FirebaseMessaging.instance.getInitialMessage().then(handleMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(handleMessage);
     FirebaseMessaging.onBackgroundMessage(handlerBackgroundMessage);
+
     FirebaseMessaging.onMessage.listen((message) async {
       final notification = message.notification;
-      if (notification != null) {
-        String? topic = message.data['topic'];
-        if (topic != null) {
-          if (topic == "public") {
-            _localNotifications.show(
-                notification.hashCode,
-                notification.title ?? 'اشعار جديد',
-                notification.body,
-                NotificationDetails(
-                  android: AndroidNotificationDetails(
-                    _androidChannel.id,
-                    _androidChannel.name,
-                    channelDescription: _androidChannel.description,
-                    importance: _androidChannel.importance,
-                    icon: 'ic_launcher',
-                  ),
-                ),
-                payload: jsonEncode(message.toMap()));
-          } else if (topic == "newVersion") {
-            SharedPreferences prefs = await SharedPreferences.getInstance();
-            prefs.setString("newVersion", message.data['version']);
-            prefs.setString("url", message.data['url']);
-            prefs.setString("minRequired", message.data["minRequired"]);
-          }
+      String? topic = message.data['topic'];
+
+      if (topic != null) {
+        if (topic == "public") {
+          _localNotifications.show(
+            notification.hashCode,
+            notification?.title ?? 'اشعار جديد',
+            notification?.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                _androidChannel.id,
+                _androidChannel.name,
+                channelDescription: _androidChannel.description,
+                importance: _androidChannel.importance,
+                icon: 'ic_launcher',
+              ),
+            ),
+            payload: jsonEncode(message.toMap()),
+          );
+        } else if (topic == "newVersion") {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          prefs.setString("newVersion", message.data['version']);
+          prefs.setString("url", message.data['url']);
+          prefs.setString("minRequired", message.data["minRequired"]);
         }
       }
     });
@@ -172,6 +134,7 @@ class FirebaseAPI {
         "userId": userId,
         "token": token,
       }).timeout(const Duration(seconds: 20));
+
       if (response.statusCode != 200) {
         messageSnackBar("الرجاء اعادة تشغيل التطبيق");
       }
@@ -188,9 +151,7 @@ void showOptionalUpdateDialog(String url) {
       content: const Text('يوجد تحديث جديد، هل ترغب في التحديث الآن؟'),
       actions: [
         TextButton(
-          onPressed: () async {
-            Get.back(); // Close dialog
-          },
+          onPressed: () => Get.back(),
           child: const Text('لاحقًا'),
         ),
         TextButton(
@@ -204,6 +165,6 @@ void showOptionalUpdateDialog(String url) {
         ),
       ],
     ),
-    barrierDismissible: false, // Prevent dismissal by tapping outside
+    barrierDismissible: false,
   );
 }
