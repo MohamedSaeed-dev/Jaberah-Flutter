@@ -129,44 +129,46 @@ class HomePageUser extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.logout),
                       title: const Text('تسجيل الخروج'),
-                      onTap: () async {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              title: const Text(
-                                'تأكيد تسجيل الخروج؟',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              content: const Text(
-                                  'هل أنت متأكد أنك تريد تسجيل الخروج؟'),
-                              actions: [
-                                TextButton(
-                                  child: const Text(
-                                    'إلغاء',
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                  onPressed: () {
-                                    Get.back();
-                                  },
+                      onTap: () {
+                        Get.dialog(
+                          AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            title: const Text(
+                              'تأكيد تسجيل الخروج؟',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            content: const Text(
+                                'هل أنت متأكد أنك تريد تسجيل الخروج؟'),
+                            actions: [
+                              TextButton(
+                                child: const Text(
+                                  'إلغاء',
+                                  style: TextStyle(color: Colors.black),
                                 ),
-                                Obx(() => TextButton(
-                                      child: Text(
-                                        authController.isLoadingLogout.value
-                                            ? 'جاري تسجيل الخروج...'
-                                            : 'تسجيل الخروج',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                      onPressed: () async {
-                                        await authController.logout();
-                                      },
-                                    )),
-                              ],
-                            );
-                          },
+                                onPressed: () {
+                                  Get.back();
+                                },
+                              ),
+                              Obx(() => TextButton(
+                                    child: Text(
+                                      authController.isLoadingLogout.value
+                                          ? 'جاري تسجيل الخروج...'
+                                          : 'تسجيل الخروج',
+                                      style: const TextStyle(color: Colors.red),
+                                    ),
+                                    onPressed: () async {
+                                      authController.isLoadingLogout.value =
+                                          true;
+                                      await authController.logout();
+                                      authController.isLoadingLogout.value =
+                                          false;
+                                      Get.back(); // Close the dialog after logout
+                                    },
+                                  )),
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -206,8 +208,8 @@ class HomePageUser extends StatelessWidget {
                               if (await canLaunchUrl(Uri.parse(
                                   versionController.versionData.value.url))) {
                                 await launchUrl(
-                                    Uri.parse(
-                                        versionController.versionData.value.url),
+                                    Uri.parse(versionController
+                                        .versionData.value.url),
                                     mode: LaunchMode.externalApplication);
                               }
                             }
@@ -218,12 +220,12 @@ class HomePageUser extends StatelessWidget {
                               Obx(() => Text(
                                     "الإصدار الحالي: ${versionController.currentVersion.value}",
                                     style: TextStyle(
-                                      color: versionController
-                                              .versionData.value.isUpdateAvailable
+                                      color: versionController.versionData.value
+                                              .isUpdateAvailable
                                           ? Colors.blue
                                           : Colors.black,
-                                      fontWeight: versionController
-                                              .versionData.value.isUpdateAvailable
+                                      fontWeight: versionController.versionData
+                                              .value.isUpdateAvailable
                                           ? FontWeight.bold
                                           : FontWeight.normal,
                                     ),

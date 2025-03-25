@@ -148,44 +148,46 @@ class HomePageAdmin extends StatelessWidget {
                     ListTile(
                       leading: const Icon(Icons.logout),
                       title: const Text('تسجيل الخروج'),
-                      onTap: () async {
-                        showDialog(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              title: const Text(
-                                'تأكيد تسجيل الخروج؟',
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              content: const Text(
-                                  'هل أنت متأكد أنك تريد تسجيل الخروج؟'),
-                              actions: [
-                                TextButton(
-                                  child: const Text(
-                                    'إلغاء',
-                                    style: TextStyle(color: Colors.black),
-                                  ),
-                                  onPressed: () {
-                                    Get.back();
-                                  },
+                      onTap: () {
+                        Get.dialog(
+                          AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            title: const Text(
+                              'تأكيد تسجيل الخروج؟',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            content: const Text(
+                                'هل أنت متأكد أنك تريد تسجيل الخروج؟'),
+                            actions: [
+                              TextButton(
+                                child: const Text(
+                                  'إلغاء',
+                                  style: TextStyle(color: Colors.black),
                                 ),
-                                Obx(() => TextButton(
-                                      child: Text(
-                                        authController.isLoadingLogout.value
-                                            ? 'جاري تسجيل الخروج...'
-                                            : 'تسجيل الخروج',
-                                        style: TextStyle(color: Colors.red),
-                                      ),
-                                      onPressed: () async {
-                                        await authController.logout();
-                                      },
-                                    )),
-                              ],
-                            );
-                          },
+                                onPressed: () {
+                                  Get.back();
+                                },
+                              ),
+                              Obx(() => TextButton(
+                                    child: Text(
+                                      authController.isLoadingLogout.value
+                                          ? 'جاري تسجيل الخروج...'
+                                          : 'تسجيل الخروج',
+                                      style: const TextStyle(color: Colors.red),
+                                    ),
+                                    onPressed: () async {
+                                      authController.isLoadingLogout.value =
+                                          true;
+                                      await authController.logout();
+                                      authController.isLoadingLogout.value =
+                                          false;
+                                      Get.back(); // Close the dialog after logout
+                                    },
+                                  )),
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -217,7 +219,7 @@ class HomePageAdmin extends StatelessWidget {
                       ),
                       Container(
                         alignment: Alignment.bottomCenter,
-                        padding: const EdgeInsets.symmetric(horizontal:  10),
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: GestureDetector(
                           onTap: () async {
                             if (versionController
@@ -250,7 +252,10 @@ class HomePageAdmin extends StatelessWidget {
                               Obx(() {
                                 if (versionController
                                     .versionData.value.isUpdateAvailable) {
-                                  return Icon(Icons.update, color: Colors.red,);
+                                  return Icon(
+                                    Icons.update,
+                                    color: Colors.red,
+                                  );
                                 }
                                 return SizedBox();
                               }),

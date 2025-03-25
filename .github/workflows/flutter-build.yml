@@ -38,12 +38,6 @@ jobs:
       - name: Rename APK
         run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/jaberah-${VERSION}.apk
 
-      - name: Generate Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Flutter-APK
-          path: build/app/outputs/flutter-apk/jaberah-${VERSION}.apk
-
       - name: Refresh Dropbox Access Token
         id: refresh_dropbox_token
         run: |

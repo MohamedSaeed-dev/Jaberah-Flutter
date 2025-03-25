@@ -17,13 +17,6 @@ import 'package:url_launcher/url_launcher.dart';
 @pragma('vm:entry-point')
 Future<void> handlerBackgroundMessage(RemoteMessage message) async {
   String? topic = message.data['topic'];
-
-  if (topic == "newVersion") {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setString("newVersion", message.data['version']);
-    prefs.setString("url", message.data['url']);
-    prefs.setString("minRequired", message.data["minRequired"]);
-  }
 }
 
 class FirebaseAPI {
@@ -118,11 +111,6 @@ class FirebaseAPI {
             ),
             payload: jsonEncode(message.toMap()),
           );
-        } else if (topic == "newVersion") {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          prefs.setString("newVersion", message.data['version']);
-          prefs.setString("url", message.data['url']);
-          prefs.setString("minRequired", message.data["minRequired"]);
         }
       }
     });
@@ -142,29 +130,4 @@ class FirebaseAPI {
       messageSnackBar("الرجاء اعادة تشغيل التطبيق");
     }
   }
-}
-
-void showOptionalUpdateDialog(String url) {
-  Get.dialog(
-    AlertDialog(
-      title: const Text('تحديث متاح'),
-      content: const Text('يوجد تحديث جديد، هل ترغب في التحديث الآن؟'),
-      actions: [
-        TextButton(
-          onPressed: () => Get.back(),
-          child: const Text('لاحقًا'),
-        ),
-        TextButton(
-          onPressed: () async {
-            if (await canLaunchUrl(Uri.parse(url))) {
-              await launchUrl(Uri.parse(url),
-                  mode: LaunchMode.externalApplication);
-            }
-          },
-          child: const Text('تحديث الآن'),
-        ),
-      ],
-    ),
-    barrierDismissible: false,
-  );
 }

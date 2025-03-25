@@ -130,7 +130,7 @@ class AuthController extends GetxController {
     '',
     '',
     snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.red.withOpacity(0.5),
+    backgroundColor: Colors.red.withValues(alpha:  0.5),
     colorText: Colors.white,
     margin: const EdgeInsets.all(10),
     duration: const Duration(seconds: 3),
