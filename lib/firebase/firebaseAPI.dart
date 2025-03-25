@@ -102,7 +102,7 @@ class FirebaseAPI {
       String? topic = message.data['topic'];
 
       if (topic != null) {
-        if (topic == "public") {
+        if (topic == "public" || topic == "token") {
           _localNotifications.show(
             notification.hashCode,
             notification?.title ?? 'اشعار جديد',
