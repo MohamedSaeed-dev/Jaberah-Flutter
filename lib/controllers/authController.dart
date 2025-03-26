@@ -101,48 +101,46 @@ class AuthController extends GetxController {
 
   var isLoadingLogout = false.obs;
   Future<void> logout() async {
-  isLoggedIn.value = false;
-  isLoadingLogout.value = true;
+    isLoadingLogout.value = true;
+    isLoggedIn.value = false;
 
-  await _firebaseMessaging.deleteToken();
-  await _firebaseMessaging.unsubscribeFromTopic("public");
-  await _firebaseMessaging.unsubscribeFromTopic("newVersion");
+    await _firebaseMessaging.deleteToken();
+    await _firebaseMessaging.unsubscribeFromTopic("public");
+    await _firebaseMessaging.unsubscribeFromTopic("newVersion");
 
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.clear();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
 
-  usernameController.value.clear();
-  passwordController.value.clear();
+    usernameController.value.clear();
+    passwordController.value.clear();
 
-  isAdmin.value = false;
-  Get.find<UserNameController>().name.value = '';
+    isAdmin.value = false;
+    Get.find<UserNameController>().name.value = '';
 
-  isLoadingLogout.value = false;
+    isLoadingLogout.value = false;
 
-  // Close the logout confirmation dialog before navigating
-  if (Get.isDialogOpen ?? false) {
+    // Close the logout confirmation dialog before navigating
     Get.back();
+
+    Get.offAll(() => Login());
+
+    // Get.snackbar(
+    //   '',
+    //   '',
+    //   snackPosition: SnackPosition.BOTTOM,
+    //   backgroundColor: Colors.red.withValues(alpha: 0.5),
+    //   colorText: Colors.white,
+    //   margin: const EdgeInsets.all(10),
+    //   duration: const Duration(seconds: 3),
+    //   isDismissible: true,
+    //   titleText: const Center(
+    //     child: Text(
+    //       'تم تسجيل خروجك بنجاح',
+    //       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+    //     ),
+    //   ),
+    // );
   }
-
-  Get.offAll(() => Login());
-
-  Get.snackbar(
-    '',
-    '',
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.red.withValues(alpha:  0.5),
-    colorText: Colors.white,
-    margin: const EdgeInsets.all(10),
-    duration: const Duration(seconds: 3),
-    isDismissible: true,
-    titleText: const Center(
-      child: Text(
-        'تم تسجيل خروجك بنجاح',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-      ),
-    ),
-  );
-}
 
   Future<AuthController> checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();

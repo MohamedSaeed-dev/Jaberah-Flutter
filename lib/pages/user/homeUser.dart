@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
+import 'package:jaberah/controllers/user/notificationsUserController.dart';
 import 'package:jaberah/controllers/versionsController.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/user/notificationsUser.dart';
@@ -58,6 +59,16 @@ class HomePageUser extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
+          actions: [
+            if (!authController.isAdmin.value)
+              GestureDetector(
+                onTap: () => Get.to(() => NotificationsUser()),
+                child: Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: NotificationIcon(),
+                ),
+              ),
+          ],
           backgroundColor: const Color.fromARGB(255, 63, 181, 108),
         ),
         drawer: Drawer(
@@ -110,14 +121,6 @@ class HomePageUser extends StatelessWidget {
                         ],
                       ),
                     ),
-                    if (!authController.isAdmin.value)
-                      ListTile(
-                        leading: const Icon(Icons.notification_important),
-                        title: const Text('الإشعارات'),
-                        onTap: () {
-                          Get.to(() => NotificationsUser());
-                        },
-                      ),
                     if (authController.isAdmin.value)
                       ListTile(
                         leading: const Icon(Icons.admin_panel_settings_sharp),
@@ -159,12 +162,7 @@ class HomePageUser extends StatelessWidget {
                                       style: const TextStyle(color: Colors.red),
                                     ),
                                     onPressed: () async {
-                                      authController.isLoadingLogout.value =
-                                          true;
                                       await authController.logout();
-                                      authController.isLoadingLogout.value =
-                                          false;
-                                      Get.back(); // Close the dialog after logout
                                     },
                                   )),
                             ],
@@ -314,6 +312,38 @@ class HomePageUser extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class NotificationIcon extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.put(NotificationsCountController());
+
+    return Stack(
+      children: [
+        Icon(Icons.notifications, color: Colors.black),
+        Positioned(
+          right: 0,
+          child: Obx(() {
+            final count = controller.newNotificationCount.value;
+            return count > 0
+                ? Container(
+                    padding: EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '$count',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  )
+                : SizedBox();
+          }),
+        ),
+      ],
     );
   }
 }

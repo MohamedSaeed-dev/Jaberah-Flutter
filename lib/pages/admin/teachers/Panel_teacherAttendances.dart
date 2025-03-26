@@ -49,19 +49,19 @@ class TeachersAttendancePanel extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 8,
-        shadowColor: color.withOpacity(0.5),
+        shadowColor: color.withValues(alpha:  0.5),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 50, color: color),
-              const SizedBox(height: 20),
+              Icon(icon, size: 45, color: color),
+              const SizedBox(height: 15),
               Text(
                 title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'GE_SS_Two',
                 ),

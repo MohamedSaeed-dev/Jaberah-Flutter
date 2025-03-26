@@ -2,45 +2,39 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/models/global/snackbars.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class NotificationsUserController extends GetxController {
-  final ApiClient _apiClient = Get.find();
-  var isLoading = false.obs;
-  final titleController = TextEditingController();
-  final bodyController = TextEditingController();
+class NotificationsCountController extends GetxController {
+  var newNotificationCount = 0.obs;
 
-  var notifications = <NotificationModel>[].obs;
-  Future sendNotification() async {
-    try {
-      isLoading.value = true;
-      var response = await _apiClient.dio.post("/$sendNotificationURL", data: {
-        "title": titleController.text,
-        "body": bodyController.text,
-      }).timeout(const Duration(seconds: 20));
-      if (response.statusCode == 200) {
-        Get.back();
-        titleController.text = "";
-        bodyController.text = "";
-        successSnackBar("تم ارسال الإشعار بنجاح");
-      } else {
-        messageSnackBar(response.data["message"]);
-      }
-    } on SocketException catch (_) {
-      socketSnackBar();
-    } on TimeoutException catch (_) {
-      timeoutSnackBar();
-    } on DioException catch (e) {
-      messageSnackBar(e.response!.data["message"]);
-    } catch (e) {
-      catchSnackBar();
-    } finally {
-      isLoading.value = false;
-    }
+  @override
+  void onInit() {
+    super.onInit();
+    loadNotificationCount(); // Load count when controller is initialized
+  }
+
+  void incrementNewNotification() async {
+    newNotificationCount.value++;
+    await saveNotificationCount(); // Save to storage
+  }
+
+  void resetNewNotification() async {
+    newNotificationCount.value = 0;
+    await saveNotificationCount(); // Reset in storage
+  }
+
+  Future<void> saveNotificationCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('notificationCount', newNotificationCount.value);
+  }
+
+  Future<void> loadNotificationCount() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    newNotificationCount.value = prefs.getInt('notificationCount') ?? 0;
   }
 }
 
@@ -49,7 +43,7 @@ class NotificationsCRUDUserController extends GetxController {
   var notifications = <NotificationModel>[].obs;
   var isLoading = false.obs;
 
-  var data = new NotificationPagedData(
+  var data = NotificationPagedData(
           data: [],
           totalCount: 0,
           totalPages: 0,

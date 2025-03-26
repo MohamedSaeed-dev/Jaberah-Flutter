@@ -178,12 +178,7 @@ class HomePageAdmin extends StatelessWidget {
                                       style: const TextStyle(color: Colors.red),
                                     ),
                                     onPressed: () async {
-                                      authController.isLoadingLogout.value =
-                                          true;
                                       await authController.logout();
-                                      authController.isLoadingLogout.value =
-                                          false;
-                                      Get.back(); // Close the dialog after logout
                                     },
                                   )),
                             ],

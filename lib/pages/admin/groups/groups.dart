@@ -138,7 +138,7 @@ class Groups extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 8,
-        shadowColor: color.withOpacity(0.5),
+        shadowColor: color.withValues(alpha:  0.5),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
@@ -146,13 +146,13 @@ class Groups extends StatelessWidget {
             children: [
               Text(title,
                   textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              Text("المعلم : $teacher", textAlign: TextAlign.center),
+              Text("المعلم : $teacher", textAlign: TextAlign.center,style: TextStyle(fontSize: 12)),
               SizedBox(height: 10),
-              Text("الفترة : $period", textAlign: TextAlign.center),
+              Text("الفترة : $period", textAlign: TextAlign.center,style: TextStyle(fontSize: 12)),
               SizedBox(height: 10),
-              Text("عدد الطلاب: $numberStd", textAlign: TextAlign.center),
+              Text("عدد الطلاب: $numberStd", textAlign: TextAlign.center,style: TextStyle(fontSize: 12)),
             ],
           ),
         ),

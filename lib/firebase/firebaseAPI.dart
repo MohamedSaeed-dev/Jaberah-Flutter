@@ -1,22 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/controllers/authController.dart';
+import 'package:jaberah/controllers/user/notificationsUserController.dart';
 import 'package:jaberah/login.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/admin/notificationsAdmin.dart';
 import 'package:jaberah/pages/user/notificationsUser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 @pragma('vm:entry-point')
 Future<void> handlerBackgroundMessage(RemoteMessage message) async {
   String? topic = message.data['topic'];
+  if (topic == "public") {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int currentCount = prefs.getInt('notificationCount') ?? 0;
+    await prefs.setInt('notificationCount', currentCount + 1);
+  }
 }
 
 class FirebaseAPI {
@@ -95,23 +99,25 @@ class FirebaseAPI {
       String? topic = message.data['topic'];
 
       if (topic != null) {
-        if (topic == "public" || topic == "token") {
-          _localNotifications.show(
-            notification.hashCode,
-            notification?.title ?? 'اشعار جديد',
-            notification?.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                _androidChannel.id,
-                _androidChannel.name,
-                channelDescription: _androidChannel.description,
-                importance: _androidChannel.importance,
-                icon: 'ic_launcher',
-              ),
-            ),
-            payload: jsonEncode(message.toMap()),
-          );
+        if (topic == "public") {
+          var notificationController = Get.find<NotificationsCountController>();
+          notificationController.incrementNewNotification();
         }
+        _localNotifications.show(
+          notification.hashCode,
+          notification?.title ?? 'اشعار جديد',
+          notification?.body,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              _androidChannel.id,
+              _androidChannel.name,
+              channelDescription: _androidChannel.description,
+              importance: _androidChannel.importance,
+              icon: 'ic_launcher',
+            ),
+          ),
+          payload: jsonEncode(message.toMap()),
+        );
       }
     });
   }

@@ -4,11 +4,18 @@ import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/notificationsUserController.dart';
 import 'dart:ui';
 
+// ignore: must_be_immutable
 class NotificationsUser extends StatelessWidget {
   final controller = Get.put(NotificationsCRUDUserController());
+  var notificationCount = Get.find<NotificationsCountController>();
+
+  NotificationsUser({super.key});
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      notificationCount.resetNewNotification();
+    });
     return Scaffold(
       appBar: AppBar(
         title: const Text('الإشعارات'),

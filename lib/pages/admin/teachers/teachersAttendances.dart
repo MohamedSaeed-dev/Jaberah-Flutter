@@ -4,7 +4,20 @@ import 'package:jaberah/controllers/admin/reportTeachersAttendancesController.da
 import 'package:jaberah/controllers/admin/teachersAttendancesController.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
 
+// Make sure your controller is defined correctly with reactive variables.
+// For example, in TeacherAttendancesController:
+//
+// class TeacherAttendancesController extends GetxController {
+//   var isLoading = false.obs;
+//   var selectedDate = JDateModel(jhijri: /* some initial Hijri date */).obs;
+//   var filteredTeachersAttendances = <TeacherAttendanceForDayReport>[].obs;
+//   var entries = <EntryAttendance>[].obs;
+//
+//   // ... methods to update these values
+// }
+
 class TeachersAttendancePage extends StatelessWidget {
+  // Initialize the controller once at the top level
   final TeacherAttendancesController controller =
       Get.put(TeacherAttendancesController());
 
@@ -13,106 +26,135 @@ class TeachersAttendancePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        bottomNavigationBar: BottomAppBar(
-          child: Obx(() => FloatingActionButton.extended(
-                onPressed: controller.isLoading.value
-                    ? null
-                    : () async {
-                        await controller.updateTeachersAttendances();
-                      },
-                label: Text(
-                  "حـفـظ",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-                icon: Icon(
-                  Icons.save,
-                  color: Colors.black,
-                ),
-                backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-              )),
+      appBar: AppBar(
+        title: const Text(
+          'الحضور للمعلمين',
+          style:
+              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
-        appBar: AppBar(
-          title: const Text(
-            'الحضور للمعلمين',
-            style:
-                TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-        ),
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Center(
-                child: Obx(
-                    () => _buildHijriMonthDatePicker(context, "الشهر الهجري:")),
+        backgroundColor: const Color(0xFF3FB56C),
+        elevation: 2,
+      ),
+      floatingActionButton: Obx(() => FloatingActionButton.extended(
+            onPressed: controller.isLoading.value
+                ? null
+                : () async {
+                    await controller.updateTeachersAttendances();
+                  },
+            label: const Text(
+              "حـفـظ",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
             ),
-            const Divider(),
-            Obx(() {
-              if (controller.isLoading.value) {
-                return _buildLoadingIndicator();
-              } else if (controller.filteredTeachersAttendances.isEmpty) {
-                return _buildEmptyDataIndicator();
-              } else {
-                return Expanded(
-                    child: ListView.builder(
-                        itemCount:
-                            controller.filteredTeachersAttendances.length,
-                        itemBuilder: (context, index) {
-                          int id =
-                              controller.filteredTeachersAttendances[index].id;
-                          bool? signature = controller
-                              .filteredTeachersAttendances[index].signature;
-                          bool? isExcuse = controller
-                              .filteredTeachersAttendances[index].isExcuse;
-                          if (!controller.entries
-                              .any((entry) => entry.teacherId == id)) {
-                            controller.entries.add(EntryAttendance(
-                                teacherId: id,
-                                signature: signature,
-                                isExcuse: isExcuse));
-                          }
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 5),
-                            child: _buildAttendanceCard(context,
-                                controller.filteredTeachersAttendances[index]),
-                          );
-                        }));
-              }
-            }),
+            icon: const Icon(
+              Icons.save,
+              color: Colors.black,
+            ),
+            backgroundColor: const Color(0xFF3FB56C),
+          )),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Date Picker Section inside a Card
+            Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _buildHijriMonthDatePicker(context, "الشهر الهجري:"),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Divider(thickness: 1),
+            const SizedBox(height: 8),
+            // Attendance List: Wrap only the reactive part in Obx
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return _buildLoadingIndicator();
+                } else if (controller.filteredTeachersAttendances.isEmpty) {
+                  return _buildEmptyDataIndicator();
+                } else {
+                  return ListView.separated(
+                    itemCount: controller.filteredTeachersAttendances.length,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      int id = controller.filteredTeachersAttendances[index].id;
+                      bool? signature = controller
+                          .filteredTeachersAttendances[index].signature;
+                      bool? isExcuse = controller
+                          .filteredTeachersAttendances[index].isExcuse;
+                      // Ensure an entry exists for this teacher.
+                      // Here we check entries; make sure entries is reactive.
+                      if (!controller.entries
+                          .any((entry) => entry.teacherId == id)) {
+                        controller.entries.add(EntryAttendance(
+                          teacherId: id,
+                          signature: signature,
+                          isExcuse: isExcuse,
+                        ));
+                      }
+                      return Obx(() => _buildAttendanceCard(context,
+                          controller.filteredTeachersAttendances[index]));
+                    },
+                  );
+                }
+              }),
+            ),
           ],
-        ));
+        ),
+      ),
+    );
   }
 
+  /// Date picker section with a label and the selected Hijri date.
   Widget _buildHijriMonthDatePicker(BuildContext context, String label) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 15),
-            ),
-            SizedBox(
-              width: 20,
-            ),
-            Text(
-              "${controller.selectedDate.value.jhijri!.day}-${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
+        // Use Flexible to avoid overflow issues.
+        Flexible(
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Obx(
+                  () => Text(
+                    "${controller.selectedDate.value.jhijri!.day}-${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         IconButton(
-            onPressed: () => _selectHijriDate(context),
-            icon: Icon(Icons.calendar_month))
+          onPressed: () => _selectHijriDate(context),
+          icon: const Icon(Icons.calendar_month, size: 28),
+          color: const Color(0xFF3FB56C),
+        ),
       ],
     );
   }
 
+  /// Displays the Hijri date picker and updates the selected date.
   Future<void> _selectHijriDate(BuildContext context) async {
     var picked = await showGlobalDatePicker(
       headerTitle: Container(
@@ -120,15 +162,16 @@ class TeachersAttendancePage extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
+          color: const Color(0xFF1976D2),
         ),
         child: const Center(
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
               color: Colors.white,
-              fontSize: 24, // Smaller for cleaner appearance
-              fontWeight: FontWeight.w600, // Slightly bold for emphasis
-              letterSpacing: 1.2, // Adds a modern touch with spaced letters
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.2,
             ),
           ),
         ),
@@ -136,8 +179,8 @@ class TeachersAttendancePage extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: const Color(0xFF1976D2),
+      backgroundColor: Colors.white,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -151,18 +194,86 @@ class TeachersAttendancePage extends StatelessWidget {
     }
   }
 
-  // Hijri Month Picker for Month Search
-
+  /// Loading indicator widget.
   Widget _buildLoadingIndicator() {
-    return Expanded(
-      child: Center(
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          CircularProgressIndicator(),
+          SizedBox(height: 12),
+          Text(
+            "جاري تحميل حضور المعلمين...",
+            style: TextStyle(fontSize: 18),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Widget to display when there is no attendance data.
+  Widget _buildEmptyDataIndicator() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Icon(Icons.hourglass_empty, size: 40),
+          SizedBox(height: 10),
+          Text("لا توجد بيانات", style: TextStyle(fontSize: 20))
+        ],
+      ),
+    );
+  }
+
+  /// Builds an attendance card for a given teacher.
+  Widget _buildAttendanceCard(
+      BuildContext context, TeacherAttendanceForDayReport teacher) {
+    final int id = teacher.id;
+    // Get the entry for this teacher.
+    final entry = controller.entries.firstWhere((x) => x.teacherId == id);
+    return Card(
+      elevation: 4,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            CircularProgressIndicator(),
-            Text(
-              "جاري تحميل حضور المعلمين...",
-              style: TextStyle(fontSize: 20),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Teacher Name Row
+            Row(
+              children: [
+                Flexible(
+                  child: Text(
+                    "المعلم: ${teacher.teacherName}",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Attendance Options Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildAttendanceOption(
+                  label: "حاضر",
+                  value: entry.signature ?? false,
+                  onChanged: (value) =>
+                      controller.updateEntry(id, signature: value),
+                ),
+                _buildAttendanceOption(
+                  label: "غائب بعذر",
+                  value: entry.isExcuse ?? false,
+                  onChanged: (value) =>
+                      controller.updateEntry(id, isExcuse: value),
+                ),
+              ],
             ),
           ],
         ),
@@ -170,94 +281,25 @@ class TeachersAttendancePage extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyDataIndicator() {
-    return Expanded(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Icon(Icons.hourglass_empty),
-            SizedBox(height: 10),
-            Text("لاتوجد بيانات", style: TextStyle(fontSize: 20))
-          ],
+  /// Builds a single attendance option with its label and checkbox.
+  Widget _buildAttendanceOption({
+    required String label,
+    required bool value,
+    required Function(bool?) onChanged,
+  }) {
+    return Row(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 16),
         ),
-      ),
-    );
-  }
-
-  Widget _buildAttendanceCard(
-      BuildContext context, TeacherAttendanceForDayReport teacher) {
-    var id = teacher.id;
-    return Container(
-      height: 130,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 8,
-        shadowColor: Colors.indigo[300], // Card shadow color
-        color: Colors.indigo[50], // Card background color
-        child: ListTile(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                children: [
-                  Text("- المعلم: "),
-                  Text(
-                    '${teacher.teacherName}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        "حاضر : ",
-                      ),
-                      Obx(
-                        () => Checkbox(
-                            value: controller.entries
-                                    .firstWhere((x) => x.teacherId == id)
-                                    .signature ??
-                                false,
-                            onChanged: (value) {
-                              controller.updateEntry(id, signature: value);
-                            }),
-                      )
-                    ],
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text("غائب بعذر :",
-                              style:
-                                  TextStyle(fontSize: 15, color: Colors.black)),
-                          Obx(
-                            () => Checkbox(
-                                value: controller.entries
-                                        .firstWhere((x) => x.teacherId == id)
-                                        .isExcuse ??
-                                    false,
-                                onChanged: (value) {
-                                  controller.updateEntry(id, isExcuse: value);
-                                }),
-                          )
-                        ],
-                      )
-                    ],
-                  )
-                ],
-              ),
-            ],
-          ),
+        const SizedBox(width: 8),
+        Checkbox(
+          activeColor: const Color(0xFF3FB56C),
+          value: value,
+          onChanged: onChanged,
         ),
-      ),
+      ],
     );
   }
 }
