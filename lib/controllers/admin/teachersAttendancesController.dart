@@ -31,7 +31,6 @@ class TeacherAttendancesController extends GetxController {
         isExcuse: isExcuse,
       ));
     }
-
     // Ensure reactive updates
     entries.refresh();
   }
@@ -68,7 +67,6 @@ class TeacherAttendancesController extends GetxController {
     } on TimeoutException {
       timeoutSnackBar();
     } catch (e) {
-      print(e);
       catchSnackBar();
     } finally {
       isLoading.value = false;
@@ -97,7 +95,6 @@ class TeacherAttendancesController extends GetxController {
     } on TimeoutException catch (_) {
       timeoutSnackBar();
     } catch (e) {
-      print(e);
       catchSnackBar();
     } finally {
       isLoading.value = false;

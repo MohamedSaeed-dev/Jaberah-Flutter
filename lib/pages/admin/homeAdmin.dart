@@ -6,6 +6,7 @@ import 'package:jaberah/controllers/admin/notificationsAdminController.dart';
 import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
 import 'package:jaberah/controllers/versionsController.dart';
+import 'package:jaberah/login.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/admin/groups/groups.dart';
 import 'package:jaberah/pages/admin/notificationsAdmin.dart';
@@ -170,17 +171,17 @@ class HomePageAdmin extends StatelessWidget {
                                   Get.back();
                                 },
                               ),
-                              Obx(() => TextButton(
-                                    child: Text(
+                              TextButton(
+                                child: Obx(() => Text(
                                       authController.isLoadingLogout.value
                                           ? 'جاري تسجيل الخروج...'
                                           : 'تسجيل الخروج',
                                       style: const TextStyle(color: Colors.red),
-                                    ),
-                                    onPressed: () async {
-                                      await authController.logout();
-                                    },
-                                  )),
+                                    )),
+                                onPressed: () async {
+                                  await authController.logout();
+                                },
+                              ),
                             ],
                           ),
                         );
@@ -189,7 +190,7 @@ class HomePageAdmin extends StatelessWidget {
                   ],
                 ),
                 Container(
-                  alignment: Alignment.bottomCenter,
+                  // alignment: Alignment.bottomCenter,
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: Column(
                     children: [
@@ -213,7 +214,7 @@ class HomePageAdmin extends StatelessWidget {
                         ],
                       ),
                       Container(
-                        alignment: Alignment.bottomCenter,
+                        // alignment: Alignment.bottomCenter,
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: GestureDetector(
                           onTap: () async {

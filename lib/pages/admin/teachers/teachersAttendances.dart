@@ -4,18 +4,6 @@ import 'package:jaberah/controllers/admin/reportTeachersAttendancesController.da
 import 'package:jaberah/controllers/admin/teachersAttendancesController.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
 
-// Make sure your controller is defined correctly with reactive variables.
-// For example, in TeacherAttendancesController:
-//
-// class TeacherAttendancesController extends GetxController {
-//   var isLoading = false.obs;
-//   var selectedDate = JDateModel(jhijri: /* some initial Hijri date */).obs;
-//   var filteredTeachersAttendances = <TeacherAttendanceForDayReport>[].obs;
-//   var entries = <EntryAttendance>[].obs;
-//
-//   // ... methods to update these values
-// }
-
 class TeachersAttendancePage extends StatelessWidget {
   // Initialize the controller once at the top level
   final TeacherAttendancesController controller =
@@ -28,7 +16,7 @@ class TeachersAttendancePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'الحضور للمعلمين',
+          'الحضور المعلمين',
           style:
               TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
@@ -68,7 +56,7 @@ class TeachersAttendancePage extends StatelessWidget {
               color: Colors.white,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: _buildHijriMonthDatePicker(context, "الشهر الهجري:"),
+                child: _buildHijriMonthDatePicker(context, "الشهر:"),
               ),
             ),
             const SizedBox(height: 16),
@@ -157,29 +145,10 @@ class TeachersAttendancePage extends StatelessWidget {
   /// Displays the Hijri date picker and updates the selected date.
   Future<void> _selectHijriDate(BuildContext context) async {
     var picked = await showGlobalDatePicker(
-      headerTitle: Container(
-        margin: const EdgeInsets.only(bottom: 25),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: const Color(0xFF1976D2),
-        ),
-        child: const Center(
-          child: Text(
-            "التقويم الهجري",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ),
-      ),
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2),
+      primaryColor: const Color(0xFF3FB56C),
       backgroundColor: Colors.white,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",

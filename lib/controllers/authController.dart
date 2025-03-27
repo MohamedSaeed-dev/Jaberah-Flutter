@@ -121,25 +121,24 @@ class AuthController extends GetxController {
 
     // Close the logout confirmation dialog before navigating
     Get.back();
-
     Get.offAll(() => Login());
 
-    // Get.snackbar(
-    //   '',
-    //   '',
-    //   snackPosition: SnackPosition.BOTTOM,
-    //   backgroundColor: Colors.red.withValues(alpha: 0.5),
-    //   colorText: Colors.white,
-    //   margin: const EdgeInsets.all(10),
-    //   duration: const Duration(seconds: 3),
-    //   isDismissible: true,
-    //   titleText: const Center(
-    //     child: Text(
-    //       'تم تسجيل خروجك بنجاح',
-    //       style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-    //     ),
-    //   ),
-    // );
+    Get.snackbar(
+      '',
+      '',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red.withValues(alpha: 0.5),
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(10),
+      duration: const Duration(seconds: 3),
+      isDismissible: true,
+      titleText: const Center(
+        child: Text(
+          'تم تسجيل خروجك بنجاح',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+      ),
+    );
   }
 
   Future<AuthController> checkLoginStatus() async {

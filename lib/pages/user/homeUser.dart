@@ -6,6 +6,7 @@ import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
 import 'package:jaberah/controllers/user/notificationsUserController.dart';
 import 'package:jaberah/controllers/versionsController.dart';
+import 'package:jaberah/login.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/user/notificationsUser.dart';
 import 'package:jaberah/pages/admin/homeAdmin.dart';
@@ -154,17 +155,17 @@ class HomePageUser extends StatelessWidget {
                                   Get.back();
                                 },
                               ),
-                              Obx(() => TextButton(
-                                    child: Text(
+                              TextButton(
+                                child: Obx(() => Text(
                                       authController.isLoadingLogout.value
                                           ? 'جاري تسجيل الخروج...'
                                           : 'تسجيل الخروج',
                                       style: const TextStyle(color: Colors.red),
-                                    ),
-                                    onPressed: () async {
-                                      await authController.logout();
-                                    },
-                                  )),
+                                    )),
+                                onPressed: () async {
+                                  await authController.logout();
+                                },
+                              ),
                             ],
                           ),
                         );

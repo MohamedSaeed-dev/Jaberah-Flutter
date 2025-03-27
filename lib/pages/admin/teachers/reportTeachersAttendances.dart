@@ -17,18 +17,20 @@ class TeachersAttendanceReport extends StatelessWidget {
         bottomNavigationBar: BottomAppBar(
           child: Builder(
             builder: (BuildContext newContext) {
-              return Obx(()=> FloatingActionButton.extended(
+              return Obx(() => FloatingActionButton.extended(
                     onPressed: controller.isLoading.value
                         ? null
                         : () async {
-                      final TabController tabController =
-                          DefaultTabController.of(newContext);
-                      if (tabController.index == 0) {
-                        await controller.getTeachersAttendancesReportByDay();
-                      } else if (tabController.index == 1) {
-                        await controller.getTeachersAttendancesReportByMonth();
-                      }
-                    },
+                            final TabController tabController =
+                                DefaultTabController.of(newContext);
+                            if (tabController.index == 0) {
+                              await controller
+                                  .getTeachersAttendancesReportByDay();
+                            } else if (tabController.index == 1) {
+                              await controller
+                                  .getTeachersAttendancesReportByMonth();
+                            }
+                          },
                     label: Text(
                       "عـرض الـتـقـريـر",
                       style: TextStyle(
@@ -47,7 +49,7 @@ class TeachersAttendanceReport extends StatelessWidget {
           ),
         ),
         appBar: AppBar(
-          title: const Text('تقرير الحضور للمعلمين'),
+          title: const Text('تقرير الحضور المعلمين'),
           backgroundColor: const Color.fromARGB(255, 63, 181, 108),
           bottom: const TabBar(
             tabs: [
@@ -73,8 +75,16 @@ class TeachersAttendanceReport extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Obx(
-            () => _buildHijriDatePicker(context, 'التاريخ الهجري:'),
+          Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildHijriDatePicker(context, "الشهر:"),
+            ),
           ),
           const Divider(),
           const SizedBox(height: 20),
@@ -110,65 +120,173 @@ class TeachersAttendanceReport extends StatelessWidget {
 
   Widget _buildMonthAttendanceCard(
       BuildContext context, TeacherAttendanceForMonthReport teacher) {
-    return SizedBox(
-      height: 130,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 8,
-        shadowColor: Colors.indigo[300], // Card shadow color
-        color: Colors.indigo[50], // Card background color
-        child: ListTile(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text("- المعلم: "),
-                  Text(
-                    '${teacher.teacherName}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+    return Card(
+      elevation: 4,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Teacher Name Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    "المعلم: ${teacher.teacherName}",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-              Text("حاضر : ${teacher.signatureNo}"),
-              Text("غائب بعذر : ${teacher.isExcuseNo}"),
-            ],
-          ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Attendance Summary Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                // Excused Absences
+                Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[300],
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.warning_amber_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "بعذر",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      "${teacher.isExcuseNo}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.orange,
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Present
+                Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check_circle_outline,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "حاضر",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      "${teacher.signatureNo}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
+
   Widget _buildDayAttendanceCard(
       BuildContext context, TeacherAttendanceForDayReport teacher) {
-    var key = teacher.signature != null && teacher.signature as bool
+    var key = teacher.signature == true
         ? 'حاضر'
-        : teacher.isExcuse != null && teacher.isExcuse as bool
-            ? 'غائب بعذر'
+        : teacher.isExcuse == true
+            ? 'بعذر'
             : 'غائب';
-    return SizedBox(
-      height: 130,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 8,
-        shadowColor: Colors.indigo[300], // Card shadow color
-        color: Colors.indigo[50], // Card background color
-        child: ListTile(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text("- المعلم: "),
-                  Text(
-                    '${teacher.teacherName}',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+
+    return Card(
+      elevation: 4,
+      shadowColor: Colors.black26,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Teacher Name Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    "المعلم: ${teacher.teacherName}",
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
-              Text(key),
-            ],
-          ),
+                ),
+                const SizedBox(width: 10),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: key == "حاضر"
+                        ? Colors.green
+                        : key == "بعذر"
+                            ? Colors.orange[200]
+                            : Colors.redAccent[200],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    key == "حاضر"
+                        ? Icons.check_circle
+                        : key == "بعذر"
+                            ? Icons.warning_amber_rounded
+                            : Icons.cancel_outlined,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Attendance Options Row
+          ],
         ),
       ),
     );
@@ -236,8 +354,16 @@ class TeachersAttendanceReport extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Obx(
-            () => _buildHijriMonthDatePicker(context, 'التاريخ الهجري:'),
+          Card(
+            elevation: 3,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            color: Colors.white,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: _buildHijriMonthDatePicker(context, "الشهر:"),
+            ),
           ),
           const Divider(),
           const SizedBox(height: 20),
@@ -276,24 +402,36 @@ class TeachersAttendanceReport extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 15),
-            ),
-            SizedBox(
-              width: 20,
-            ),
-            Text(
-              "${controller.selectedDate.value.jhijri!.day} - ${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
+        // Use Flexible to avoid overflow issues.
+        Flexible(
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Obx(
+                  () => Text(
+                    "${controller.selectedDate.value.jhijri!.day}-${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         IconButton(
-            onPressed: () => _selectHijriDate(context),
-            icon: Icon(Icons.calendar_month))
+          onPressed: () => _selectHijriDayDate(context),
+          icon: const Icon(Icons.calendar_month, size: 28),
+          color: const Color(0xFF3FB56C),
+        ),
       ],
     );
   }
@@ -302,53 +440,66 @@ class TeachersAttendanceReport extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 15),
-            ),
-            SizedBox(
-              width: 20,
-            ),
-            Text(
-              "${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
+        // Use Flexible to avoid overflow issues.
+        Flexible(
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Obx(
+                  () => Text(
+                    "${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         IconButton(
-            onPressed: () => _selectHijriDate(context),
-            icon: Icon(Icons.calendar_month))
+          onPressed: () => _selectHijriMonthDate(context),
+          icon: const Icon(Icons.calendar_month, size: 28),
+          color: const Color(0xFF3FB56C),
+        ),
       ],
     );
   }
 
-  Future<void> _selectHijriDate(BuildContext context) async {
+  Future<void> _selectHijriDayDate(BuildContext context) async {
     var picked = await showGlobalDatePicker(
-      headerTitle: Container(
-        margin: const EdgeInsets.only(bottom: 25),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Center(
-          child: Text(
-            "التقويم الهجري",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24, // Smaller for cleaner appearance
-              fontWeight: FontWeight.w600, // Slightly bold for emphasis
-              letterSpacing: 1.2, // Adds a modern touch with spaced letters
-            ),
-          ),
-        ),
-      ),
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: const Color(0xFF3FB56C),
+      backgroundColor: Colors.white,
+      cancelButtonText: "إلغاء",
+      okButtonText: "تأكيد",
+      selectedDate: controller.selectedDate.value,
+    );
+
+    if (picked != null &&
+        picked.jhijri != controller.selectedDate.value.jhijri) {
+      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri);
+      await controller.getTeachersAttendancesReportByDay();
+    }
+  }
+
+  Future<void> _selectHijriMonthDate(BuildContext context) async {
+    var picked = await showGlobalDatePicker(
+      locale: const Locale("ar", "SA"),
+      context: context,
+      pickerType: PickerType.JHijri,
+      primaryColor: const Color(0xFF3FB56C),
+      backgroundColor: Colors.white,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
