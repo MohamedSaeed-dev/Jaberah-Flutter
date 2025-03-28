@@ -508,7 +508,7 @@ class TeachersAttendanceReport extends StatelessWidget {
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
       controller.selectedDate.value = JDateModel(jhijri: picked.jhijri);
-      await controller.getTeachersAttendancesReportByDay();
+      await controller.getTeachersAttendancesReportByMonth();
     }
   }
 
