@@ -41,7 +41,7 @@ jobs:
       - name: Update Version in Backend
         run: |
           response=$(curl -X PUT "${{ secrets.BACKEND_API }}?version=${{ env.VERSION }}" \
-            -H "Content-Type: application/x-www-form-urlencoded" \
+            -H "Content-Type: multipart/form-data" \
             -F "apkFile=@build/app/outputs/flutter-apk/jaberah-${VERSION}.apk")
           echo "Response from backend: $response"
 
