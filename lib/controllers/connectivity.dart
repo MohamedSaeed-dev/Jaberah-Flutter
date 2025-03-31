@@ -11,18 +11,20 @@ class ConnectivityController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _connectivityStream = _connectivity.onConnectivityChanged;
+    
+    // Transform Stream<List<ConnectivityResult>> into Stream<ConnectivityResult>
+    _connectivityStream = _connectivity.onConnectivityChanged.map((results) => 
+        results.isNotEmpty ? results.first : ConnectivityResult.none);
+
     _connectivityStream.listen((ConnectivityResult result) {
       bool hasInternet = result != ConnectivityResult.none;
       if (isConnected.value != hasInternet) {
         isConnected.value = hasInternet;
         if (!hasInternet) {
-          // When internet is lost, show the dialog if not already displayed.
           if (!_dialogShown) {
             _showNoInternetDialog();
           }
         } else {
-          // When internet is back, dismiss the dialog if it is open.
           if (_dialogShown) {
             Get.back();
             _dialogShown = false;
@@ -36,13 +38,13 @@ class ConnectivityController extends GetxController {
     _dialogShown = true;
     Get.dialog(
       AlertDialog(
-        title: Center(
+        title: const Center(
           child: Text(
             'غير متصل بالانترنت',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
         ),
-        content: Center(
+        content: const Center(
           child: Text(
             'لقد فقدت الاتصال بالانترنت',
             textAlign: TextAlign.center,
@@ -52,20 +54,19 @@ class ConnectivityController extends GetxController {
         actions: [
           TextButton(
             onPressed: () async {
-              // Check connectivity when the reload button is pressed.
               var result = await _connectivity.checkConnectivity();
               if (result != ConnectivityResult.none) {
                 if (_dialogShown) {
-                  Get.back(); // Dismiss the dialog.
+                  Get.back();
                   _dialogShown = false;
                 }
               }
             },
-            child: Text("تحديث"),
+            child: const Text("تحديث"),
           ),
         ],
       ),
-      barrierDismissible: false, // Prevent dismissing by tapping outside.
+      barrierDismissible: false,
     );
   }
 }
