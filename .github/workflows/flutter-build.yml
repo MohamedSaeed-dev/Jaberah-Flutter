@@ -29,6 +29,8 @@ jobs:
         id: extract_version
         run: |
           version=$(grep '^version:' pubspec.yaml | awk '{print $2}' | cut -d "+" -f 1)
+          echo "App version is $version"
+          echo "VERSION=$version" >> $GITHUB_ENV
 
       - name: Build APK
         run: flutter build apk --release --target=lib/login.dart --no-tree-shake-icons
@@ -38,8 +40,10 @@ jobs:
 
       - name: Update Version in Backend
         run: |
-          curl -X PUT "${{ secrets.BACKEND_API }}?version=${{ env.VERSION }}" \
-          -H "Content-Type: application/x-www-form-urlencoded" \
-          -F "apkFile=@build/app/outputs/flutter-apk/jaberah-${VERSION}.apk"
+          response=$(curl -X PUT "${{ secrets.BACKEND_API }}?version=${{ env.VERSION }}" \
+            -H "Content-Type: application/x-www-form-urlencoded" \
+            -F "apkFile=@build/app/outputs/flutter-apk/jaberah-${VERSION}.apk")
+          echo "Response from backend: $response"
+
 
 
