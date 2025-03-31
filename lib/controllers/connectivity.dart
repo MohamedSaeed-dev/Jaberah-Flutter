@@ -25,11 +25,13 @@ class ConnectivityController extends GetxController {
   }
 
   void _showNoInternetDialog() {
-    if (Get.isDialogOpen == true)
+    if (Get.isDialogOpen ?? false)
       return; // Check properly if a dialog is already open
 
     Get.dialog(
-      AlertDialog(
+      PopScope(
+        canPop: false,
+      child: AlertDialog(
         title: const Text('غير متصل بالانترنت'),
         content: const Text('لقد فقدت الاتصال بالانترنت'),
         actions: [
@@ -38,7 +40,7 @@ class ConnectivityController extends GetxController {
               var results = await _connectivity.checkConnectivity();
               if (results.isNotEmpty &&
                   results.any((result) => result != ConnectivityResult.none)) {
-                if (Get.isDialogOpen == true) {
+                if (Get.isDialogOpen ?? false) {
                   // Ensure Get.isDialogOpen is checked properly
                   Get.back();
                   await versionController.checkVersion();
@@ -49,6 +51,7 @@ class ConnectivityController extends GetxController {
           ),
         ],
       ),
+        ),
       barrierDismissible: false,
     );
   }
