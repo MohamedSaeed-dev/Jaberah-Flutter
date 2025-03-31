@@ -6,7 +6,6 @@ import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
 import 'package:jaberah/controllers/user/notificationsUserController.dart';
 import 'package:jaberah/controllers/versionsController.dart';
-import 'package:jaberah/login.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/user/notificationsUser.dart';
 import 'package:jaberah/pages/admin/homeAdmin.dart';
@@ -19,7 +18,7 @@ import 'package:url_launcher/url_launcher.dart';
 class HomePageUser extends StatelessWidget {
   final AuthController authController = Get.put(AuthController());
   final UserNameController userNameController = Get.put(UserNameController());
-  final VersionsController versionController = Get.put(VersionsController());
+  final VersionsController versionController = Get.find<VersionsController>();
   @override
   Widget build(BuildContext context) {
     return PopScope(

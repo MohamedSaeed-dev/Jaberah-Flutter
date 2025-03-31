@@ -1,64 +1,47 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaberah/controllers/versionsController.dart';
 
 class ConnectivityController extends GetxController {
   final Connectivity _connectivity = Connectivity();
   late Stream<ConnectivityResult> _connectivityStream;
-  var isConnected = true.obs;
-  bool _dialogShown = false;
+  var versionController = Get.put(VersionsController());
 
   @override
   void onInit() {
     super.onInit();
-    
+
     // Transform Stream<List<ConnectivityResult>> into Stream<ConnectivityResult>
-    _connectivityStream = _connectivity.onConnectivityChanged.map((results) => 
+    _connectivityStream = _connectivity.onConnectivityChanged.map((results) =>
         results.isNotEmpty ? results.first : ConnectivityResult.none);
 
     _connectivityStream.listen((ConnectivityResult result) {
       bool hasInternet = result != ConnectivityResult.none;
-      if (isConnected.value != hasInternet) {
-        isConnected.value = hasInternet;
-        if (!hasInternet) {
-          if (!_dialogShown) {
-            _showNoInternetDialog();
-          }
-        } else {
-          if (_dialogShown) {
-            Get.back();
-            _dialogShown = false;
-          }
-        }
+      if (!hasInternet) {
+        _showNoInternetDialog();
       }
     });
   }
 
   void _showNoInternetDialog() {
-    _dialogShown = true;
+    if (Get.isDialogOpen == true)
+      return; // Check properly if a dialog is already open
+
     Get.dialog(
       AlertDialog(
-        title: const Center(
-          child: Text(
-            'غير متصل بالانترنت',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-          ),
-        ),
-        content: const Center(
-          child: Text(
-            'لقد فقدت الاتصال بالانترنت',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16),
-          ),
-        ),
+        title: const Text('غير متصل بالانترنت'),
+        content: const Text('لقد فقدت الاتصال بالانترنت'),
         actions: [
           TextButton(
             onPressed: () async {
-              var result = await _connectivity.checkConnectivity();
-              if (result != ConnectivityResult.none) {
-                if (_dialogShown) {
+              var results = await _connectivity.checkConnectivity();
+              if (results.isNotEmpty &&
+                  results.any((result) => result != ConnectivityResult.none)) {
+                if (Get.isDialogOpen == true) {
+                  // Ensure Get.isDialogOpen is checked properly
                   Get.back();
-                  _dialogShown = false;
+                  await versionController.checkVersion();
                 }
               }
             },

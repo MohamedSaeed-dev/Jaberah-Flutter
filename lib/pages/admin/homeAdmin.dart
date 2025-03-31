@@ -6,7 +6,6 @@ import 'package:jaberah/controllers/admin/notificationsAdminController.dart';
 import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
 import 'package:jaberah/controllers/versionsController.dart';
-import 'package:jaberah/login.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/admin/groups/groups.dart';
 import 'package:jaberah/pages/admin/notificationsAdmin.dart';
@@ -25,7 +24,7 @@ class HomePageAdmin extends StatelessWidget {
   final UserNameController userNameController = Get.put(UserNameController());
   final NotificationsAdminController notificationController =
       Get.put(NotificationsAdminController());
-  final VersionsController versionController = Get.put(VersionsController());
+  final VersionsController versionController = Get.find<VersionsController>();
   @override
   Widget build(BuildContext context) {
     return PopScope(

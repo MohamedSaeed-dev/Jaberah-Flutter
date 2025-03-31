@@ -52,12 +52,16 @@ class VersionsController extends GetxController {
         versionData.value = VersionData.fromJson(response.data);
         await handleUpdateDialog();
       }
-    } on SocketException catch (_) {
-      socketSnackBar();
-    } on TimeoutException catch (_) {
-      timeoutSnackBar();
     } on DioException catch (e) {
-      messageSnackBar(e.response!.data["message"] ?? "حدث خطأ ما");
+      if (e.error is SocketException) {
+        socketSnackBar();
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.sendTimeout) {
+        timeoutSnackBar();
+      } else {
+        messageSnackBar(e.response?.data?["message"] ?? "حدث خطأ ما");
+      }
     } catch (e) {
       catchSnackBar();
     }
