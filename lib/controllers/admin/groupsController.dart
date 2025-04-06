@@ -30,12 +30,16 @@ class GroupsController extends GetxController {
       } else {
         messageSnackBar(response.data["message"]);
       }
-    } on SocketException catch (_) {
-      socketSnackBar();
-    } on TimeoutException catch (_) {
-      timeoutSnackBar();
     } on DioException catch (e) {
-      messageSnackBar(e.response!.data["message"]);
+      if (e.error is SocketException) {
+        socketSnackBar();
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        timeoutSnackBar();
+      } else {
+        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+      }
     } catch (e) {
       catchSnackBar();
     } finally {
@@ -62,12 +66,16 @@ class GroupsController extends GetxController {
         messageSnackBar(response.data["message"]);
       }
       return response;
-    } on SocketException catch (_) {
-      socketSnackBar();
-    } on TimeoutException catch (_) {
-      timeoutSnackBar();
     } on DioException catch (e) {
-      messageSnackBar(e.response!.data["message"]);
+      if (e.error is SocketException) {
+        socketSnackBar();
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        timeoutSnackBar();
+      } else {
+        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+      }
     } catch (e) {
       catchSnackBar();
     } finally {
@@ -83,7 +91,7 @@ class GroupsController extends GetxController {
         teachersForGeneralUse.value =
             result.map((item) => TeachersForGeneralUse.fromJson(item)).toList();
         teachersForGeneralUse.insert(
-            0, TeachersForGeneralUse(id: null,teacherName:  "بدون معلم"));
+            0, TeachersForGeneralUse(id: null, teacherName: "بدون معلم"));
       } else {
         messageSnackBar(response.data["message"]);
       }

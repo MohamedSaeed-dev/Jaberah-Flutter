@@ -15,6 +15,7 @@ import 'package:jaberah/pages/admin/students/add_students.dart';
 import 'package:jaberah/pages/admin/teachers/Panel_teachers.dart';
 import 'package:jaberah/pages/admin/teachers/add_teacher.dart';
 import 'package:jaberah/pages/admin/teachers/profile.dart';
+import 'package:jaberah/pages/admin/trash.dart';
 import 'package:jaberah/pages/user/homeUser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -136,6 +137,13 @@ class HomePageAdmin extends StatelessWidget {
                       title: const Text('الإشعارات'),
                       onTap: () {
                         Get.to(() => NotificationsAdmin());
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.auto_delete),
+                      title: const Text('سلة المحذوفات'),
+                      onTap: () {
+                        Get.to(() => TrashPage());
                       },
                     ),
                     ListTile(

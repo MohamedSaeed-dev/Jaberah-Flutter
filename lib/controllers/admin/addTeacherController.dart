@@ -31,12 +31,16 @@ class AddTeacherController extends GetxController {
       } else {
         messageSnackBar(response.data["message"]);
       }
-    } on SocketException catch (_) {
-      socketSnackBar();
-    } on TimeoutException catch (_) {
-      timeoutSnackBar();
     } on DioException catch (e) {
-      messageSnackBar(e.response!.data["message"]);
+      if (e.error is SocketException) {
+        socketSnackBar();
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        timeoutSnackBar();
+      } else {
+        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+      }
     } catch (e) {
       catchSnackBar();
     } finally {
@@ -61,12 +65,16 @@ class AddTeacherController extends GetxController {
       } else {
         messageSnackBar(response.data["message"]);
       }
-    } on SocketException catch (_) {
-      socketSnackBar();
-    } on TimeoutException catch (_) {
-      timeoutSnackBar();
     } on DioException catch (e) {
-      messageSnackBar(e.response!.data["message"]);
+      if (e.error is SocketException) {
+        socketSnackBar();
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        timeoutSnackBar();
+      } else {
+        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+      }
     } catch (e) {
       catchSnackBar();
     } finally {

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
@@ -62,10 +63,16 @@ class TeacherAttendancesController extends GetxController {
       } else {
         messageSnackBar(response.data['message']);
       }
-    } on SocketException {
-      socketSnackBar();
-    } on TimeoutException {
-      timeoutSnackBar();
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        socketSnackBar();
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        timeoutSnackBar();
+      } else {
+        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+      }
     } catch (e) {
       catchSnackBar();
     } finally {
