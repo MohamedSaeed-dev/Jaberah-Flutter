@@ -60,7 +60,7 @@ class ApiInterceptors extends Interceptor {
 
   Future<String> _refreshToken(String refreshToken) async {
     final response = await Dio().post(
-      '$baseUrl/api/auth/refresh',
+      '$baseUrl/auth/refresh',
       data: {'refreshToken': refreshToken},
     );
     return response.data['accessToken'];
