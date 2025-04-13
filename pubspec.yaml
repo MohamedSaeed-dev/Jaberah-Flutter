@@ -53,6 +53,7 @@ dependencies:
   flutter_local_notifications: 
   dio:
   package_info_plus:
+  table_calendar:
 
 dev_dependencies:
   flutter_test:

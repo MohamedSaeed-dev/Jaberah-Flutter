@@ -7,6 +7,7 @@ import 'package:jaberah/controllers/admin/userNameController.dart';
 import 'package:jaberah/controllers/user/notificationsUserController.dart';
 import 'package:jaberah/controllers/versionsController.dart';
 import 'package:jaberah/models/global/snackbars.dart';
+import 'package:jaberah/pages/user/myAttendances.dart';
 import 'package:jaberah/pages/user/notificationsUser.dart';
 import 'package:jaberah/pages/admin/homeAdmin.dart';
 import 'package:jaberah/pages/user/followStudents/groups_followStudents.dart';
@@ -129,6 +130,13 @@ class HomePageUser extends StatelessWidget {
                           Get.off(() => HomePageAdmin());
                         },
                       ),
+                    ListTile(
+                      leading: const Icon(Icons.fingerprint_sharp),
+                      title: const Text('حضوري'),
+                      onTap: () {
+                        Get.to(() => MyAttendances());
+                      },
+                    ),
                     ListTile(
                       leading: const Icon(Icons.logout),
                       title: const Text('تسجيل الخروج'),
