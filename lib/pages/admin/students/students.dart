@@ -50,17 +50,6 @@ class Students extends StatelessWidget {
                   ),
                 ];
               }),
-          Obx(() => IconButton(
-              onPressed: controller.isLoadingData.value
-                  ? null
-                  : () async {
-                      controller.pageNumber.value = 1;
-                      await controller.getStudents();
-                    },
-              icon: Icon(
-                Icons.refresh_outlined,
-                color: Colors.black,
-              )))
         ],
         title: const Text(
           'الطلاب',

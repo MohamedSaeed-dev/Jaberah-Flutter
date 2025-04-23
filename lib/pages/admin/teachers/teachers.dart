@@ -34,37 +34,26 @@ class Teachers extends StatelessWidget {
       appBar: AppBar(
         actions: [
           PopupMenuButton(
-            iconColor: Colors.black,
-            itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                child: StatefulBuilder(
-                  builder: (context, setState) {
-                    return Obx(() => CheckboxListTile(
-                          title: Text('بدون حلقات'),
-                          value: controller.withoutGroups.value,
-                          onChanged: (bool? value) async {
-                            controller.withoutGroups.value = value!;
-                            await controller.getTeachers();
-                          },
-                          controlAffinity: ListTileControlAffinity.leading,
-                        ));
-                  },
-                ),
-              ),
-            ];
-          }),
-          Obx(() => IconButton(
-              onPressed: controller.isLoadingData.value
-                  ? null
-                  : () async {
-                      controller.pageNumber.value = 1;
-                      await controller.getTeachers();
-                    },
-              icon: Icon(
-                Icons.refresh_outlined,
-                color: Colors.black,
-              )))
+              iconColor: Colors.black,
+              itemBuilder: (context) {
+                return [
+                  PopupMenuItem(
+                    child: StatefulBuilder(
+                      builder: (context, setState) {
+                        return Obx(() => CheckboxListTile(
+                              title: Text('بدون حلقات'),
+                              value: controller.withoutGroups.value,
+                              onChanged: (bool? value) async {
+                                controller.withoutGroups.value = value!;
+                                await controller.getTeachers();
+                              },
+                              controlAffinity: ListTileControlAffinity.leading,
+                            ));
+                      },
+                    ),
+                  ),
+                ];
+              }),
         ],
         title: const Text(
           'المعلمين',
@@ -198,10 +187,10 @@ class Teachers extends StatelessWidget {
             _buildDetailRow('الاسم:', teacher.teacherName),
             _buildDetailRow('رقم الجوال:', teacher.phoneNumber),
             _buildDetailRow(
-                'الحلقات:', teacher.groups != null ?
-                teacher.groups!
-                    .map((group) => group.groupName)
-                    .join("، ") : ""),
+                'الحلقات:',
+                teacher.groups != null
+                    ? teacher.groups!.map((group) => group.groupName).join("، ")
+                    : ""),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -388,7 +377,8 @@ class Teachers extends StatelessWidget {
                           final group = controller.groupsSpecial.firstWhere(
                               (group) =>
                                   group.id.toString() == groupId.toString(),
-                              orElse: () => GroupsSpecial(id: groupId, groupName: ""));
+                              orElse: () =>
+                                  GroupsSpecial(id: groupId, groupName: ""));
 
                           return MultiSelectItem(
                               group.id.toString(), group.groupName);
@@ -507,6 +497,5 @@ class Teachers extends StatelessWidget {
         );
       },
     );
-
   }
 }

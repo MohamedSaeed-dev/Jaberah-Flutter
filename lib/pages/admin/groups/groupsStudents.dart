@@ -39,20 +39,6 @@ class GroupStudents extends StatelessWidget {
         ),
       ),
       appBar: AppBar(
-        actions: [
-          Obx(() => IconButton(
-                onPressed: controller.isLoadingData.value
-                    ? null
-                    : () {
-                        controller.pageNumber.value = 1;
-                        controller.getStudents();
-                      },
-                icon: Icon(
-                  Icons.refresh_outlined,
-                  color: Colors.black,
-                ),
-              ))
-        ],
         title: Obx(() => Text(
               'طلاب ${controller.groupName.value}',
               style: TextStyle(

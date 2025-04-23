@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/teachersSalariesController.dart';
-import 'package:jhijri/_src/_jHijri.dart';
 
 class TeachersSalaries extends StatelessWidget {
   final TeachersSalariesController controller =
@@ -11,20 +10,6 @@ class TeachersSalaries extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          IconButton(
-            onPressed: () async {
-              controller.selectedMonth.value = JHijri.now().month;
-              controller.monthName.value = JHijri.now().monthName;
-              controller.entries.clear();
-              await controller.getTeachersSalaries();
-            },
-            icon: const Icon(
-              Icons.refresh_outlined,
-              color: Colors.black,
-            ),
-          ),
-        ],
         title: const Text(
           'رواتب المعلمين',
           style:
@@ -32,82 +17,106 @@ class TeachersSalaries extends StatelessWidget {
         ),
         backgroundColor: const Color.fromARGB(255, 63, 181, 108),
       ),
-      body: Column(
-        children: [
-          Center(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              margin: EdgeInsets.only(bottom: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(10.0),
-                boxShadow: [
-                  BoxShadow(
-                    color: Color.fromARGB(255, 63, 181, 108).withOpacity(0.2),
-                    blurRadius: 8.0,
-                    spreadRadius: 2.0,
-                    offset: Offset(0, 5),
-                  ),
-                ],
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          children: [
+            Card(
+              elevation: 3,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Obx(() => DropdownButtonFormField<int>(
-                    decoration: InputDecoration(
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide: BorderSide(color: Colors.transparent),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10.0),
-                        borderSide:
-                            BorderSide(color: Colors.transparent, width: 1.5),
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-                    ),
-                    dropdownColor: Colors.white,
-                    icon: Icon(Icons.arrow_drop_down,
-                        color: const Color.fromARGB(255, 63, 181, 108)),
-                    hint: Text(
-                      'اختر شهرًا',
-                      style: TextStyle(color: Colors.grey[700], fontSize: 16),
-                    ),
-                    value: controller.selectedMonth.value,
-                    items: controller.hijriMonths.map((month) {
-                      return DropdownMenuItem<int>(
-                        value: month['value'],
-                        child: Text(
-                          month['month'],
-                          style: TextStyle(color: Colors.black, fontSize: 16),
-                        ),
-                      );
-                    }).toList(),
-                    onChanged: (int? newValue) async {
-                      if (newValue != null &&
-                          newValue != controller.selectedMonth.value) {
-                        controller.selectedMonth.value = newValue;
-                        controller.monthName.value = controller.hijriMonths
-                            .firstWhere(
-                                (month) => month['value'] == newValue)['month'];
-                        controller.entries.clear();
-                        await controller.getTeachersSalaries();
-                      }
-                    },
-                  )),
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: _buildHijriMonthDatePicker(context, "الشهر:"),
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Divider(),
+            const SizedBox(height: 10),
+            Obx(() {
+              if (controller.isLoading.value) {
+                return _buildLoadingIndicator();
+              } else if (controller.teachersSalaries.isEmpty) {
+                return _buildEmptyDataIndicator();
+              } else {
+                return _buildTeachersSalariesList();
+              }
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHijriMonthDatePicker(BuildContext context, String label) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Use Flexible to avoid overflow issues.
+        Flexible(
+          child: Row(
+            children: [
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Obx(
+                  () => Text(
+                    "${controller.monthName.value} (${controller.selectedMonth.value})",
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        IconButton(
+          onPressed: () => _showMonthDialog(context),
+          icon: const Icon(Icons.calendar_month, size: 28),
+          color: const Color(0xFF3FB56C),
+        ),
+      ],
+    );
+  }
+
+  // Opens a dialog to display and select Hijri months.
+  void _showMonthDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("اختر الشهر"),
+          content: Container(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: controller.hijriMonths.length,
+              itemBuilder: (context, index) {
+                var monthData = controller.hijriMonths[index];
+                return ListTile(
+                  title: Text(monthData["month"]),
+                  onTap: () async {
+                    controller.selectedMonth.value = monthData["value"];
+                    controller.monthName.value = monthData["month"];
+                    controller.entries.clear();
+                    await controller.getTeachersSalaries();
+                    Navigator.of(context).pop(); // close the dialog
+                  },
+                );
+              },
             ),
           ),
-          Obx(() {
-            if (controller.isLoading.value) {
-              return _buildLoadingIndicator();
-            } else if (controller.teachersSalaries.isEmpty) {
-              return _buildEmptyDataIndicator();
-            } else {
-              return _buildTeachersSalariesList();
-            }
-          }),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -151,9 +160,7 @@ class TeachersSalaries extends StatelessWidget {
           final salaryData = controller.teachersSalaries[index];
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            child: _buildSalaryCard(
-                context,
-                salaryData),
+            child: _buildSalaryCard(context, salaryData),
           );
         },
       ),
@@ -175,10 +182,10 @@ class TeachersSalaries extends StatelessWidget {
             _buildDetailRow('راتب:', salaryData.salary),
             _buildDetailRow('أيام الغياب:', salaryData.daysAbsence),
             _buildDetailRow('الراتب بعد الخصم:', salaryData.netSalary),
-            _buildDetailRow('استلم المبلغ؟', salaryData.signature ? 'نعم' : 'لا'),
+            _buildDetailRow(
+                'استلم المبلغ؟', salaryData.signature ? 'نعم' : 'لا'),
             ElevatedButton(
-              onPressed: () =>
-                  _editSalary(context, salaryData),
+              onPressed: () => _editSalary(context, salaryData),
               child: const Text('تعديل'),
             ),
           ],
@@ -225,18 +232,24 @@ class TeachersSalaries extends StatelessWidget {
               children: [
                 TextField(
                   controller: salaryController,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(labelText: 'الراتب', border: OutlineInputBorder()),
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: 'الراتب',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
                 Row(
                   children: [
-                    Text("استلم المبلغ؟"),
-                    Obx(() => Checkbox(
-                          value: controller.currentSignature.value,
-                          onChanged: (value) {
-                            controller.currentSignature.value = value!;
-                          },
-                        )),
+                    const Text("استلم المبلغ؟"),
+                    Obx(
+                      () => Checkbox(
+                        value: controller.currentSignature.value,
+                        onChanged: (value) {
+                          controller.currentSignature.value = value!;
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -257,7 +270,8 @@ class TeachersSalaries extends StatelessWidget {
                   controller.currentSignature.value,
                 );
               },
-              child: Obx(()=> Text(controller.isLoading.value ? 'جاري الحفظ...' : 'حفظ')),
+              child: Obx(() =>
+                  Text(controller.isLoading.value ? 'جاري الحفظ...' : 'حفظ')),
             ),
           ],
         );
