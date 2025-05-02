@@ -38,7 +38,6 @@ class AuthController extends GetxController {
         final LoginModel data = LoginModel.fromJson(response.data);
         SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('accessToken', data.accessToken);
-        await prefs.setString('refreshToken', data.refreshToken);
         final UserNameController usernameC = Get.put(UserNameController());
         usernameC.saveValue(data.user.teacherName);
         await prefs.setString("id", data.user.id.toString());
@@ -92,7 +91,6 @@ class AuthController extends GetxController {
       messageSnackBar('خطأ في الخادم، حاول مرة أخرى لاحقاً',
           title: 'خطأ في تسجيل الدخول');
     } catch (e) {
-      print(e);
       messageSnackBar('يرجى التحقق من بياناتك', title: 'خطأ في تسجيل الدخول');
     } finally {
       isLoading.value = false;
@@ -182,17 +180,14 @@ class User {
 class LoginModel {
   User user;
   String accessToken;
-  String refreshToken;
 
   LoginModel(
       {required this.user,
-      required this.accessToken,
-      required this.refreshToken});
+      required this.accessToken});
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
     return LoginModel(
         user: User.fromJson(json["user"]),
-        accessToken: json["accessToken"] as String,
-        refreshToken: json["refreshToken"] as String);
+        accessToken: json["accessToken"] as String);
   }
 }
