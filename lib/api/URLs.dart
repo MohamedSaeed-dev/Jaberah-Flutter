@@ -1,3 +1,4 @@
+const appFolder = '/storage/emulated/0/حلقات مسجد جابرة';
 const local_node = "http://10.0.2.2:9632";
 const server_node = "https://jaberahapp-server.onrender.com";
 
@@ -24,7 +25,7 @@ const groupsWithNoTeachersAndTeacherGroups =
 
 const teachersSalariesURL = "teachers-salaries";
 
-const teachersAttendancesForDayURL = "teachers-attendances";
+const teachersAttendancesURL = "teachers-attendances";
 const teachersAttendancesForReportByDayURL =
     "teachers-attendances/for-day-report";
 const teachersAttendancesForReportByMonthURL =

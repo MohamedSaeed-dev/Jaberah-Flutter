@@ -85,7 +85,7 @@ class TeacherAttendancesController extends GetxController {
       isLoading.value = true;
       var response = await _apiClient.dio
           .post(
-              "/$teachersAttendancesForDayURL?date=${selectedDate.value.jhijri!.year}-${selectedDate.value.jhijri!.month}-${selectedDate.value.jhijri!.day}",
+              "/$teachersAttendancesURL?date=${selectedDate.value.jhijri!.year}-${selectedDate.value.jhijri!.month}-${selectedDate.value.jhijri!.day}",
               data: entries.map((e) => e.toJson()).toList())
           .timeout(const Duration(seconds: 20));
 

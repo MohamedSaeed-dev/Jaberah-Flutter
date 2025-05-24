@@ -318,7 +318,7 @@ class SemesterReportController extends GetxController {
     try {
       final pdf = pw.Document();
       semesterReportPage(reportName, semesterReport, pdf);
-      final directory = Directory('/storage/emulated/0/Download');
+      final directory = Directory(appFolder);
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }

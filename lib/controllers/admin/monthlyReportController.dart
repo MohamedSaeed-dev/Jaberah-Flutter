@@ -286,7 +286,7 @@ class MonthlyReportController extends GetxController {
     try {
       final pdf = pw.Document();
       monthlyReportPage(reportName, monthlyReport, pdf);
-      final directory = Directory('/storage/emulated/0/Download');
+      final directory = Directory(appFolder);
       if (!await directory.exists()) {
         await directory.create(recursive: true);
       }

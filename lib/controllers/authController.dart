@@ -142,9 +142,8 @@ class AuthController extends GetxController {
   Future<AuthController> checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var accessToken = prefs.getString('accessToken');
-    var refreshToken = prefs.getString('refreshToken');
     var role = prefs.getString("role");
-    if (accessToken != null && refreshToken != null && role != null) {
+    if (accessToken != null && role != null) {
       isAdmin.value = role == "1";
       isLoggedIn.value = true;
     } else {

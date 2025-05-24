@@ -16,6 +16,7 @@ import 'package:jaberah/pages/admin/teachers/Panel_teachers.dart';
 import 'package:jaberah/pages/admin/teachers/add_teacher.dart';
 import 'package:jaberah/pages/admin/teachers/profile.dart';
 import 'package:jaberah/pages/admin/trash.dart';
+import 'package:jaberah/pages/exportedReportsPage.dart';
 import 'package:jaberah/pages/user/homeUser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -151,6 +152,13 @@ class HomePageAdmin extends StatelessWidget {
                       title: const Text('قسم الحلقات'),
                       onTap: () {
                         Get.off(() => HomePageUser());
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.data_thresholding),
+                      title: const Text('التقارير المصدرة'),
+                      onTap: () {
+                        Get.to(() => ExportedReportsPage());
                       },
                     ),
                     ListTile(
