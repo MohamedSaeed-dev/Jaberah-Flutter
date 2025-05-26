@@ -1,5 +1,9 @@
 import 'dart:io';
 import 'package:get/get.dart';
+import 'package:jaberah/api/URLs.dart';
+import 'package:jaberah/models/global/snackbars.dart';
+import 'package:open_file/open_file.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ExportedReportsModel {
   final File file;
@@ -11,17 +15,16 @@ class ExportedReportsModel {
 class ExportedReportsController extends GetxController {
   final int pageSize = 10;
 
-  var totalFiles = <ExportedReportsModel>[]; // all loaded files
-  var filteredFiles =
-      <ExportedReportsModel>[]; // filtered files after filters applied
-  var paginatedFiles = <ExportedReportsModel>[].obs; // currently displayed page
+  var totalFiles = <ExportedReportsModel>[];
+  var filteredFiles = <ExportedReportsModel>[];
+  var paginatedFiles = <ExportedReportsModel>[].obs;
 
   var isLoading = false.obs;
   var isDeleting = false.obs;
-  var isLoadingMore = false.obs;
-  var hasMore = true.obs;
+  var hasMore = false.obs;
 
-  // Filters
+  var currentPage = 0.obs;
+
   var filterStartDate = Rxn<DateTime>();
   var filterEndDate = Rxn<DateTime>();
   var filterName = ''.obs;
@@ -35,7 +38,12 @@ class ExportedReportsController extends GetxController {
   Future<void> loadPdfFilesWithDate() async {
     isLoading.value = true;
     try {
-      final directory = Directory('/storage/emulated/0/Download/Reports');
+      final status = await Permission.manageExternalStorage.request();
+      if (!status.isGranted) {
+        messageSnackBar("يجب منح الإذن للوصول إلى التخزين");
+        return;
+      }
+      final directory = Directory(appFolder);
       final files = directory.existsSync() ? directory.listSync() : [];
       final pdfFiles = files
           .whereType<File>()
@@ -49,12 +57,9 @@ class ExportedReportsController extends GetxController {
               ))
           .toList();
 
-      totalFiles
-          .sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Descending
-
+      totalFiles.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       applyFilters();
     } catch (e) {
-      // Handle errors here
       totalFiles = [];
       filteredFiles = [];
       paginatedFiles.clear();
@@ -68,44 +73,65 @@ class ExportedReportsController extends GetxController {
       final fileName = fileModel.file.path.split('/').last.toLowerCase();
       final createdAt = fileModel.createdAt;
 
-      // Filter by start date
       bool matchesDate = true;
       if (filterStartDate.value != null) {
         matchesDate = createdAt
             .isAfter(filterStartDate.value!.subtract(const Duration(days: 1)));
       }
-      // Filter by end date
       if (matchesDate && filterEndDate.value != null) {
         matchesDate = createdAt
             .isBefore(filterEndDate.value!.add(const Duration(days: 1)));
       }
 
-      // Filter by name
-      final nameFilter = filterName.value.toLowerCase();
-      bool matchesName = fileName.contains(nameFilter);
+      bool matchesName = fileName.contains(filterName.value.toLowerCase());
 
       return matchesDate && matchesName;
     }).toList();
 
-    // Reset pagination
-    paginatedFiles.clear();
-    hasMore.value = filteredFiles.isNotEmpty;
-
-    _loadPage(0);
+    currentPage.value = 0;
+    paginate();
   }
 
-  void updateNameFilter(String value) {
-    filterName.value = value;
-    applyFilters();
+  void paginate() {
+    final start = currentPage.value * pageSize;
+    final end = start + pageSize;
+
+    if (start >= filteredFiles.length) {
+      paginatedFiles.value = [];
+    } else {
+      paginatedFiles.value =
+          filteredFiles.sublist(start, end.clamp(0, filteredFiles.length));
+    }
+
+    hasMore.value = (currentPage.value + 1) * pageSize < filteredFiles.length;
   }
 
-  void updateStartDate(DateTime? date) {
+  void nextPage() {
+    if (hasMore.value) {
+      currentPage.value++;
+      paginate();
+    }
+  }
+
+  void prevPage() {
+    if (currentPage.value > 0) {
+      currentPage.value--;
+      paginate();
+    }
+  }
+
+  void updateStartDate(DateTime date) {
     filterStartDate.value = date;
     applyFilters();
   }
 
-  void updateEndDate(DateTime? date) {
+  void updateEndDate(DateTime date) {
     filterEndDate.value = date;
+    applyFilters();
+  }
+
+  void updateNameFilter(String name) {
+    filterName.value = name;
     applyFilters();
   }
 
@@ -116,49 +142,23 @@ class ExportedReportsController extends GetxController {
     applyFilters();
   }
 
-  void _loadPage(int pageIndex) {
-    final start = pageIndex * pageSize;
-    if (start >= filteredFiles.length) {
-      hasMore.value = false;
-      return;
-    }
-
-    final end = (start + pageSize) > filteredFiles.length
-        ? filteredFiles.length
-        : (start + pageSize);
-
-    paginatedFiles.addAll(filteredFiles.sublist(start, end));
-
-    hasMore.value = end < filteredFiles.length;
-  }
-
-  Future<void> loadMoreFiles() async {
-    if (isLoadingMore.value || !hasMore.value) return;
-
-    isLoadingMore.value = true;
-
-    // Calculate next page index by current loaded items count / pageSize
-    final nextPage = paginatedFiles.length ~/ pageSize;
-    await Future.delayed(const Duration(milliseconds: 300)); // simulate delay
-    _loadPage(nextPage);
-
-    isLoadingMore.value = false;
-  }
-
   Future<void> deleteFile(File file) async {
     isDeleting.value = true;
     try {
-      await file.delete();
-      // Remove from lists
-      totalFiles.removeWhere((e) => e.file.path == file.path);
-      applyFilters();
+      if (await file.exists()) {
+        await file.delete();
+        loadPdfFilesWithDate();
+      }
     } catch (e) {
-      // Handle delete error if needed
+      messageSnackBar("حدث خطأ أثناء الحذف");
     }
     isDeleting.value = false;
   }
 
-  void openFile(File file) {
-    // Implement your file open logic here
+  Future<void> openFile(File file) async {
+    final result = await OpenFile.open(file.path);
+    if (result.type != ResultType.done) {
+      messageSnackBar("تعذر فتح التقرير");
+    }
   }
 }

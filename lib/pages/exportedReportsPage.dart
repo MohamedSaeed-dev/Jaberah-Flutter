@@ -11,14 +11,6 @@ class ExportedReportsPage extends StatelessWidget {
   final ScrollController _scrollController = ScrollController();
 
   ExportedReportsPage({Key? key}) : super(key: key) {
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 200 &&
-          controller.hasMore.value &&
-          !controller.isLoadingMore.value) {
-        controller.loadMoreFiles();
-      }
-    });
   }
 
   Future<void> _pickStartDate(BuildContext context) async {
@@ -59,7 +51,7 @@ class ExportedReportsPage extends StatelessWidget {
             actions: [
               TextButton(
                 child: const Text("إلغاء"),
-                onPressed: () => Navigator.of(context).pop(),
+                onPressed: () => Get.back(),
               ),
               controller.isDeleting.value
                   ? const Padding(
@@ -71,7 +63,7 @@ class ExportedReportsPage extends StatelessWidget {
                           style: TextStyle(color: Colors.red)),
                       onPressed: () async {
                         await controller.deleteFile(file);
-                        Navigator.of(context).pop();
+                        Get.back();
                       },
                     ),
             ],
@@ -92,71 +84,101 @@ class ExportedReportsPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // File name filter
                 TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: "بحث باسم الملف",
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
                   ),
                   onChanged: controller.updateNameFilter,
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
-                // Date pickers row
-                Row(
-                  children: [
-                    Expanded(
-                      child: Obx(() {
-                        final start = controller.filterStartDate.value;
-                        final text = start == null
-                            ? "تاريخ البداية"
-                            : DateFormat('yyyy-MM-dd', 'ar').format(start);
-                        return ElevatedButton.icon(
-                          icon: const Icon(Icons.date_range),
-                          label: Text(text),
-                          onPressed: () => _pickStartDate(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green[400],
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Obx(() {
-                        final end = controller.filterEndDate.value;
-                        final text = end == null
-                            ? "تاريخ النهاية"
-                            : DateFormat('yyyy-MM-dd', 'ar').format(end);
-                        return ElevatedButton.icon(
-                          icon: const Icon(Icons.date_range),
-                          label: Text(text),
-                          onPressed: () => _pickEndDate(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green[400],
-                          ),
-                        );
-                      }),
-                    ),
-                    const SizedBox(width: 8),
+                // Filters Row with X icon at the end
+                Obx(() {
+                  final start = controller.filterStartDate.value;
+                  final end = controller.filterEndDate.value;
+                  final anyFilterActive = start != null ||
+                      end != null ||
+                      controller.filterName.value.isNotEmpty;
 
-                    // Clear filters button
-                    Obx(() {
-                      final anyFilterActive =
-                          controller.filterStartDate.value != null ||
-                              controller.filterEndDate.value != null ||
-                              controller.filterName.value.isNotEmpty;
-                      return IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.red),
-                        tooltip: 'مسح الفلاتر',
-                        onPressed:
-                            anyFilterActive ? controller.clearFilters : null,
-                      );
-                    }),
-                  ],
-                ),
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Date filters
+                      Expanded(
+                        child: Wrap(
+                          spacing: 10,
+                          runSpacing: 10,
+                          children: [
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.date_range),
+                              label: Text(
+                                start == null
+                                    ? "تاريخ البداية"
+                                    : DateFormat('yyyy-MM-dd', 'ar')
+                                        .format(start),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              onPressed: () => _pickStartDate(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.shade400,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            ElevatedButton.icon(
+                              icon: const Icon(Icons.date_range),
+                              label: Text(
+                                end == null
+                                    ? "تاريخ النهاية"
+                                    : DateFormat('yyyy-MM-dd', 'ar')
+                                        .format(end),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              onPressed: () => _pickEndDate(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green.shade400,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Clear X icon at end of row
+                      Container(
+                        height: 48,
+                        width: 48,
+                        decoration: BoxDecoration(
+                          color: anyFilterActive
+                              ? Colors.red.shade100
+                              : Colors.grey.shade200,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: IconButton(
+                          icon: const Icon(Icons.clear),
+                          tooltip: 'مسح الفلاتر',
+                          color: anyFilterActive ? Colors.red : Colors.grey,
+                          onPressed:
+                              anyFilterActive ? controller.clearFilters : null,
+                        ),
+                      ),
+                    ],
+                  );
+                }),
               ],
             ),
           ),
@@ -200,14 +222,9 @@ class ExportedReportsPage extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   if (index == controller.paginatedFiles.length) {
-                    if (controller.hasMore.value) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16),
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    } else {
+                    
                       return const SizedBox.shrink();
-                    }
+                    
                   }
 
                   final fileWithDate = controller.paginatedFiles[index];
@@ -229,51 +246,70 @@ class ExportedReportsPage extends StatelessWidget {
                   final fileName =
                       file.path.split('/').last.replaceAll(".pdf", ".");
 
-                  return Card(
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 12),
-                      leading: const Icon(Icons.picture_as_pdf,
-                          color: Colors.red, size: 30),
-                      title: Text(
-                        fileName,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
+                  return GestureDetector(
+                      onTap: () => controller.openFile(file),
+                      child: Card(
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ),
-                      subtitle: Text(
-                        'تاريخ الإنشاء: $createdAtStr',
-                        style:
-                            const TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.open_in_new,
-                                color: Colors.green),
-                            tooltip: "فتح التقرير",
-                            onPressed: () => controller.openFile(file),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          leading: const Icon(Icons.picture_as_pdf,
+                              color: Colors.red, size: 30),
+                          title: Text(
+                            fileName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            tooltip: "حذف التقرير",
-                            onPressed: () =>
-                                _showDeleteConfirmation(context, file),
+                          subtitle: Text(
+                            'تاريخ الإنشاء: $createdAtStr',
+                            style: const TextStyle(
+                                fontSize: 12, color: Colors.grey),
                           ),
-                        ],
-                      ),
-                    ),
-                  );
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon:
+                                    const Icon(Icons.delete, color: Colors.red),
+                                tooltip: "حذف التقرير",
+                                onPressed: () =>
+                                    _showDeleteConfirmation(context, file),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ));
                 },
               );
             }),
           ),
+          Obx(() {
+            final totalPages =
+                (controller.paginatedFiles.length / controller.pageSize).ceil();
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.arrow_back),
+                  onPressed: controller.currentPage.value > 0
+                      ? controller.prevPage
+                      : null,
+                ),
+                Text(
+                    '${controller.paginatedFiles.length} من ${controller.totalFiles.length}'),
+                IconButton(
+                  icon: Icon(Icons.arrow_forward),
+                  onPressed:
+                      controller.hasMore.value ? controller.nextPage : null,
+                ),
+              ],
+            );
+          }),
         ],
       ),
     );

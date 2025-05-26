@@ -43,27 +43,29 @@ class MyAttendances extends StatelessWidget {
       bottomNavigationBar: BottomAppBar(
         child: Builder(
           builder: (BuildContext newContext) {
-            return Obx(() => FloatingActionButton.extended(
-                  onPressed: controller.isLoading.value ||
-                          controller.selectedAttendance.value.signature == true
-                      ? null
-                      : () async {
-                          print("a");
-                        },
-                  label: Text(
-                    "رفع طلب",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  icon: Icon(
-                    Icons.cloud_upload_rounded,
+            return Obx(() {
+              return !controller.isAdmin.value ? FloatingActionButton.extended(
+                onPressed: controller.isLoading.value ||
+                        controller.selectedAttendance.value.signature == true
+                    ? null
+                    : () async {
+                        print("a");
+                      },
+                label: Text(
+                  "رفع طلب",
+                  style: TextStyle(
                     color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-                ));
+                ),
+                icon: Icon(
+                  Icons.cloud_upload_rounded,
+                  color: Colors.black,
+                ),
+                backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+              ) : SizedBox();
+            });
           },
         ),
       ),
@@ -237,7 +239,7 @@ class MyAttendances extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade200),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
+              color: Colors.grey.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -300,11 +302,9 @@ class MyAttendances extends StatelessWidget {
                 ),
               ],
             ),
-
           ],
         ),
       );
     });
   }
-
 }

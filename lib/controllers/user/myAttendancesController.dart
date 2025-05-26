@@ -26,6 +26,8 @@ class MyAttendancesController extends GetxController {
           .obs;
   var dataForMonth = <MyAttendance>[].obs;
 
+  var isAdmin = false.obs;
+
   final Map<int, String> hijriMonthNames = {
     1: 'محرم',
     2: 'صفر',
@@ -163,11 +165,14 @@ class MyAttendancesController extends GetxController {
   }
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     final date = HijriCalendar.now();
     focusedDay = DateTime(date.hYear, date.hMonth, date.hDay).obs;
     selectedDay = DateTime(date.hYear, date.hMonth, date.hDay).obs;
+    var sp = await SharedPreferences.getInstance();
+    isAdmin.value = sp.getString("role") == "1";
+    print(isAdmin.value);
     getAttendanceForDay();
     getAttendanceForMonth();
   }
