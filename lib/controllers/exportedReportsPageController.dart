@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/models/global/snackbars.dart';
+import 'package:jhijri_picker/jhijri_picker.dart';
 import 'package:open_file/open_file.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -25,8 +26,8 @@ class ExportedReportsController extends GetxController {
 
   var currentPage = 0.obs;
 
-  var filterStartDate = Rxn<DateTime>();
-  var filterEndDate = Rxn<DateTime>();
+  var filterStartDate = Rxn<JDateModel>();
+  var filterEndDate = Rxn<JDateModel>();
   var filterName = ''.obs;
 
   @override
@@ -49,7 +50,7 @@ class ExportedReportsController extends GetxController {
           .whereType<File>()
           .where((f) => f.path.endsWith('.pdf'))
           .toList();
-
+          
       totalFiles = pdfFiles
           .map((file) => ExportedReportsModel(
                 file: file,
@@ -75,12 +76,12 @@ class ExportedReportsController extends GetxController {
 
       bool matchesDate = true;
       if (filterStartDate.value != null) {
-        matchesDate = createdAt
-            .isAfter(filterStartDate.value!.subtract(const Duration(days: 1)));
+        matchesDate = createdAt.isAfter(
+            filterStartDate.value!.dateTime!.subtract(const Duration(days: 1)));
       }
       if (matchesDate && filterEndDate.value != null) {
-        matchesDate = createdAt
-            .isBefore(filterEndDate.value!.add(const Duration(days: 1)));
+        matchesDate = createdAt.isBefore(
+            filterEndDate.value!.dateTime!.add(const Duration(days: 1)));
       }
 
       bool matchesName = fileName.contains(filterName.value.toLowerCase());
@@ -120,12 +121,12 @@ class ExportedReportsController extends GetxController {
     }
   }
 
-  void updateStartDate(DateTime date) {
+  void updateStartDate(JDateModel date) {
     filterStartDate.value = date;
     applyFilters();
   }
 
-  void updateEndDate(DateTime date) {
+  void updateEndDate(JDateModel date) {
     filterEndDate.value = date;
     applyFilters();
   }

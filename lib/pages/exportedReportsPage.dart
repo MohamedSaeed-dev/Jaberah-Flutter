@@ -4,40 +4,89 @@ import 'package:get/get.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:jaberah/controllers/exportedReportsPageController.dart';
+import 'package:jhijri_picker/jhijri_picker.dart';
 
 class ExportedReportsPage extends StatelessWidget {
   final ExportedReportsController controller =
       Get.put(ExportedReportsController());
   final ScrollController _scrollController = ScrollController();
 
-  ExportedReportsPage({Key? key}) : super(key: key) {
-  }
+  ExportedReportsPage({super.key});
 
-  Future<void> _pickStartDate(BuildContext context) async {
-    final picked = await showDatePicker(
+Future<void> _pickHijriStartDate(BuildContext context) async {
+  var picked = await showGlobalDatePicker(
+      headerTitle: Container(
+        margin: const EdgeInsets.only(bottom: 25),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            "التقويم الهجري",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24, // Smaller for cleaner appearance
+              fontWeight: FontWeight.w600, // Slightly bold for emphasis
+              letterSpacing: 1.2, // Adds a modern touch with spaced letters
+            ),
+          ),
+        ),
+      ),
+      locale: const Locale("ar", "SA"),
       context: context,
-      initialDate: controller.filterStartDate.value ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-      locale: const Locale('ar'),
+      pickerType: PickerType.JHijri,
+      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
+      backgroundColor: Colors.white, // Light background for contrast
+      cancelButtonText: "إلغاء",
+      okButtonText: "تأكيد",
+      selectedDate: controller.filterStartDate.value,
     );
-    if (picked != null) {
-      controller.updateStartDate(picked);
-    }
-  }
 
-  Future<void> _pickEndDate(BuildContext context) async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: controller.filterEndDate.value ?? DateTime.now(),
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-      locale: const Locale('ar'),
-    );
-    if (picked != null) {
-      controller.updateEndDate(picked);
-    }
+  if (picked != null) {
+    controller.updateStartDate(JDateModel(
+        jhijri: picked.jhijri,
+        dateTime: picked.date
+      ));
+
   }
+}
+
+Future<void> _pickHijriEndDate(BuildContext context) async {
+  var picked = await showGlobalDatePicker(
+      headerTitle: Container(
+        margin: const EdgeInsets.only(bottom: 25),
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(
+          child: Text(
+            "التقويم الهجري",
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 24, // Smaller for cleaner appearance
+              fontWeight: FontWeight.w600, // Slightly bold for emphasis
+              letterSpacing: 1.2, // Adds a modern touch with spaced letters
+            ),
+          ),
+        ),
+      ),
+      locale: const Locale("ar", "SA"),
+      context: context,
+      pickerType: PickerType.JHijri,
+      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
+      backgroundColor: Colors.white, // Light background for contrast
+      cancelButtonText: "إلغاء",
+      okButtonText: "تأكيد",
+      selectedDate: controller.filterEndDate.value,
+    );
+
+    if (picked != null) {
+      controller.updateEndDate(JDateModel(jhijri: picked.jhijri, dateTime: picked.date));
+    }
+}
+
 
   void _showDeleteConfirmation(BuildContext context, File file) {
     final controller = Get.find<ExportedReportsController>();
@@ -82,108 +131,96 @@ class ExportedReportsPage extends StatelessWidget {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // File name filter
-                TextField(
-                  decoration: InputDecoration(
-                    labelText: "بحث باسم الملف",
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+  padding: const EdgeInsets.all(12.0),
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      TextField(
+        decoration: InputDecoration(
+          labelText: "بحث باسم التقرير",
+          prefixIcon: const Icon(Icons.search),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
+        onChanged: controller.updateNameFilter,
+      ),
+      const SizedBox(height: 16),
+
+      Obx(() {
+        final start = controller.filterStartDate.value;
+        final end = controller.filterEndDate.value;
+        final anyFilterActive = start != null || end != null || controller.filterName.value.isNotEmpty;
+
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  FilledButton.icon(
+                    icon: const Icon(Icons.date_range),
+                    label: Text(
+                      start == null
+                          ? "تاريخ البداية"
+                          : HijriCalendar.fromDate(start.dateTime!).toFormat("dd - mm - yyyy هـ"),
+                      style: const TextStyle(fontSize: 13),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 14,
+                    onPressed: () => _pickHijriStartDate(context),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.green.shade500,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                   ),
-                  onChanged: controller.updateNameFilter,
-                ),
-                const SizedBox(height: 12),
-
-                // Filters Row with X icon at the end
-                Obx(() {
-                  final start = controller.filterStartDate.value;
-                  final end = controller.filterEndDate.value;
-                  final anyFilterActive = start != null ||
-                      end != null ||
-                      controller.filterName.value.isNotEmpty;
-
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Date filters
-                      Expanded(
-                        child: Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: [
-                            ElevatedButton.icon(
-                              icon: const Icon(Icons.date_range),
-                              label: Text(
-                                start == null
-                                    ? "تاريخ البداية"
-                                    : DateFormat('yyyy-MM-dd', 'ar')
-                                        .format(start),
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              onPressed: () => _pickStartDate(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green.shade400,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                            ElevatedButton.icon(
-                              icon: const Icon(Icons.date_range),
-                              label: Text(
-                                end == null
-                                    ? "تاريخ النهاية"
-                                    : DateFormat('yyyy-MM-dd', 'ar')
-                                        .format(end),
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              onPressed: () => _pickEndDate(context),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.green.shade400,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                  FilledButton.icon(
+                    icon: const Icon(Icons.date_range),
+                    label: Text(
+                      end == null
+                          ? "تاريخ النهاية"
+                          : HijriCalendar.fromDate(end.dateTime!).toFormat("dd - mm - yyyy هـ"),
+                      style: const TextStyle(fontSize: 13),
+                    ),
+                    onPressed: () => _pickHijriEndDate(context),
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Colors.green.shade500,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
                       ),
-
-                      // Clear X icon at end of row
-                      Container(
-                        height: 48,
-                        width: 48,
-                        decoration: BoxDecoration(
-                          color: anyFilterActive
-                              ? Colors.red.shade100
-                              : Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.clear),
-                          tooltip: 'مسح الفلاتر',
-                          color: anyFilterActive ? Colors.red : Colors.grey,
-                          onPressed:
-                              anyFilterActive ? controller.clearFilters : null,
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-              ],
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
 
-          // List expanded
+            const SizedBox(width: 10),
+
+            IconButton(
+              tooltip: 'مسح الفلاتر',
+              onPressed: anyFilterActive ? controller.clearFilters : null,
+              icon: Icon(Icons.clear),
+              color: anyFilterActive ? Colors.red : Colors.grey,
+              style: IconButton.styleFrom(
+                backgroundColor: anyFilterActive ? Colors.red.shade100 : Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ],
+        );
+      }),
+      const SizedBox(height: 10),
+      const Divider(),
+    ],
+  ),
+)
+,
+
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value &&
@@ -222,9 +259,7 @@ class ExportedReportsPage extends StatelessWidget {
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   if (index == controller.paginatedFiles.length) {
-                    
-                      return const SizedBox.shrink();
-                    
+                    return const SizedBox.shrink();
                   }
 
                   final fileWithDate = controller.paginatedFiles[index];
@@ -246,7 +281,7 @@ class ExportedReportsPage extends StatelessWidget {
                   final fileName =
                       file.path.split('/').last.replaceAll(".pdf", ".");
 
-                  return GestureDetector(
+                  return InkWell(
                       onTap: () => controller.openFile(file),
                       child: Card(
                         elevation: 2,
@@ -289,8 +324,6 @@ class ExportedReportsPage extends StatelessWidget {
             }),
           ),
           Obx(() {
-            final totalPages =
-                (controller.paginatedFiles.length / controller.pageSize).ceil();
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
