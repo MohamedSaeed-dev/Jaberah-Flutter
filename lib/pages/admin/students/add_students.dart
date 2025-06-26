@@ -97,6 +97,14 @@ class AddStudent extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
                     controller: controller.notesController.value,
+                    validator: (value) {
+                      if (value != null &&
+                          (int.tryParse(value) == null ||
+                              int.parse(value) < 0)) {
+                        return 'يرجى إدخال مقدار حفظ صحيح';
+                      }
+                      return null;
+                    },
                     decoration: const InputDecoration(
                         labelText: 'ملاحظات', border: OutlineInputBorder()),
                   ),

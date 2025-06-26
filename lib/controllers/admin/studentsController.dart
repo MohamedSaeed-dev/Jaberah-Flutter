@@ -86,13 +86,12 @@ class StudentsController extends GetxController {
   Future<dynamic> addStudent() async {
     try {
       isLoading.value = true;
-      print(selectedGroupAddId.value);
       var response = await _apiClient.dio.post("/$studentsURL", data: {
         "studentName": nameAddController.value.text,
         "phoneNumber": phoneAddController.value.text,
         "schoolLevel": levelAddController.value.text,
         "schoolClass": selectedAddSchoolClass.value,
-        "memoRate": rateAddController.value.text,
+        "memoRate": int.tryParse( rateAddController.value.text),
         "notes": notesAddController.value.text,
         "groupId": selectedGroupAddId.value
       }).timeout(const Duration(seconds: 20));
@@ -257,7 +256,7 @@ class StudentsController extends GetxController {
         "phoneNumber": phoneEditController.value.text,
         "schoolLevel": levelEditController.value.text,
         "schoolClass": selectedEditSchoolClass.value,
-        "memoRate": rateEditController.value.text,
+        "memoRate": int.tryParse( rateEditController.value.text),
         "notes": notesEditController.value.text,
         "groupId": selectedGroupEditId.value
       }).timeout(const Duration(seconds: 20));
@@ -284,7 +283,7 @@ class Student {
   String studentName;
   String phoneNumber;
   String? schoolClass;
-  String? memoRate;
+  int? memoRate;
   String? schoolLevel;
   int? groupId;
   String? groupName;
@@ -308,7 +307,7 @@ class Student {
       phoneNumber: json["phoneNumber"] as String,
       schoolClass:
           json["schoolClass"] != null ? json["schoolClass"] as String : null,
-      memoRate: json["memoRate"] != null ? json["memoRate"] as String : null,
+      memoRate: json["memoRate"] != null ? json["memoRate"] as int : null,
       groupId: json["groupId"] != null ? json["groupId"] as int : null,
       groupName: json["groupName"] != null ? json["groupName"] as String : null,
       schoolLevel:

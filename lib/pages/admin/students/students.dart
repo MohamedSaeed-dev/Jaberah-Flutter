@@ -213,6 +213,10 @@ class Students extends StatelessWidget {
                   _buildDialogTextField(
                       'مقدار الحفظ', controller.rateAddController.value,
                       (value) {
+                    if (value != null &&
+                        (int.tryParse(value) == null || int.parse(value) < 0)) {
+                      return 'يرجى إدخال مقدار حفظ صحيح';
+                    }
                     return null;
                   }),
                   _buildDialogTextField(
@@ -332,7 +336,7 @@ class Students extends StatelessWidget {
           children: [
             _buildDetailRow('اسم الطالب:', student.studentName),
             _buildDetailRow('رقم ولي الامر:', student.phoneNumber),
-            _buildDetailRow('مقدار الحفظ:', student.memoRate),
+            _buildDetailRow('مقدار الحفظ:', student.memoRate.toString()),
             _buildDetailRow('المستوى:', student.schoolLevel),
             _buildDetailRow('المرحلة الدراسية:', student.schoolClass),
             _buildDetailRow('ملاحظات:', student.notes),
@@ -390,7 +394,7 @@ class Students extends StatelessWidget {
     controller.nameEditController.value.text = student.studentName;
     controller.phoneEditController.value.text = student.phoneNumber;
     controller.selectedEditSchoolClass.value = student.schoolClass ?? "";
-    controller.rateEditController.value.text = student.memoRate ?? "";
+    controller.rateEditController.value.text = student.memoRate.toString();
     controller.levelEditController.value.text = student.schoolLevel ?? "";
     controller.notesEditController.value.text = student.notes ?? "";
     controller.selectedGroupEditName.value = student.groupName ?? "";
@@ -439,6 +443,9 @@ class Students extends StatelessWidget {
                   _buildDialogTextField(
                       'مقدار الحفظ', controller.rateEditController.value,
                       (value) {
+                        if(value != null && (int.tryParse(value) == null || int.parse(value) < 0)) {
+                          return 'يرجى إدخال مقدار حفظ صحيح';
+                        }
                     return null;
                   }),
                   _buildDialogTextField(

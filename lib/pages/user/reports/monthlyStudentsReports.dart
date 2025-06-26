@@ -13,9 +13,11 @@ class MonthlyStudentsReports extends StatelessWidget {
         bottomNavigationBar: BottomAppBar(
           child: Column(children: [
             SizedBox(
-              width: double.infinity,
-              child: Obx(()=> FloatingActionButton.extended(
-                    onPressed: controller.selectedGroupId.value == 0 || controller.isLoading.value
+                width: double.infinity,
+                child: Obx(
+                  () => FloatingActionButton.extended(
+                    onPressed: controller.selectedGroupId.value == 0 ||
+                            controller.isLoading.value
                         ? null
                         : () async {
                             await controller.getMonthlyReport();
@@ -34,13 +36,26 @@ class MonthlyStudentsReports extends StatelessWidget {
                     ),
                     backgroundColor: const Color.fromARGB(255, 63, 181, 108),
                   ),
-                )
-            ),
+                )),
           ]),
         ),
         appBar: AppBar(
-          title: const Text('التقارير الشهرية'),
+          title: const Text('التقرير الشهري'),
           backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+          actions: [
+            Obx(() => IconButton(
+                  icon: Icon(
+                    Icons.menu_book_rounded,
+                    color: Colors.black,
+                  ),
+                  onPressed: controller.isLoading.value ||
+                          controller.selectedGroupId.value == 0
+                      ? null
+                      : () {
+                          _showBooksPopup(Get.context!);
+                        },
+                ))
+          ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -57,7 +72,7 @@ class MonthlyStudentsReports extends StatelessWidget {
               Obx(() {
                 if (controller.isLoading.value) {
                   return _buildLoadingIndicator();
-                } else if (controller.monthlyReport.isEmpty) {
+                } else if (controller.monthlyReport.value.data.isEmpty) {
                   return _buildEmptyDataIndicator();
                 } else {
                   return Expanded(
@@ -65,10 +80,11 @@ class MonthlyStudentsReports extends StatelessWidget {
                     child: ListView.builder(
                       // No need for `shrinkWrap` here since it's inside Expanded
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: controller.monthlyReport.length,
+                      itemCount: controller.monthlyReport.value.data.length,
                       itemBuilder: (context, index) {
                         return _buildStudentsCard(
-                            controller.monthlyReport[index], context);
+                            controller.monthlyReport.value.data[index],
+                            context);
                       },
                     ),
                   );
@@ -77,6 +93,138 @@ class MonthlyStudentsReports extends StatelessWidget {
             ],
           ),
         ));
+  }
+
+  void _showBooksPopup(BuildContext context) {
+    final books = controller.monthlyReport.value.books;
+    showDialog(
+      context: context,
+      builder: (_) {
+        return AlertDialog(
+          title: const Text("كتب الحلقة"),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.separated(
+              shrinkWrap: true,
+              itemCount: books.length,
+              separatorBuilder: (_, __) => const Divider(),
+              itemBuilder: (_, index) {
+                final book = books[index];
+                return ListTile(
+                  leading: const Icon(Icons.book),
+                  title: Text(book.title),
+                  subtitle: Text(
+                    "من ${book.from} إلى ${book.to}\nالشهر: ${book.month.year}-${book.month.month.toString().padLeft(2, '0')}",
+                    textAlign: TextAlign.right,
+                  ),
+                  trailing: Wrap(
+                    spacing: 8,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Colors.blue),
+                        onPressed: () {
+                          Get.back();
+                          _showAddOrEditBookDialog(context, book: book);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          await controller.deleteBook(book.id);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Get.back();
+                _showAddOrEditBookDialog(context);
+              },
+              child: const Text("إضافة كتاب"),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("إغلاق"),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void _showAddOrEditBookDialog(BuildContext context, {BooksData? book}) {
+    final titleController = TextEditingController(text: book?.title ?? '');
+    final fromController = TextEditingController(text: book?.from ?? '');
+    final toController = TextEditingController(text: book?.to ?? '');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing during loading
+      builder: (_) => AlertDialog(
+        title: Text(book == null ? "إضافة كتاب" : "تعديل كتاب"),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: titleController,
+                decoration: const InputDecoration(labelText: "عنوان الكتاب"),
+              ),
+              TextField(
+                controller: fromController,
+                decoration: const InputDecoration(labelText: "من"),
+                keyboardType: TextInputType.number,
+              ),
+              TextField(
+                controller: toController,
+                decoration: const InputDecoration(labelText: "إلى"),
+                keyboardType: TextInputType.number,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          Obx(() => TextButton(
+                onPressed: controller.isLoading.value ? null : () => Get.back(),
+                child: const Text("إلغاء"),
+              )),
+          Obx(() => TextButton(
+                onPressed: controller.isLoading.value
+                    ? null
+                    : () async {
+                        final title = titleController.text.trim();
+                        final from = fromController.text.trim();
+                        final to = toController.text.trim();
+
+                        if (title.isEmpty || from.isEmpty || to.isEmpty) {
+                          Get.snackbar("خطأ", "يرجى تعبئة جميع الحقول");
+                          return;
+                        }
+
+                        if (book == null) {
+                          await controller.addBook(
+                              title: title, from: from, to: to);
+                        } else {
+                          await controller.updateBook(
+                            bookId: book.id,
+                            title: title,
+                            from: from,
+                            to: to,
+                          );
+                        }
+                      },
+                child: Text(controller.isLoading.value
+                    ? (book == null ? 'جاري الاضافة...' : 'جاري التحديث...')
+                    : (book == null ? "إضافة" : "تحديث")),
+              )),
+        ],
+      ),
+    );
   }
 
   Widget _buildLoadingIndicator() {

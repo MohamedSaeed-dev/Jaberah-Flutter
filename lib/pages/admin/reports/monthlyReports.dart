@@ -41,7 +41,7 @@ class MonthlyReportPage extends StatelessWidget {
           actions: [
             Obx(() => IconButton(
                 onPressed: (controller.isLoading.value ||
-                        controller.monthlyReport.isEmpty)
+                        controller.monthlyReport.value.data.isEmpty)
                     ? null
                     : () async {
                         controller.exportAsPDF(
@@ -70,7 +70,7 @@ class MonthlyReportPage extends StatelessWidget {
               Obx(() {
                 if (controller.isLoading.value) {
                   return _buildLoadingIndicator();
-                } else if (controller.monthlyReport.isEmpty) {
+                } else if (controller.monthlyReport.value.data.isEmpty) {
                   return _buildEmptyDataIndicator();
                 } else {
                   return Expanded(
@@ -78,10 +78,10 @@ class MonthlyReportPage extends StatelessWidget {
                     child: ListView.builder(
                       // No need for `shrinkWrap` here since it's inside Expanded
                       physics: const AlwaysScrollableScrollPhysics(),
-                      itemCount: controller.monthlyReport.length,
+                      itemCount: controller.monthlyReport.value.data.length,
                       itemBuilder: (context, index) {
                         return _buildStudentsCard(
-                          controller.monthlyReport[index],
+                          controller.monthlyReport.value.data[index],
                         );
                       },
                     ),

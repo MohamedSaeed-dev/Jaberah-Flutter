@@ -173,7 +173,7 @@ class GroupStudents extends StatelessWidget {
           children: [
             _buildDetailRow('اسم الطالب:', student.studentName),
             _buildDetailRow('رقم ولي الامر:', student.phoneNumber),
-            _buildDetailRow('مقدار الحفظ:', student.memoRate),
+            _buildDetailRow('مقدار الحفظ:', student.memoRate.toString()),
             _buildDetailRow('المستوى:', student.schoolLevel),
             _buildDetailRow('المرحلة الدراسية:', student.schoolClass),
             _buildDetailRow('ملاحظات:', student.notes),
@@ -227,7 +227,7 @@ class GroupStudents extends StatelessWidget {
     studentController.nameController.value.text = student.studentName;
     studentController.phoneController.value.text = student.phoneNumber;
     studentController.selectedSchoolClass.value = student.schoolClass ?? "";
-    studentController.rateController.value.text = student.memoRate ?? "";
+    studentController.rateController.value.text = student.memoRate.toString();
     studentController.levelController.value.text = student.schoolLevel ?? "";
     studentController.notesController.value.text = student.notes ?? "";
     var key = GlobalKey<FormState>();

@@ -287,7 +287,7 @@ class StudentGroup {
   String studentName;
   String phoneNumber;
   String? schoolClass;
-  String? memoRate;
+  int? memoRate;
   String? schoolLevel;
   String? notes;
 
@@ -307,7 +307,7 @@ class StudentGroup {
       phoneNumber: json["phoneNumber"] as String,
       schoolClass:
           json["schoolClass"] != null ? json["schoolClass"] as String : null,
-      memoRate: json["memoRate"] != null ? json["memoRate"] as String : null,
+      memoRate: json["memoRate"] != null ? json["memoRate"] as int : null,
       schoolLevel:
           json["schoolLevel"] != null ? json["schoolLevel"] as String : null,
       notes: json["notes"] != null ? json["notes"] as String : null,

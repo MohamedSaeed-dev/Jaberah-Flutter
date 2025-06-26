@@ -30,7 +30,7 @@ class AddStudentController extends GetxController {
         "studentName": studentNameController.value.text,
         "phoneNumber": phoneController.value.text,
         "schoolLevel": levelController.value.text,
-        "memoRate": memoRateController.value.text,
+        "memoRate": int.tryParse( memoRateController.value.text),
         "schoolClass": schoolClassController.value.text,
         "notes": notesController.value.text,
         "groupId": selectedGroup.value,
@@ -38,7 +38,7 @@ class AddStudentController extends GetxController {
       if (response.statusCode == 201) {
         studentNameController.value.text = "";
         levelController.value.text = "";
-        memoRateController.value.text = "";
+        memoRateController.value.text = "0";
         phoneController.value.text = "";
         schoolClassController.value.text = "";
         selectedGroup.value = null;

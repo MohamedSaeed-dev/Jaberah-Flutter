@@ -13,17 +13,17 @@ import 'package:pdf/pdf.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
-
 class MonthlyReportController extends GetxController {
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
+  var isLoadingUpdate = false.obs; // Add this for exam updates
   var selectedDate = JDateModel(jhijri: JHijri.now()).obs;
 
   var groups = <GroupsGeneral>[].obs;
   var selectedGroupId = 0.obs;
   var selectedGroupName = ''.obs;
 
-  var monthlyReport = <MonthlyReportModel>[];
+  var monthlyReport = MonthlyReportResponse(books: [], data: []).obs;
 
   Future getMonthlyReport() async {
     try {
@@ -33,10 +33,8 @@ class MonthlyReportController extends GetxController {
               "/$monthlyReportURL?groupId=$selectedGroupId&year=${selectedDate.value.jhijri!.year}&month=${selectedDate.value.jhijri!.month}")
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
-        List<dynamic> result = response.data;
-        monthlyReport =
-            result.map((item) => MonthlyReportModel.fromJson(item)).toList();
-        ;
+        Map<String, dynamic> result = response.data;
+        monthlyReport.value = MonthlyReportResponse.fromJson(result);
       } else {
         messageSnackBar(response.data["message"]);
       }
@@ -72,7 +70,6 @@ class MonthlyReportController extends GetxController {
         List<dynamic> result = response.data;
         groups.value =
             result.map((item) => GroupsGeneral.fromJson(item)).toList();
-        ;
         if (groups.isNotEmpty) {
           selectedGroupId.value = groups[0].id;
           selectedGroupName.value = groups[0].groupName;
@@ -92,11 +89,128 @@ class MonthlyReportController extends GetxController {
       }
     } catch (e) {
       catchSnackBar();
-    } finally {}
+    }
+  }
+
+  // Add book management methods
+  Future<bool> addBook(
+      {required String title, required String from, required String to}) async {
+    try {
+      isLoading.value = true;
+      var response = await _apiClient.dio
+          .post("/books", // Replace with your actual endpoint
+              data: {
+            'title': title,
+            'from': from,
+            'to': to,
+            'groupId': selectedGroupId.value,
+            'year': selectedDate.value.jhijri!.year,
+            'month': selectedDate.value.jhijri!.month,
+          }).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        await getMonthlyReport(); // Refresh data
+        successSnackBar("تم إضافة الكتاب بنجاح");
+        return true;
+      } else {
+        messageSnackBar(response.data["message"]);
+        return false;
+      }
+    } catch (e) {
+      catchSnackBar();
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> updateBook(
+      {required int bookId,
+      required String title,
+      required String from,
+      required String to}) async {
+    try {
+      isLoading.value = true;
+      var response = await _apiClient.dio
+          .put("/books/$bookId", // Replace with your actual endpoint
+              data: {
+            'title': title,
+            'from': from,
+            'to': to,
+          }).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        await getMonthlyReport(); // Refresh data
+        successSnackBar("تم تحديث الكتاب بنجاح");
+        return true;
+      } else {
+        messageSnackBar(response.data["message"]);
+        return false;
+      }
+    } catch (e) {
+      catchSnackBar();
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> deleteBook(int bookId) async {
+    try {
+      isLoading.value = true;
+      var response = await _apiClient.dio
+          .delete("/books/$bookId" // Replace with your actual endpoint
+              )
+          .timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        await getMonthlyReport(); // Refresh data
+        successSnackBar("تم حذف الكتاب بنجاح");
+        return true;
+      } else {
+        messageSnackBar(response.data["message"]);
+        return false;
+      }
+    } catch (e) {
+      catchSnackBar();
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> UpdateExams({
+    required int followStudentId,
+    required double? paperExam,
+    required double? oralExam,
+  }) async {
+    try {
+      isLoadingUpdate.value = true;
+      var response = await _apiClient.dio.put(
+          "/students/$followStudentId/exams", // Replace with your actual endpoint
+          data: {
+            'paperGrade': paperExam,
+            'oralGrade': oralExam,
+          }).timeout(const Duration(seconds: 20));
+
+      if (response.statusCode == 200) {
+        await getMonthlyReport(); // Refresh data
+        successSnackBar("تم تحديث الدرجات بنجاح");
+        return true;
+      } else {
+        messageSnackBar(response.data["message"]);
+        return false;
+      }
+    } catch (e) {
+      catchSnackBar();
+      return false;
+    } finally {
+      isLoadingUpdate.value = false;
+    }
   }
 
   void monthlyReportPage(String reportName,
-      List<MonthlyReportModel> monthlyReport, Document pdf) async {
+      MonthlyReportResponse monthlyReportData, Document pdf) async {
     final fontData = await rootBundle.load('fonts/GE_SS_Two_Bold.ttf');
     final ttf = pw.Font.ttf(fontData);
 
@@ -108,6 +222,12 @@ class MonthlyReportController extends GetxController {
 
     final cellStyle =
         pw.TextStyle(fontSize: 9, font: ttf, fontFallback: [Font.helvetica()]);
+
+    final titleStyle = pw.TextStyle(
+        fontSize: 14,
+        fontWeight: pw.FontWeight.bold,
+        font: ttf,
+        fontFallback: [Font.helvetica()]);
 
     pdf.addPage(
       pw.MultiPage(
@@ -144,8 +264,96 @@ class MonthlyReportController extends GetxController {
           );
         },
         build: (pw.Context context) {
-          return [
-            // Table Header
+          List<pw.Widget> content = [];
+
+          // Add Books Section if books exist
+          if (monthlyReportData.books.isNotEmpty) {
+            content.addAll([
+              pw.Container(
+                alignment: pw.Alignment.centerRight,
+                margin: pw.EdgeInsets.only(bottom: 15),
+                child: pw.Text(
+                  'كتب الحلقة:',
+                  style: titleStyle,
+                ),
+              ),
+              // Books Table Header
+              pw.Container(
+                color: PdfColors.grey300,
+                padding: pw.EdgeInsets.all(8),
+                child: pw.Row(
+                  children: [
+                    pw.Expanded(
+                        flex: 1,
+                        child:
+                            pw.Center(child: pw.Text('م', style: headerStyle))),
+                    pw.Expanded(
+                        flex: 4,
+                        child: pw.Center(
+                            child:
+                                pw.Text('عنوان الكتاب', style: headerStyle))),
+                    pw.Expanded(
+                        flex: 2,
+                        child: pw.Center(
+                            child: pw.Text('من صفحة', style: headerStyle))),
+                    pw.Expanded(
+                        flex: 2,
+                        child: pw.Center(
+                            child: pw.Text('إلى صفحة', style: headerStyle))),
+                  ],
+                ),
+              ),
+              // Books Rows
+              ...monthlyReportData.books.asMap().entries.map((entry) {
+                final index = entry.key;
+                final book = entry.value;
+                return pw.Container(
+                  padding: pw.EdgeInsets.symmetric(vertical: 5),
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border(
+                        bottom: pw.BorderSide(color: PdfColors.grey300)),
+                  ),
+                  child: pw.Row(
+                    children: [
+                      pw.Expanded(
+                          flex: 1,
+                          child: pw.Center(
+                              child:
+                                  pw.Text('${index + 1}', style: cellStyle))),
+                      pw.Expanded(
+                          flex: 4,
+                          child: pw.Center(
+                              child: pw.Text(book.title, style: cellStyle))),
+                      pw.Expanded(
+                          flex: 2,
+                          child: pw.Center(
+                              child: pw.Text(book.from, style: cellStyle))),
+                      pw.Expanded(
+                          flex: 2,
+                          child: pw.Center(
+                              child: pw.Text(book.to, style: cellStyle))),
+                    ],
+                  ),
+                );
+              }),
+              pw.SizedBox(height: 30), // Space between books and students
+            ]);
+          }
+
+          // Add Students Section Title
+          content.add(
+            pw.Container(
+              alignment: pw.Alignment.centerRight,
+              margin: pw.EdgeInsets.only(bottom: 15),
+              child: pw.Text(
+                'تقرير الطلاب:',
+                style: titleStyle,
+              ),
+            ),
+          );
+
+          // Students Table Header
+          content.add(
             pw.Container(
               color: PdfColors.grey300,
               padding: pw.EdgeInsets.all(8),
@@ -198,8 +406,11 @@ class MonthlyReportController extends GetxController {
                 ],
               ),
             ),
-            // Table Rows
-            ...monthlyReport.asMap().entries.map((entry) {
+          );
+
+          // Students Table Rows
+          content.addAll(
+            monthlyReportData.data.asMap().entries.map((entry) {
               final index = entry.key;
               final data = entry.value;
               return pw.Container(
@@ -276,7 +487,9 @@ class MonthlyReportController extends GetxController {
                 ),
               );
             }),
-          ];
+          );
+
+          return content;
         },
       ),
     );
@@ -290,7 +503,7 @@ class MonthlyReportController extends GetxController {
         return;
       }
       final pdf = pw.Document();
-      monthlyReportPage(reportName, monthlyReport, pdf);
+      monthlyReportPage(reportName, monthlyReport.value, pdf);
       final directory = Directory(appFolder);
       if (!await directory.exists()) {
         await directory.create(recursive: true);
@@ -324,7 +537,27 @@ class GroupsGeneral {
   }
 }
 
+class MonthlyReportResponse {
+  List<BooksData> books;
+  List<MonthlyReportModel> data;
+
+  MonthlyReportResponse({
+    required this.books,
+    required this.data,
+  });
+
+  factory MonthlyReportResponse.fromJson(Map<String, dynamic> json) {
+    return MonthlyReportResponse(
+      books: (json['books'] as List).map((b) => BooksData.fromJson(b)).toList(),
+      data: (json['data'] as List)
+          .map((d) => MonthlyReportModel.fromJson(d))
+          .toList(),
+    );
+  }
+}
+
 class MonthlyReportModel {
+  int followStudentId;
   String studentName;
 
   String saveFromSurah;
@@ -349,64 +582,82 @@ class MonthlyReportModel {
   double oralGrade;
   double total;
 
-  MonthlyReportModel(
-      {required this.studentName,
-      required this.saveFromSurah,
-      required this.saveFromVerse,
-      required this.saveToSurah,
-      required this.saveToVerse,
-      required this.saveRate,
-      required this.savePages,
-      required this.reviewFromSurah,
-      required this.reviewFromVerse,
-      required this.reviewToSurah,
-      required this.reviewToVerse,
-      required this.reviewRate,
-      required this.reviewPages,
-      required this.saveGrade,
-      required this.reviewGrade,
-      required this.attendanceGrade,
-      required this.behaviorGrade,
-      required this.oralGrade,
-      required this.paperGrade,
-      required this.total});
+  MonthlyReportModel({
+    required this.followStudentId,
+    required this.studentName,
+    required this.saveFromSurah,
+    required this.saveFromVerse,
+    required this.saveToSurah,
+    required this.saveToVerse,
+    required this.saveRate,
+    required this.savePages,
+    required this.reviewFromSurah,
+    required this.reviewFromVerse,
+    required this.reviewToSurah,
+    required this.reviewToVerse,
+    required this.reviewRate,
+    required this.reviewPages,
+    required this.saveGrade,
+    required this.reviewGrade,
+    required this.attendanceGrade,
+    required this.behaviorGrade,
+    required this.paperGrade,
+    required this.oralGrade,
+    required this.total,
+  });
 
   factory MonthlyReportModel.fromJson(Map<String, dynamic> json) {
     return MonthlyReportModel(
+      followStudentId: json["followStudentId"] as int,
       studentName: json["studentName"] as String,
       saveFromSurah: json["saveData"]["from"]["surahName"] as String,
-      saveToSurah: json["saveData"]["to"]["surahName"] as String,
       saveFromVerse: json["saveData"]["from"]["verse"] as int,
+      saveToSurah: json["saveData"]["to"]["surahName"] as String,
       saveToVerse: json["saveData"]["to"]["verse"] as int,
-      savePages: (json["saveData"]["pages"] is int)
-          ? (json["saveData"]["pages"] as int).toDouble()
-          : double.parse(json["saveData"]["pages"].toString()),
+      savePages: _toDouble(json["saveData"]["pages"]),
       saveRate: json["saveData"]["rate"]?.toString() ?? "",
       reviewFromSurah: json["reviewData"]["from"]["surahName"] as String,
-      reviewToSurah: json["reviewData"]["to"]["surahName"] as String,
       reviewFromVerse: json["reviewData"]["from"]["verse"] as int,
+      reviewToSurah: json["reviewData"]["to"]["surahName"] as String,
       reviewToVerse: json["reviewData"]["to"]["verse"] as int,
-      reviewPages: (json["reviewData"]["pages"] is int)
-          ? (json["reviewData"]["pages"] as int).toDouble()
-          : double.parse(json["reviewData"]["pages"].toString()),
+      reviewPages: _toDouble(json["reviewData"]["pages"]),
       reviewRate: json["reviewData"]["rate"]?.toString() ?? "",
-      saveGrade: (json["saveGrade"] is int)
-          ? (json["saveGrade"] as int).toDouble()
-          : double.parse(json["saveGrade"].toString()),
-      reviewGrade: json["reviewGrade"] is int
-          ? (json["reviewGrade"] as int).toDouble()
-          : double.parse(json["reviewGrade"].toString()),
+      saveGrade: _toDouble(json["saveGrade"]),
+      reviewGrade: _toDouble(json["reviewGrade"]),
       attendanceGrade: json["attendanceGrade"] as int,
       behaviorGrade: json["behaviorGrade"] as int,
-      oralGrade: (json["oralGrade"] is int)
-          ? (json["oralGrade"] as int).toDouble()
-          : double.parse(json["oralGrade"].toString()),
-      paperGrade: (json["paperGrade"] is int)
-          ? (json["paperGrade"] as int).toDouble()
-          : double.parse(json["paperGrade"].toString()),
-      total: (json["total"] is int)
-          ? (json["total"] as int).toDouble()
-          : double.parse(json["total"].toString()),
+      paperGrade: _toDouble(json["paperGrade"]),
+      oralGrade: _toDouble(json["oralGrade"]),
+      total: _toDouble(json["total"]),
+    );
+  }
+
+  static double _toDouble(dynamic val) {
+    if (val is int) return val.toDouble();
+    if (val is double) return val;
+    return double.tryParse(val.toString()) ?? 0.0;
+  }
+}
+
+class BooksData {
+  int id;
+  String title;
+  String from;
+  String to;
+
+  BooksData({
+    required this.id,
+    required this.title,
+    required this.from,
+    required this.to,
+  });
+
+  factory BooksData.fromJson(Map<String, dynamic> json) {
+    return BooksData(
+      id: json["id"] as int,
+      title: json["title"] as String,
+      from: json["from"].toString(),
+      to: json["to"].toString(),
     );
   }
 }
