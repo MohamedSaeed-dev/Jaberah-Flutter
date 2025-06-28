@@ -88,6 +88,7 @@ class EditFollowStudent extends StatelessWidget {
                                 onChanged: (value) {
                                   controller.selectedSurahFromSave.value =
                                       value!;
+                                      controller.selectedSurahToSave.value = value;
                                 },
                                 decoration: InputDecoration(
                                   labelText: "من سورة",
@@ -147,7 +148,7 @@ class EditFollowStudent extends StatelessWidget {
                                 ),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "برجاء إدخال رقم الآية";
+                                    return "يرجاء إدخال رقم الآية";
                                   }
                                   if (int.tryParse(value) == null) {
                                     return "يجب إدخال رقم صحيح";
@@ -210,6 +211,13 @@ class EditFollowStudent extends StatelessWidget {
                                   labelText: "عدد الصفحات",
                                   border: OutlineInputBorder(),
                                 ),
+                                validator: (value) {
+                                  var num = double.tryParse(value!);
+                                  if (num! < 0) {
+                                    return "يجب إدخال عدد صفحات صحيح ";
+                                  }
+                                  return null;
+                                },
                               ),
                             ),
                           ],
@@ -236,6 +244,8 @@ class EditFollowStudent extends StatelessWidget {
                                 onChanged: (value) {
                                   controller.selectedSurahFromReview.value =
                                       value!;
+                                      controller.selectedSurahToReview.value =
+                                      value;
                                 },
                                 decoration: InputDecoration(
                                   labelText: "من سورة",
@@ -356,7 +366,7 @@ class EditFollowStudent extends StatelessWidget {
                                   border: OutlineInputBorder(),
                                 ),
                                 validator: (value) {
-                                  var num = int.tryParse(value!);
+                                  var num = double.tryParse(value!);
                                   if (num! < 0) {
                                     return "يجب إدخال عدد صفحات صحيح ";
                                   }
@@ -382,7 +392,7 @@ class EditFollowStudent extends StatelessWidget {
                                 border: OutlineInputBorder(),
                               ),
                               validator: (value) {
-                                var num = int.tryParse(value!);
+                                var num = double.tryParse(value!);
                                 if (num! < 0 || num > 1) {
                                   return "يجب إدخال حضور صحيح ";
                                 }
@@ -399,7 +409,7 @@ class EditFollowStudent extends StatelessWidget {
                                 border: OutlineInputBorder(),
                               ),
                               validator: (value) {
-                                var num = int.tryParse(value!);
+                                var num = double.tryParse(value!);
                                 if (num! < 0 || num > 1) {
                                   return "يجب إدخال سلوك صحيح ";
                                 }

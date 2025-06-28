@@ -12,8 +12,6 @@ class AddStudentController extends GetxController {
   final ApiClient apiClient = Get.find();
   var studentNameController = TextEditingController().obs;
   var phoneController = TextEditingController().obs;
-  var schoolClassController =
-      TextEditingController(text: 'المرحلة الابتدائية').obs;
   var levelController = TextEditingController().obs;
   var memoRateController = TextEditingController().obs;
   var notesController = TextEditingController(text: '').obs;
@@ -31,7 +29,7 @@ class AddStudentController extends GetxController {
         "phoneNumber": phoneController.value.text,
         "schoolLevel": levelController.value.text,
         "memoRate": int.tryParse( memoRateController.value.text),
-        "schoolClass": schoolClassController.value.text,
+        "schoolClass": selectedSchoolLevel.value,
         "notes": notesController.value.text,
         "groupId": selectedGroup.value,
       }).timeout(const Duration(seconds: 20));
@@ -40,7 +38,7 @@ class AddStudentController extends GetxController {
         levelController.value.text = "";
         memoRateController.value.text = "0";
         phoneController.value.text = "";
-        schoolClassController.value.text = "";
+        selectedSchoolLevel.value = "";
         selectedGroup.value = null;
         successSnackBar("تم اضافة الطالب بنجاح");
       } else {

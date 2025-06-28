@@ -89,14 +89,9 @@ class AddStudent extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
                     controller: controller.memoRateController.value,
+                    keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                         labelText: 'مقدار الحفظ', border: OutlineInputBorder()),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextFormField(
-                    controller: controller.notesController.value,
                     validator: (value) {
                       if (value != null &&
                           (int.tryParse(value) == null ||
@@ -105,13 +100,19 @@ class AddStudent extends StatelessWidget {
                       }
                       return null;
                     },
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
+                    controller: controller.notesController.value,
                     decoration: const InputDecoration(
                         labelText: 'ملاحظات', border: OutlineInputBorder()),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: Obx(() => InputDecorator(
+                  child: InputDecorator(
                         decoration: InputDecoration(
                           labelText:
                               'المرحلة الدراسية', // Add label text similar to TextFormField
@@ -120,11 +121,11 @@ class AddStudent extends StatelessWidget {
                               horizontal: 12), // Adjust padding
                         ),
                         child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
+                          child:Obx(()=> DropdownButton<String>(
                             isExpanded: true,
-                            value: controller.schoolClassController.value.text,
+                            value: controller.selectedSchoolLevel.value,
                             onChanged: (value) {
-                              controller.schoolClassController.value.text =
+                              controller.selectedSchoolLevel.value =
                                   value.toString();
                             },
                             items: [
@@ -159,7 +160,8 @@ class AddStudent extends StatelessWidget {
                           child: DropdownButton(
                             isExpanded:
                                 true, // Ensures the dropdown expands to full width
-                            value: controller.selectedGroup.value, // Default value
+                            value:
+                                controller.selectedGroup.value, // Default value
                             onChanged: (value) {
                               controller.selectedGroup.value =
                                   value; // Update selected group
@@ -167,7 +169,8 @@ class AddStudent extends StatelessWidget {
                             items: controller.groups.map((group) {
                               return DropdownMenuItem(
                                 value: group.id, // Group ID as value
-                                child: Text(group.groupName), // Group name as the displayed text
+                                child: Text(group
+                                    .groupName), // Group name as the displayed text
                               );
                             }).toList(),
                           ),

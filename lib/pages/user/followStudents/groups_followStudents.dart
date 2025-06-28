@@ -69,7 +69,7 @@ class GroupsFollowStudents extends StatelessWidget {
                 return _buildGroupCard(
                   context: context,
                   title: data.groupName,
-                  period: data.period == 'EVENING' ? 'مسائية' : 'صباحية',
+                  period: data.period,
                   studentsCount: data.studentsNo,
                   color: const Color.fromARGB(255, 63, 181, 108),
                   onTap: () {

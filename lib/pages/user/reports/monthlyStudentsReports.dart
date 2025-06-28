@@ -100,62 +100,82 @@ class MonthlyStudentsReports extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) {
-        return AlertDialog(
-          title: const Text("كتب الحلقة"),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.separated(
-              shrinkWrap: true,
-              itemCount: books.length,
-              separatorBuilder: (_, __) => const Divider(),
-              itemBuilder: (_, index) {
-                final book = books[index];
-                return ListTile(
-                  leading: const Icon(Icons.book),
-                  title: Text(book.title),
-                  subtitle: Text(
-                    "من ${book.from} إلى ${book.to}\nالشهر: ${book.month.year}-${book.month.month.toString().padLeft(2, '0')}",
-                    textAlign: TextAlign.right,
+        return Dialog(
+          insetPadding: const EdgeInsets.all(16), // Reduce side padding
+          child: Container(
+            width:
+                MediaQuery.of(context).size.width * 0.95, // almost full width
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("كتب الحلقة", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 400, // adjust if needed
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: books.length,
+                    separatorBuilder: (_, __) => const Divider(),
+                    itemBuilder: (_, index) {
+                      final book = books[index];
+                      return ListTile(
+                        leading: const Icon(Icons.book),
+                        title: Text(
+                          book.title,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          "من ${book.from} إلى ${book.to} — الشهر: ${book.month.year}-${book.month.month.toString().padLeft(2, '0')}",
+                          textAlign: TextAlign.right,
+                        ),
+                        trailing: Wrap(
+                          spacing: 8,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () {
+                                Get.back();
+                                _showAddOrEditBookDialog(context, book: book);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () async {
+                                await controller.deleteBook(book.id);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                  trailing: Wrap(
-                    spacing: 8,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () {
-                          Get.back();
-                          _showAddOrEditBookDialog(context, book: book);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () async {
-                          await controller.deleteBook(book.id);
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        Get.back();
+                        _showAddOrEditBookDialog(context);
+                      },
+                      child: const Text("إضافة كتاب"),
+                    ),
+                    TextButton(
+                      onPressed: () => Get.back(),
+                      child: const Text("إغلاق"),
+                    ),
+                  ],
+                )
+              ],
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-                _showAddOrEditBookDialog(context);
-              },
-              child: const Text("إضافة كتاب"),
-            ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("إغلاق"),
-            )
-          ],
         );
       },
     );
   }
+
 
   void _showAddOrEditBookDialog(BuildContext context, {BooksData? book}) {
     final titleController = TextEditingController(text: book?.title ?? '');
