@@ -154,8 +154,8 @@ class SemesterReportModel {
   int studentId;
   String studentName;
   double gradeSum;
-  int attendanceSum;
-  int behaviorSum;
+  double attendanceSum;
+  double behaviorSum;
   double oralGradeSum;
   double paperGradeSum;
   double midFinalGrade;
@@ -179,8 +179,12 @@ class SemesterReportModel {
         gradeSum: json["gradeSum"] is int
             ? (json["gradeSum"] as int).toDouble()
             : double.parse(json["gradeSum"].toString()),
-        attendanceSum: json["attendanceSum"] as int,
-        behaviorSum: json["behaviorSum"] as int,
+        attendanceSum: (json["attendanceSum"] is int) ? 
+            (json["attendanceSum"] as int).toDouble() :
+            double.parse(json["attendanceSum"].toString()),
+        behaviorSum: (json["behaviorSum"] is int) ? 
+            (json["behaviorSum"] as int).toDouble() :
+            double.parse(json["behaviorSum"].toString()),
         oralGradeSum: (json["oralGradeSum"] is int)
             ? (json["oralGradeSum"] as int).toDouble()
             : double.parse(json["oralGradeSum"].toString()),

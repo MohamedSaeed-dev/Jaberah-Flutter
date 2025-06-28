@@ -39,6 +39,7 @@ class StudentGroupsFollowStudentsController extends GetxController {
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;
+        print(result);
         students.value =
             result.map((item) => FollowStudent.fromJson(item)).toList();
         filteredStudents.value = students;
@@ -46,6 +47,7 @@ class StudentGroupsFollowStudentsController extends GetxController {
         messageSnackBar(response.data["message"]);
       }
     } on DioException catch (e) {
+      print(e);
       if (e.error is SocketException) {
         socketSnackBar();
       } else if (e.type == DioExceptionType.connectionTimeout ||
@@ -56,6 +58,7 @@ class StudentGroupsFollowStudentsController extends GetxController {
         messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
       }
     } catch (e) {
+      print(e);
       catchSnackBar();
     } finally {
       isLoading.value = false;
@@ -79,17 +82,17 @@ class FollowStudent {
   String surahToTeacher;
   int verseToTeacher;
   String rateTeacher;
-  int pagesTeacher;
+  double pagesTeacher;
 
   String surahFromFriend;
   int verseFromFriend;
   String surahToFriend;
   int verseToFriend;
   String rateFriend;
-  int pagesFriend;
+  double pagesFriend;
 
-  int attendance;
-  int behavior;
+  double attendance;
+  double behavior;
 
   String notes;
 
@@ -116,22 +119,23 @@ class FollowStudent {
   factory FollowStudent.fromJson(Map<String, dynamic> json) {
     return FollowStudent(
       studentId: json["studentId"] as int,
-      studentName: json["studentName"] as String,
+      studentName: json["studentName"] ?? "",
       surahFromTeacher: json["surahFromTeacher"] ?? "",
       surahToTeacher: json["surahToTeacher"] ?? "",
       verseFromTeacher: json["verseFromTeacher"] as int,
       verseToTeacher: json["verseToTeacher"] as int,
-      pagesTeacher: json["pagesTeacher"] as int,
+      pagesTeacher: (json["pagesTeacher"] as num).toDouble(),
       rateTeacher: json["rateTeacher"] ?? "",
       surahFromFriend: json["surahFromFriend"] ?? "",
       surahToFriend: json["surahToFriend"] ?? "",
       verseFromFriend: json["verseFromFriend"] as int,
       verseToFriend: json["verseToFriend"] as int,
-      pagesFriend: json["pagesFriend"] as int,
+      pagesFriend: (json["pagesFriend"] as num).toDouble(),
       rateFriend: json["rateFriend"] ?? "",
-      attendance: json["attendance"] as int,
-      behavior: json["behavior"] as int,
+      attendance: (json["attendance"] as num).toDouble(),
+      behavior: (json["behavior"] as num).toDouble(),
       notes: json["notes"] ?? "",
     );
   }
+
 }

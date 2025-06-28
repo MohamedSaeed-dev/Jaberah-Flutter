@@ -576,8 +576,8 @@ class MonthlyReportModel {
 
   double saveGrade;
   double reviewGrade;
-  int attendanceGrade;
-  int behaviorGrade;
+  double attendanceGrade;
+  double behaviorGrade;
   double paperGrade;
   double oralGrade;
   double total;
@@ -624,8 +624,8 @@ class MonthlyReportModel {
       reviewRate: json["reviewData"]["rate"]?.toString() ?? "",
       saveGrade: _toDouble(json["saveGrade"]),
       reviewGrade: _toDouble(json["reviewGrade"]),
-      attendanceGrade: json["attendanceGrade"] as int,
-      behaviorGrade: json["behaviorGrade"] as int,
+      attendanceGrade: _toDouble( json["attendanceGrade"]),
+      behaviorGrade: _toDouble( json["behaviorGrade"]),
       paperGrade: _toDouble(json["paperGrade"]),
       oralGrade: _toDouble(json["oralGrade"]),
       total: _toDouble(json["total"]),
