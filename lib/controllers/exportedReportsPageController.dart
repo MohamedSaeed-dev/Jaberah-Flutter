@@ -2,9 +2,9 @@ import 'dart:io';
 import 'package:get/get.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/models/global/snackbars.dart';
+import 'package:jaberah/models/global/storage-permission.dart';
 import 'package:jhijri_picker/jhijri_picker.dart';
 import 'package:open_file/open_file.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class ExportedReportsModel {
   final File file;
@@ -39,18 +39,14 @@ class ExportedReportsController extends GetxController {
   Future<void> loadPdfFilesWithDate() async {
     isLoading.value = true;
     try {
-      final status = await Permission.manageExternalStorage.request();
-      if (!status.isGranted) {
-        messageSnackBar("يجب منح الإذن للوصول إلى التخزين");
-        return;
-      }
+      await requestStoragePermission();
       final directory = Directory(appFolder);
       final files = directory.existsSync() ? directory.listSync() : [];
       final pdfFiles = files
           .whereType<File>()
           .where((f) => f.path.endsWith('.pdf'))
           .toList();
-          
+
       totalFiles = pdfFiles
           .map((file) => ExportedReportsModel(
                 file: file,

@@ -8,12 +8,12 @@ import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/controllers/admin/monthlyReportController.dart';
 import 'package:jaberah/models/global/snackbars.dart';
+import 'package:jaberah/models/global/storage-permission.dart';
 import 'package:jhijri/_src/_jHijri.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:permission_handler/permission_handler.dart';
 
 class SemesterReportController extends GetxController {
   final ApiClient _apiClient = Get.find();
@@ -317,11 +317,7 @@ class SemesterReportController extends GetxController {
 
   Future<void> exportAsPDF(String reportName) async {
     try {
-      final status = await Permission.manageExternalStorage.request();
-      if (!status.isGranted) {
-        messageSnackBar("يجب منح الإذن للوصول إلى التخزين");
-        return;
-      }
+      await requestStoragePermission();
       final pdf = pw.Document();
       semesterReportPage(reportName, semesterReport, pdf);
       final directory = Directory(appFolder);
@@ -364,12 +360,12 @@ class SemesterReportModel {
         gradeSum: json["gradeSum"] is int
             ? (json["gradeSum"] as int).toDouble()
             : double.parse(json["gradeSum"].toString()),
-        attendanceSum: (json["attendanceSum"] is int) ? 
-            (json["attendanceSum"] as int).toDouble() :
-            double.parse(json["attendanceSum"].toString()),
-        behaviorSum: (json["behaviorSum"] is int) ? 
-            (json["behaviorSum"] as int).toDouble() :
-            double.parse(json["behaviorSum"].toString()),
+        attendanceSum: (json["attendanceSum"] is int)
+            ? (json["attendanceSum"] as int).toDouble()
+            : double.parse(json["attendanceSum"].toString()),
+        behaviorSum: (json["behaviorSum"] is int)
+            ? (json["behaviorSum"] as int).toDouble()
+            : double.parse(json["behaviorSum"].toString()),
         oralGradeSum: (json["oralGradeSum"] is int)
             ? (json["oralGradeSum"] as int).toDouble()
             : double.parse(json["oralGradeSum"].toString()),

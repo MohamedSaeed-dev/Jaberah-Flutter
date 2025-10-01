@@ -7,13 +7,13 @@ import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/models/global/snackbars.dart';
+import 'package:jaberah/models/global/storage-permission.dart';
 import 'package:jhijri/_src/_jHijri.dart';
 import 'package:jhijri_picker/jhijri_picker.dart';
 import 'package:pdf/pdf.dart';
 
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class BestStudentsController extends GetxController {
   final ApiClient _apiClient = Get.find();
@@ -34,7 +34,7 @@ class BestStudentsController extends GetxController {
       isLoading.value = true;
       var response = await _apiClient.dio
           .get(
-              "/$bestStudentReportURL?groupId=$selectedGroupId&year=${selectedDate.value.jhijri!.year}&month=${selectedDate.value.jhijri!.month}&take=${take.value}")
+              "/$bestStudentForGroupReportURL?groupId=$selectedGroupId&year=${selectedDate.value.jhijri!.year}&month=${selectedDate.value.jhijri!.month}&take=${take.value}")
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;
@@ -55,6 +55,7 @@ class BestStudentsController extends GetxController {
         messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
       }
     } catch (e) {
+      print(e);
       catchSnackBar();
     } finally {
       isLoading.value = false;
@@ -338,11 +339,7 @@ class BestStudentsController extends GetxController {
   Future<void> exportAsPDF(
       String reportName, List<BestStudentsReportModel> list) async {
     try {
-      final status = await Permission.manageExternalStorage.request();
-      if (!status.isGranted) {
-        messageSnackBar("يجب منح الإذن للوصول إلى التخزين");
-        return;
-      }
+      await requestStoragePermission();
       final pdf = pw.Document();
       bestStudentsReportPage(reportName, list, pdf);
       final directory = Directory(appFolder);
@@ -365,8 +362,8 @@ class BestStudentsReportModel {
 
   double saveGrade;
   double reviewGrade;
-  int attendanceGrade;
-  int behaviorGrade;
+  double attendanceGrade;
+  double behaviorGrade;
   double paperGrade;
   double oralGrade;
   double total;
@@ -392,8 +389,12 @@ class BestStudentsReportModel {
       reviewGrade: json["reviewGrade"] is int
           ? (json["reviewGrade"] as int).toDouble()
           : double.parse(json["reviewGrade"].toString()),
-      attendanceGrade: json["attendanceGrade"] as int,
-      behaviorGrade: json["behaviorGrade"] as int,
+      attendanceGrade: (json["attendanceGrade"] is int)
+          ? (json["attendanceGrade"] as int).toDouble()
+          : double.parse(json["attendanceGrade"].toString()),
+      behaviorGrade: json["behaviorGrade"] is int
+          ? (json["behaviorGrade"] as int).toDouble()
+          : double.parse(json["behaviorGrade"].toString()),
       oralGrade: (json["oralGrade"] is int)
           ? (json["oralGrade"] as int).toDouble()
           : double.parse(json["oralGrade"].toString()),

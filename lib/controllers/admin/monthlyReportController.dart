@@ -7,12 +7,13 @@ import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/models/global/snackbars.dart';
+import 'package:jaberah/models/global/storage-permission.dart';
 import 'package:jhijri/_src/_jHijri.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
 import 'package:pdf/pdf.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
+
 class MonthlyReportController extends GetxController {
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
@@ -497,11 +498,7 @@ class MonthlyReportController extends GetxController {
 
   Future<void> exportAsPDF(String reportName) async {
     try {
-      final status = await Permission.manageExternalStorage.request();
-      if (!status.isGranted) {
-        messageSnackBar("يجب منح الإذن للوصول إلى التخزين");
-        return;
-      }
+      await requestStoragePermission();
       final pdf = pw.Document();
       monthlyReportPage(reportName, monthlyReport.value, pdf);
       final directory = Directory(appFolder);
@@ -624,8 +621,8 @@ class MonthlyReportModel {
       reviewRate: json["reviewData"]["rate"]?.toString() ?? "",
       saveGrade: _toDouble(json["saveGrade"]),
       reviewGrade: _toDouble(json["reviewGrade"]),
-      attendanceGrade: _toDouble( json["attendanceGrade"]),
-      behaviorGrade: _toDouble( json["behaviorGrade"]),
+      attendanceGrade: _toDouble(json["attendanceGrade"]),
+      behaviorGrade: _toDouble(json["behaviorGrade"]),
       paperGrade: _toDouble(json["paperGrade"]),
       oralGrade: _toDouble(json["oralGrade"]),
       total: _toDouble(json["total"]),
