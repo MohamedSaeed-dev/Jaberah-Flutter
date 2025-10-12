@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/models/global/snackbars.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class GroupsController extends GetxController {
   final ApiClient _apiClient = Get.find();
@@ -27,6 +29,9 @@ class GroupsController extends GetxController {
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;
         groups.value = result.map((item) => Group.fromJson(item)).toList();
+
+        // Apply saved order
+        await _applySavedOrder();
       } else {
         messageSnackBar(response.data["message"]);
       }
@@ -44,6 +49,47 @@ class GroupsController extends GetxController {
       catchSnackBar();
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> _applySavedOrder() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedOrderJson = prefs.getString('groups_order');
+
+      if (savedOrderJson != null) {
+        List<int> savedOrder = List<int>.from(json.decode(savedOrderJson));
+
+        // Create a map for quick lookup
+        Map<int, Group> groupsMap = {for (var group in groups) group.id: group};
+
+        // Reorder based on saved order
+        List<Group> orderedGroups = [];
+        for (int id in savedOrder) {
+          if (groupsMap.containsKey(id)) {
+            orderedGroups.add(groupsMap[id]!);
+            groupsMap.remove(id);
+          }
+        }
+
+        // Add any new groups that weren't in the saved order
+        orderedGroups.addAll(groupsMap.values);
+
+        groups.value = orderedGroups;
+      }
+    } catch (e) {
+      // If there's any error loading saved order, just use the original order
+      print("Error applying saved order: $e");
+    }
+  }
+
+  Future<void> _saveOrder() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      List<int> orderIds = groups.map((group) => group.id).toList();
+      await prefs.setString('groups_order', json.encode(orderIds));
+    } catch (e) {
+      print("Error saving order: $e");
     }
   }
 
@@ -102,6 +148,17 @@ class GroupsController extends GetxController {
     } catch (e) {
       catchSnackBar();
     }
+  }
+
+  void reorderGroups(int oldIndex, int newIndex) {
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final Group item = groups.removeAt(oldIndex);
+    groups.insert(newIndex, item);
+
+    // Save the new order permanently
+    _saveOrder();
   }
 
   @override

@@ -58,6 +58,7 @@ dependencies:
   dio_cookie_manager:
   open_file:
   permission_handler:
+  reorderable_grid_view: ^2.2.8
 
 dev_dependencies:
   flutter_test:

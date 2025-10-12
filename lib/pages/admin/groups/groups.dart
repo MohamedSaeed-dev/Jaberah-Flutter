@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/groupsController.dart';
 import 'package:jaberah/pages/admin/groups/groupsStudents.dart';
+import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 
 class Groups extends StatelessWidget {
   final GroupsController groupsController = Get.put(GroupsController());
@@ -78,7 +79,7 @@ class Groups extends StatelessWidget {
               ),
             );
           } else {
-            return GridView.builder(
+            return ReorderableGridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: screenWidth > 600 ? 3 : 2, // Adjust for tablets
                 crossAxisSpacing: 10,
@@ -86,9 +87,13 @@ class Groups extends StatelessWidget {
                 childAspectRatio: screenWidth > 600 ? 1.2 : 1,
               ),
               itemCount: groupsController.groups.length,
+              onReorder: (int oldIndex, int newIndex) {
+                groupsController.reorderGroups(oldIndex, newIndex);
+              },
               itemBuilder: (context, index) {
                 var data = groupsController.groups[index];
                 return _buildGroupCard(
+                  key: ValueKey(data.id),
                   context: context,
                   title: data.groupName,
                   teacher: data.teacherName ?? "بدون معلم",
@@ -125,6 +130,7 @@ class Groups extends StatelessWidget {
   }
 
   Widget _buildGroupCard({
+    required Key key,
     required BuildContext context,
     required String title,
     required String teacher,
@@ -134,6 +140,7 @@ class Groups extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return GestureDetector(
+      key: key,
       onTap: onTap,
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
