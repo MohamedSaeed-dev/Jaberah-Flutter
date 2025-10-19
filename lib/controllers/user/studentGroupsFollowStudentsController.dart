@@ -39,7 +39,7 @@ class StudentGroupsFollowStudentsController extends GetxController {
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;
-        print(result);
+
         students.value =
             result.map((item) => FollowStudent.fromJson(item)).toList();
         filteredStudents.value = students;
@@ -47,7 +47,6 @@ class StudentGroupsFollowStudentsController extends GetxController {
         messageSnackBar(response.data["message"]);
       }
     } on DioException catch (e) {
-      print(e);
       if (e.error is SocketException) {
         socketSnackBar();
       } else if (e.type == DioExceptionType.connectionTimeout ||
@@ -58,7 +57,6 @@ class StudentGroupsFollowStudentsController extends GetxController {
         messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
       }
     } catch (e) {
-      print(e);
       catchSnackBar();
     } finally {
       isLoading.value = false;
@@ -137,5 +135,4 @@ class FollowStudent {
       notes: json["notes"] ?? "",
     );
   }
-
 }

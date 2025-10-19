@@ -172,7 +172,7 @@ class MyAttendancesController extends GetxController {
     selectedDay = DateTime(date.hYear, date.hMonth, date.hDay).obs;
     var sp = await SharedPreferences.getInstance();
     isAdmin.value = sp.getString("role") == "1";
-    print(isAdmin.value);
+
     getAttendanceForDay();
     getAttendanceForMonth();
   }

@@ -79,7 +79,6 @@ class GroupsController extends GetxController {
       }
     } catch (e) {
       // If there's any error loading saved order, just use the original order
-      print("Error applying saved order: $e");
     }
   }
 
@@ -88,9 +87,7 @@ class GroupsController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       List<int> orderIds = groups.map((group) => group.id).toList();
       await prefs.setString('groups_order', json.encode(orderIds));
-    } catch (e) {
-      print("Error saving order: $e");
-    }
+    } catch (e) {}
   }
 
   Future addGroup() async {
@@ -151,11 +148,17 @@ class GroupsController extends GetxController {
   }
 
   void reorderGroups(int oldIndex, int newIndex) {
-    if (oldIndex < newIndex) {
-      newIndex -= 1;
-    }
-    final Group item = groups.removeAt(oldIndex);
-    groups.insert(newIndex, item);
+    // إنشاء نسخة من القائمة
+    List<Group> newList = List<Group>.from(groups);
+
+    // إزالة العنصر من موقعه القديم
+    final Group item = newList.removeAt(oldIndex);
+
+    // إدراج العنصر في الموقع الجديد
+    newList.insert(newIndex, item);
+
+    // تحديث القائمة الأصلية
+    groups.value = newList;
 
     // Save the new order permanently
     _saveOrder();

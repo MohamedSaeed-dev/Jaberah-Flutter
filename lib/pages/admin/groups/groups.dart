@@ -81,19 +81,34 @@ class Groups extends StatelessWidget {
           } else {
             return ReorderableGridView.builder(
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: screenWidth > 600 ? 3 : 2, // Adjust for tablets
+                crossAxisCount: screenWidth > 600 ? 3 : 2,
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 childAspectRatio: screenWidth > 600 ? 1.2 : 1,
               ),
               itemCount: groupsController.groups.length,
-              onReorder: (int oldIndex, int newIndex) {
+              onReorder: (oldIndex, newIndex) {
                 groupsController.reorderGroups(oldIndex, newIndex);
+              },
+              dragWidgetBuilder: (index, child) {
+                return Transform.scale(
+                  scale: 1.05,
+                  child: Card(
+                    elevation: 12,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Opacity(
+                      opacity: 0.9,
+                      child: child,
+                    ),
+                  ),
+                );
               },
               itemBuilder: (context, index) {
                 var data = groupsController.groups[index];
                 return _buildGroupCard(
-                  key: ValueKey(data.id),
+                  key: ValueKey(data.id), // unique stable key
                   context: context,
                   title: data.groupName,
                   teacher: data.teacherName ?? "بدون معلم",
@@ -145,7 +160,7 @@ class Groups extends StatelessWidget {
       child: Card(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 8,
-        shadowColor: color.withValues(alpha:  0.5),
+        shadowColor: color.withOpacity(0.5),
         child: Padding(
           padding: const EdgeInsets.all(10.0),
           child: Column(
@@ -155,11 +170,14 @@ class Groups extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               SizedBox(height: 10),
-              Text("المعلم : $teacher", textAlign: TextAlign.center,style: TextStyle(fontSize: 12)),
+              Text("المعلم : $teacher",
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
               SizedBox(height: 10),
-              Text("الفترة : $period", textAlign: TextAlign.center,style: TextStyle(fontSize: 12)),
+              Text("الفترة : $period",
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
               SizedBox(height: 10),
-              Text("عدد الطلاب: $numberStd", textAlign: TextAlign.center,style: TextStyle(fontSize: 12)),
+              Text("عدد الطلاب: $numberStd",
+                  textAlign: TextAlign.center, style: TextStyle(fontSize: 12)),
             ],
           ),
         ),

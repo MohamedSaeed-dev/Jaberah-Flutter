@@ -55,7 +55,6 @@ class BestStudentsController extends GetxController {
         messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
       }
     } catch (e) {
-      print(e);
       catchSnackBar();
     } finally {
       isLoading.value = false;

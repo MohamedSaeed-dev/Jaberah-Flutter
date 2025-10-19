@@ -356,7 +356,7 @@ class SemesterReportPage extends StatelessWidget {
             // Grades and Exams
             _buildSectionTitle('التقييمات'),
             const SizedBox(height: 10),
-            _buildStudentRow('الدرجة:', "${student.gradeSum}"),
+            _buildStudentRow('درجة الحفظ:', "${student.gradeSum}"),
             _buildStudentRow('الحضور:', "${student.attendanceSum}"),
             _buildStudentRow('السلوك', "${student.behaviorSum}"),
             _buildStudentRow('درجة الشفهي:', "${student.oralGradeSum}"),

@@ -65,7 +65,7 @@ class SemesterReportController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    subtractMonths(selectedFromDate, 4);
+    subtractMonths(selectedFromDate, 3);
     getGroups();
   }
 

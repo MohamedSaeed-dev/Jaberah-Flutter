@@ -21,8 +21,7 @@ class MonthlyStudentsReportsController extends GetxController {
   var selectedGroupId = 0.obs;
   var selectedGroupName = ''.obs;
 
-  var monthlyReport =
-      MonthlyReportResponse(books: [], data: []).obs;
+  var monthlyReport = MonthlyReportResponse(books: [], data: []).obs;
 
   Future getMonthlyReport() async {
     try {
@@ -33,7 +32,7 @@ class MonthlyStudentsReportsController extends GetxController {
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         Map<String, dynamic> result = response.data;
-        print(result);
+
         monthlyReport.value = MonthlyReportResponse.fromJson(result);
       } else {
         messageSnackBar(response.data["message"]);
@@ -49,7 +48,6 @@ class MonthlyStudentsReportsController extends GetxController {
         messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
       }
     } catch (e) {
-      print(e);
       catchSnackBar();
     } finally {
       isLoading.value = false;
@@ -323,8 +321,8 @@ class MonthlyReportModel {
       reviewRate: json["reviewData"]["rate"]?.toString() ?? "",
       saveGrade: _toDouble(json["saveGrade"]),
       reviewGrade: _toDouble(json["reviewGrade"]),
-      attendanceGrade: _toDouble( json["attendanceGrade"]),
-      behaviorGrade: _toDouble( json["behaviorGrade"]),
+      attendanceGrade: _toDouble(json["attendanceGrade"]),
+      behaviorGrade: _toDouble(json["behaviorGrade"]),
       paperGrade: _toDouble(json["paperGrade"]),
       oralGrade: _toDouble(json["oralGrade"]),
       total: _toDouble(json["total"]),

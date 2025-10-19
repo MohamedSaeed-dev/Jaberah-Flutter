@@ -301,7 +301,6 @@ class Teachers extends StatelessWidget {
     var groupIds =
         teacher.groups?.map((group) => group.id.toString()).toList() ?? [];
     controller.selectedGroupsEdit.addAll(groupIds);
-    print(controller.selectedGroupsEdit);
 
     var key = GlobalKey<FormState>();
     showDialog(
@@ -365,7 +364,6 @@ class Teachers extends StatelessWidget {
                       initialValue: controller.selectedGroupsEdit,
                       listType: MultiSelectListType.CHIP,
                       onConfirm: (values) {
-                        print(controller.selectedGroupsEdit);
                         controller.selectedGroupsEdit.value =
                             values.cast<String>();
                       },

@@ -18,6 +18,7 @@ import 'package:jaberah/pages/admin/teachers/profile.dart';
 import 'package:jaberah/pages/admin/trash.dart';
 import 'package:jaberah/pages/exportedReportsPage.dart';
 import 'package:jaberah/pages/user/homeUser.dart';
+import 'package:jaberah/pages/admin/partialExams/groups_partialExams.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -159,6 +160,13 @@ class HomePageAdmin extends StatelessWidget {
                       title: const Text('التقارير المصدرة'),
                       onTap: () {
                         Get.to(() => ExportedReportsPage());
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.quiz),
+                      title: const Text('اختبارات الجزئي'),
+                      onTap: () {
+                        Get.to(() => GroupsPartialExams());
                       },
                     ),
                     ListTile(

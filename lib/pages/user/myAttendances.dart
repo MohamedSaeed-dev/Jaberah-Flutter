@@ -44,27 +44,28 @@ class MyAttendances extends StatelessWidget {
         child: Builder(
           builder: (BuildContext newContext) {
             return Obx(() {
-              return !controller.isAdmin.value ? FloatingActionButton.extended(
-                onPressed: controller.isLoading.value ||
-                        controller.selectedAttendance.value.signature == true
-                    ? null
-                    : () async {
-                        print("a");
-                      },
-                label: Text(
-                  "رفع طلب",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                icon: Icon(
-                  Icons.cloud_upload_rounded,
-                  color: Colors.black,
-                ),
-                backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-              ) : SizedBox();
+              return !controller.isAdmin.value
+                  ? FloatingActionButton.extended(
+                      onPressed: controller.isLoading.value ||
+                              controller.selectedAttendance.value.signature ==
+                                  true
+                          ? null
+                          : () async {},
+                      label: Text(
+                        "رفع طلب",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.cloud_upload_rounded,
+                        color: Colors.black,
+                      ),
+                      backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+                    )
+                  : SizedBox();
             });
           },
         ),

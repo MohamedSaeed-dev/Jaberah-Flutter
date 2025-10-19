@@ -224,6 +224,11 @@ class Students extends StatelessWidget {
                     return null;
                   }),
                   _buildDialogTextField(
+                      'الصف الدراسي', controller.studyLevelAddController.value,
+                      (value) {
+                    return null;
+                  }),
+                  _buildDialogTextField(
                       'ملاحظات', controller.notesAddController.value, (value) {
                     return null;
                   }),
@@ -339,6 +344,7 @@ class Students extends StatelessWidget {
             _buildDetailRow('مقدار الحفظ:', student.memoRate.toString()),
             _buildDetailRow('المستوى:', student.schoolLevel),
             _buildDetailRow('المرحلة الدراسية:', student.schoolClass),
+            _buildDetailRow('الصف الدراسي:', student.studyLevel),
             _buildDetailRow('ملاحظات:', student.notes),
             _buildDetailRow('الحلقة:', student.groupName ?? ""),
             Row(
@@ -397,6 +403,7 @@ class Students extends StatelessWidget {
     controller.rateEditController.value.text = student.memoRate.toString();
     controller.levelEditController.value.text = student.schoolLevel ?? "";
     controller.notesEditController.value.text = student.notes ?? "";
+    controller.studyLevelEditController.value.text = student.studyLevel ?? "";
     controller.selectedGroupEditName.value = student.groupName ?? "";
     controller.selectedGroupEditId.value = student.groupId;
     var keyForm = GlobalKey<FormState>();
@@ -450,6 +457,10 @@ class Students extends StatelessWidget {
                   }),
                   _buildDialogTextField(
                       'المستوى', controller.levelEditController.value, (value) {
+                    return null;
+                  }),
+                  _buildDialogTextField(
+                      'الصف الدراسي', controller.studyLevelEditController.value, (value) {
                     return null;
                   }),
                   _buildDialogTextField(

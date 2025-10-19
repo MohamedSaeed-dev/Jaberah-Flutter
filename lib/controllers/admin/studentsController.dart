@@ -15,6 +15,7 @@ class StudentsController extends GetxController {
   final phoneAddController = TextEditingController().obs;
   final rateAddController = TextEditingController().obs;
   final levelAddController = TextEditingController().obs;
+  final studyLevelAddController = TextEditingController().obs;
   final notesAddController = TextEditingController().obs;
   var selectedAddSchoolClass = 'المرحلة الابتدائية'.obs;
 
@@ -92,6 +93,7 @@ class StudentsController extends GetxController {
         "schoolLevel": levelAddController.value.text,
         "schoolClass": selectedAddSchoolClass.value,
         "memoRate": int.tryParse( rateAddController.value.text),
+        "studyLevel": studyLevelAddController.value.text,
         "notes": notesAddController.value.text,
         "groupId": selectedGroupAddId.value
       }).timeout(const Duration(seconds: 20));
@@ -222,7 +224,7 @@ class StudentsController extends GetxController {
   final rateEditController = TextEditingController().obs;
   final levelEditController = TextEditingController().obs;
   final notesEditController = TextEditingController().obs;
-
+  final studyLevelEditController = TextEditingController().obs;
   var selectedEditSchoolClass = 'المرحلة الابتدائية'.obs;
 
   Future<void> deleteStudent({required String id}) async {
@@ -257,6 +259,7 @@ class StudentsController extends GetxController {
         "schoolLevel": levelEditController.value.text,
         "schoolClass": selectedEditSchoolClass.value,
         "memoRate": int.tryParse( rateEditController.value.text),
+        "studyLevel": studyLevelEditController.value.text,
         "notes": notesEditController.value.text,
         "groupId": selectedGroupEditId.value
       }).timeout(const Duration(seconds: 20));
@@ -288,7 +291,7 @@ class Student {
   int? groupId;
   String? groupName;
   String? notes;
-
+  String? studyLevel;
   Student(
       {required this.id,
       required this.studentName,
@@ -298,7 +301,8 @@ class Student {
       this.groupId,
       this.groupName,
       this.schoolLevel,
-      this.notes});
+      this.notes,
+      this.studyLevel});
 
   factory Student.fromJson(Map<String, dynamic> json) {
     return Student(
@@ -313,6 +317,7 @@ class Student {
       schoolLevel:
           json["schoolLevel"] != null ? json["schoolLevel"] as String : null,
       notes: json["notes"] != null ? json["notes"] as String : null,
+      studyLevel: json["studyLevel"] != null ? json["studyLevel"] as String : null,
     );
   }
 }

@@ -105,6 +105,15 @@ class AddStudent extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
+                    controller: controller.studyLevelController.value,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                        labelText: 'الصف الدراسي', border: OutlineInputBorder()),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextFormField(
                     controller: controller.notesController.value,
                     decoration: const InputDecoration(
                         labelText: 'ملاحظات', border: OutlineInputBorder()),

@@ -14,6 +14,7 @@ class AddStudentController extends GetxController {
   var phoneController = TextEditingController().obs;
   var levelController = TextEditingController().obs;
   var memoRateController = TextEditingController().obs;
+  var studyLevelController = TextEditingController().obs;
   var notesController = TextEditingController(text: '').obs;
 
   var isLoading = false.obs;
@@ -30,6 +31,7 @@ class AddStudentController extends GetxController {
         "schoolLevel": levelController.value.text,
         "memoRate": int.tryParse( memoRateController.value.text),
         "schoolClass": selectedSchoolLevel.value,
+        "studyLevel": studyLevelController.value.text,
         "notes": notesController.value.text,
         "groupId": selectedGroup.value,
       }).timeout(const Duration(seconds: 20));
@@ -39,6 +41,7 @@ class AddStudentController extends GetxController {
         memoRateController.value.text = "0";
         phoneController.value.text = "";
         selectedSchoolLevel.value = "";
+        studyLevelController.value.text = "";
         selectedGroup.value = null;
         successSnackBar("تم اضافة الطالب بنجاح");
       } else {

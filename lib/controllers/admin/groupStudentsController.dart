@@ -212,7 +212,7 @@ class StudentsOfGroupController extends GetxController {
   final rateController = TextEditingController().obs;
   final levelController = TextEditingController().obs;
   final notesController = TextEditingController().obs;
-
+  final studyLevelController = TextEditingController().obs;
   var selectedSchoolClass = 'المرحلة الابتدائية'.obs;
 
   Future<void> deleteStudent({required int id}) async {
@@ -255,6 +255,7 @@ class StudentsOfGroupController extends GetxController {
         "schoolClass": selectedSchoolClass.value,
         "memoRate": rateController.value.text,
         "notes": notesController.value.text,
+        "studyLevel": studyLevelController.value.text,
         "groupId": Get.find<GroupStudentsController>().id
       }).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
@@ -290,7 +291,7 @@ class StudentGroup {
   int? memoRate;
   String? schoolLevel;
   String? notes;
-
+  String? studyLevel;
   StudentGroup(
       {required this.id,
       required this.studentName,
@@ -298,7 +299,8 @@ class StudentGroup {
       this.schoolClass,
       this.memoRate,
       this.schoolLevel,
-      this.notes});
+      this.notes,
+      this.studyLevel});
 
   factory StudentGroup.fromJson(Map<String, dynamic> json) {
     return StudentGroup(
@@ -311,6 +313,7 @@ class StudentGroup {
       schoolLevel:
           json["schoolLevel"] != null ? json["schoolLevel"] as String : null,
       notes: json["notes"] != null ? json["notes"] as String : null,
+      studyLevel: json["studyLevel"] != null ? json["studyLevel"] as String : null,
     );
   }
 }

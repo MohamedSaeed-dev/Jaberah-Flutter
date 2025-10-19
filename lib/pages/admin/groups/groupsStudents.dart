@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/groupStudentsController.dart';
 import 'package:jaberah/controllers/admin/groupsController.dart';
+import 'package:jaberah/pages/user/followStudents/students_followStudents.dart';
 
 class GroupStudents extends StatelessWidget {
   final GroupStudentsController controller = Get.put(GroupStudentsController());
@@ -47,6 +48,23 @@ class GroupStudents extends StatelessWidget {
               ),
             )),
         backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        actions: [
+          Tooltip(
+            message: 'عرض كمعلم',
+            child: IconButton(
+              icon: Icon(Icons.visibility_outlined, color: Colors.black),
+              onPressed: () {
+                Get.to(
+                  () => StudentGroupsFollowStudents(),
+                  arguments: {
+                    "id": controller.id,
+                    "Name": controller.groupName.value,
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -175,6 +193,7 @@ class GroupStudents extends StatelessWidget {
             _buildDetailRow('رقم ولي الامر:', student.phoneNumber),
             _buildDetailRow('مقدار الحفظ:', student.memoRate.toString()),
             _buildDetailRow('المستوى:', student.schoolLevel),
+            _buildDetailRow('الصف الدراسي:', student.studyLevel),
             _buildDetailRow('المرحلة الدراسية:', student.schoolClass),
             _buildDetailRow('ملاحظات:', student.notes),
             Row(
@@ -230,6 +249,8 @@ class GroupStudents extends StatelessWidget {
     studentController.rateController.value.text = student.memoRate.toString();
     studentController.levelController.value.text = student.schoolLevel ?? "";
     studentController.notesController.value.text = student.notes ?? "";
+    studentController.studyLevelController.value.text =
+        student.studyLevel ?? "";
     var key = GlobalKey<FormState>();
     showDialog(
       context: context,
@@ -267,6 +288,10 @@ class GroupStudents extends StatelessWidget {
                   _buildDialogTextField(
                       'مقدار الحفظ', studentController.rateController.value,
                       (value) {
+                    return null;
+                  }),
+                  _buildDialogTextField('الصف الدراسي',
+                      studentController.studyLevelController.value, (value) {
                     return null;
                   }),
                   _buildDialogTextField(

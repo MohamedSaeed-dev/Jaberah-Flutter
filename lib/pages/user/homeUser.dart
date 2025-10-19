@@ -272,24 +272,20 @@ class HomePageUser extends StatelessWidget {
                 ),
               ),
             ),
-            Center(
-              child: Container(
-                alignment: Alignment.topCenter,
-                width: 400,
-                height: 450,
-                child: const Text(
-                  "القوائم",
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 40,
-                    color: Colors.black,
-                  ),
+            Container(
+              margin: const EdgeInsets.only(top: 100),
+              alignment: Alignment.topCenter,
+              child: const Text(
+                "القوائم",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 40,
+                  color: Colors.black,
                 ),
               ),
             ),
             Center(
-              child: Container(
-                alignment: Alignment.center,
+              child: SizedBox(
                 width: 400,
                 height: 200,
                 child: GridView(

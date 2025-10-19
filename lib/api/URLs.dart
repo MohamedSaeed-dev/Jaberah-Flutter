@@ -42,6 +42,7 @@ const followStudentsForGroup = "$followStudentsURL/groups";
 
 const monthlyExamsURL = "exams/monthly-exam";
 const midFinalExamURL = "exams/mid-final-exam";
+const partialExamsURL = "exams/partial-exam";
 
 const notificationsURL = "notifications";
 const sendNotificationURL = "$notificationsURL/send";
