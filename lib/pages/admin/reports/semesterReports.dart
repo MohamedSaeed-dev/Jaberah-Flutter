@@ -168,7 +168,7 @@ class SemesterReportPage extends StatelessWidget {
 
       var fromDateHijri = picked.jhijri;
       var newToYear = fromDateHijri.year;
-      var newToMonth = fromDateHijri.month + 4;
+      var newToMonth = fromDateHijri.month + 3;
 
       // Adjust year and month if month addition results in greater than 12
       if (newToMonth > 12) {
@@ -224,7 +224,7 @@ class SemesterReportPage extends StatelessWidget {
 
       var toDateHijri = picked.jhijri;
       var newFromYear = toDateHijri.year;
-      var newFromMonth = toDateHijri.month - 4;
+      var newFromMonth = toDateHijri.month - 3;
 
       // Adjust year and month if month subtraction results in less than 1
       if (newFromMonth < 1) {

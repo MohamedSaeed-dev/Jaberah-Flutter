@@ -155,7 +155,7 @@ class SemesterStudentsReports extends StatelessWidget {
 
       var fromDateHijri = picked.jhijri;
       var newToYear = fromDateHijri.year;
-      var newToMonth = fromDateHijri.month + 4;
+      var newToMonth = fromDateHijri.month + 3;
 
       // Adjust year and month if month addition results in greater than 12
       if (newToMonth > 12) {
@@ -210,7 +210,7 @@ class SemesterStudentsReports extends StatelessWidget {
 
       var toDateHijri = picked.jhijri;
       var newFromYear = toDateHijri.year;
-      var newFromMonth = toDateHijri.month - 4;
+      var newFromMonth = toDateHijri.month - 3;
 
       // Adjust year and month if month subtraction results in less than 1
       if (newFromMonth < 1) {
@@ -367,8 +367,8 @@ class SemesterStudentsReports extends StatelessWidget {
                                           var val =
                                               double.tryParse(value ?? "");
                                           if (val != null &&
-                                              (val > 10 || val < 0)) {
-                                            return 'ادخل قيمه من 0 الى 10';
+                                              (val > 40 || val < 0)) {
+                                            return 'ادخل قيمه من 0 الى 40';
                                           } else if (val == null) {
                                             return 'ادخل قيمة صحيحه';
                                           }
