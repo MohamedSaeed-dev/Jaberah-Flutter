@@ -164,7 +164,8 @@ class StudentsPartialExams extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
-      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedDate.value =
+          JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
       await controller.getStudents();
     }
   }
@@ -225,7 +226,7 @@ class StudentsPartialExams extends StatelessWidget {
                           "question9": student.question9,
                           "question10": student.question10,
                           "performance": student.performance,
-                          "muhktabir": student.muhktabir,
+                          "tester": student.tester,
                           "part": student.part,
                           "rate": student.rate,
                           "notes": student.notes,
@@ -338,7 +339,7 @@ class StudentsPartialExams extends StatelessWidget {
 
               SizedBox(height: 12),
 
-              // Additional Info (Rate, Muhktabir, Part)
+              // Additional Info (Rate, tester, Part)
               if (student.hasExam) ...[
                 Row(
                   children: [
@@ -354,7 +355,7 @@ class StudentsPartialExams extends StatelessWidget {
                     Expanded(
                       child: _buildDetailBox(
                         'المختبر',
-                        student.muhktabir ?? '-',
+                        student.tester ?? '-',
                         Icons.book_outlined,
                         Colors.blue,
                       ),
@@ -677,7 +678,7 @@ class StudentsPartialExams extends StatelessWidget {
                         _buildInfoRow(
                             'المجموع', '${student.totalScore ?? 0} / 20'),
                         SizedBox(height: 12),
-                        _buildInfoRow('المختبر', student.muhktabir ?? '-'),
+                        _buildInfoRow('المختبر', student.tester ?? '-'),
                         SizedBox(height: 12),
                         _buildInfoRow('الجزء', student.part ?? '-'),
                         SizedBox(height: 12),

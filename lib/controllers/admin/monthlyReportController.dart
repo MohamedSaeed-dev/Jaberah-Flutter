@@ -18,7 +18,30 @@ class MonthlyReportController extends GetxController {
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
   var isLoadingUpdate = false.obs; // Add this for exam updates
-  var selectedDate = JDateModel(jhijri: JHijri.now()).obs;
+  var selectedDate =
+      JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
+
+  /// بداية ونهاية الشهر الهجري المختار بالميلادي (للـ API).
+  var monthReportFromDate = ''.obs;
+  var monthReportToDate = ''.obs;
+
+  /// يحسب fromDate و toDate من أول/آخر يوم في الشهر الهجري المختار (ميلادي). يُستدعى عند تحديد التاريخ.
+  void updateMonthReportDates() {
+    final jhijri = selectedDate.value.jhijri;
+    if (jhijri == null) return;
+    final year = jhijri.year;
+    final month = jhijri.month;
+    final firstHijriDay = JHijri(fYear: year, fMonth: month, fDay: 1);
+    final fromDateTime = firstHijriDay.dateTime;
+    monthReportFromDate.value =
+        '${fromDateTime.year}-${fromDateTime.month.toString().padLeft(2, '0')}-${fromDateTime.day.toString().padLeft(2, '0')}';
+    final nextMonth = month == 12 ? 1 : month + 1;
+    final nextYear = month == 12 ? year + 1 : year;
+    final firstOfNextHijri = JHijri(fYear: nextYear, fMonth: nextMonth, fDay: 1);
+    final toDateTime = firstOfNextHijri.dateTime.subtract(const Duration(days: 1));
+    monthReportToDate.value =
+        '${toDateTime.year}-${toDateTime.month.toString().padLeft(2, '0')}-${toDateTime.day.toString().padLeft(2, '0')}';
+  }
 
   var groups = <GroupsGeneral>[].obs;
   var selectedGroupId = 0.obs;
@@ -29,10 +52,17 @@ class MonthlyReportController extends GetxController {
   Future getMonthlyReport() async {
     try {
       isLoading.value = true;
-      var response = await _apiClient.dio
-          .get(
-              "/$monthlyReportURL?groupId=$selectedGroupId&year=${selectedDate.value.jhijri!.year}&month=${selectedDate.value.jhijri!.month}")
-          .timeout(const Duration(seconds: 20));
+      final fromDate = monthReportFromDate.value;
+      final toDate = monthReportToDate.value;
+      if (fromDate.isEmpty || toDate.isEmpty) {
+        messageSnackBar('يرجى اختيار الشهر أولاً');
+        isLoading.value = false;
+        return;
+      }
+      var url =
+          "/$monthlyReportURL?groupId=$selectedGroupId&fromDate=$fromDate&toDate=$toDate";
+      var response =
+          await _apiClient.dio.get(url).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         Map<String, dynamic> result = response.data;
         monthlyReport.value = MonthlyReportResponse.fromJson(result);
@@ -59,6 +89,7 @@ class MonthlyReportController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    updateMonthReportDates();
     getGroups();
   }
 
@@ -73,7 +104,7 @@ class MonthlyReportController extends GetxController {
             result.map((item) => GroupsGeneral.fromJson(item)).toList();
         if (groups.isNotEmpty) {
           selectedGroupId.value = groups[0].id;
-          selectedGroupName.value = groups[0].groupName;
+          selectedGroupName.value = groups[0].name;
         }
       } else {
         messageSnackBar(response.data["message"]);
@@ -90,123 +121,6 @@ class MonthlyReportController extends GetxController {
       }
     } catch (e) {
       catchSnackBar();
-    }
-  }
-
-  // Add book management methods
-  Future<bool> addBook(
-      {required String title, required String from, required String to}) async {
-    try {
-      isLoading.value = true;
-      var response = await _apiClient.dio
-          .post("/books", // Replace with your actual endpoint
-              data: {
-            'title': title,
-            'from': from,
-            'to': to,
-            'groupId': selectedGroupId.value,
-            'year': selectedDate.value.jhijri!.year,
-            'month': selectedDate.value.jhijri!.month,
-          }).timeout(const Duration(seconds: 20));
-
-      if (response.statusCode == 200) {
-        await getMonthlyReport(); // Refresh data
-        successSnackBar("تم إضافة الكتاب بنجاح");
-        return true;
-      } else {
-        messageSnackBar(response.data["message"]);
-        return false;
-      }
-    } catch (e) {
-      catchSnackBar();
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<bool> updateBook(
-      {required int bookId,
-      required String title,
-      required String from,
-      required String to}) async {
-    try {
-      isLoading.value = true;
-      var response = await _apiClient.dio
-          .put("/books/$bookId", // Replace with your actual endpoint
-              data: {
-            'title': title,
-            'from': from,
-            'to': to,
-          }).timeout(const Duration(seconds: 20));
-
-      if (response.statusCode == 200) {
-        await getMonthlyReport(); // Refresh data
-        successSnackBar("تم تحديث الكتاب بنجاح");
-        return true;
-      } else {
-        messageSnackBar(response.data["message"]);
-        return false;
-      }
-    } catch (e) {
-      catchSnackBar();
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<bool> deleteBook(int bookId) async {
-    try {
-      isLoading.value = true;
-      var response = await _apiClient.dio
-          .delete("/books/$bookId" // Replace with your actual endpoint
-              )
-          .timeout(const Duration(seconds: 20));
-
-      if (response.statusCode == 200) {
-        await getMonthlyReport(); // Refresh data
-        successSnackBar("تم حذف الكتاب بنجاح");
-        return true;
-      } else {
-        messageSnackBar(response.data["message"]);
-        return false;
-      }
-    } catch (e) {
-      catchSnackBar();
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<bool> UpdateExams({
-    required int followStudentId,
-    required double? paperExam,
-    required double? oralExam,
-  }) async {
-    try {
-      isLoadingUpdate.value = true;
-      var response = await _apiClient.dio.put(
-          "/students/$followStudentId/exams", // Replace with your actual endpoint
-          data: {
-            'paperGrade': paperExam,
-            'oralGrade': oralExam,
-          }).timeout(const Duration(seconds: 20));
-
-      if (response.statusCode == 200) {
-        await getMonthlyReport(); // Refresh data
-        successSnackBar("تم تحديث الدرجات بنجاح");
-        return true;
-      } else {
-        messageSnackBar(response.data["message"]);
-        return false;
-      }
-    } catch (e) {
-      catchSnackBar();
-      return false;
-    } finally {
-      isLoadingUpdate.value = false;
     }
   }
 
@@ -377,6 +291,10 @@ class MonthlyReportController extends GetxController {
                       child: pw.Center(
                           child: pw.Text('درجة الحفظ', style: headerStyle))),
                   pw.Expanded(
+                      flex: 2,
+                      child: pw.Center(
+                          child: pw.Text('عدد صفحات الحفظ', style: headerStyle))),
+                  pw.Expanded(
                       flex: 3,
                       child: pw.Center(
                           child: pw.Text('مراجعة', style: headerStyle))),
@@ -384,6 +302,10 @@ class MonthlyReportController extends GetxController {
                       flex: 2,
                       child: pw.Center(
                           child: pw.Text('درجة المراجعة', style: headerStyle))),
+                  pw.Expanded(
+                      flex: 2,
+                      child: pw.Center(
+                          child: pw.Text('عدد صفحات المراجعة', style: headerStyle))),
                   pw.Expanded(
                       flex: 2,
                       child: pw.Center(
@@ -441,6 +363,11 @@ class MonthlyReportController extends GetxController {
                           overflow: pw.TextOverflow.span,
                         ))),
                     pw.Expanded(
+                      flex: 2,
+                      child: pw.Center(
+                          child: pw.Text('${data.savePages}',
+                              style: cellStyle))),
+                    pw.Expanded(
                         flex: 2,
                         child: pw.Center(
                             child: pw.Text('${data.saveGrade}',
@@ -458,6 +385,11 @@ class MonthlyReportController extends GetxController {
                         flex: 2,
                         child: pw.Center(
                             child: pw.Text('${data.reviewGrade}',
+                                style: cellStyle))),
+                    pw.Expanded(
+                        flex: 2,
+                        child: pw.Center(
+                            child: pw.Text('${data.reviewPages}',
                                 style: cellStyle))),
                     pw.Expanded(
                         flex: 2,
@@ -517,19 +449,19 @@ class MonthlyReportController extends GetxController {
 
 class GroupsGeneral {
   int id;
-  String groupName;
+  String name;
 
-  GroupsGeneral({required this.id, required this.groupName});
+  GroupsGeneral({required this.id, required this.name});
 
   factory GroupsGeneral.fromJson(Map<String, dynamic> json) {
     return GroupsGeneral(
-        id: json["id"] as int, groupName: json["groupName"] as String);
+        id: json["id"] as int, name: json["name"] as String);
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'groupName': groupName,
+      'name': name,
     };
   }
 }

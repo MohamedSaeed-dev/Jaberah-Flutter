@@ -15,7 +15,32 @@ class MonthlyStudentsReportsController extends GetxController {
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
   var isLoadingUpdate = false.obs;
-  var selectedDate = JDateModel(jhijri: JHijri.now()).obs;
+  var selectedDate =
+      JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
+
+  /// بداية ونهاية الشهر الهجري المختار بالميلادي (للـ API).
+  var monthReportFromDate = ''.obs;
+  var monthReportToDate = ''.obs;
+
+  /// يحسب fromDate و toDate من أول/آخر يوم في الشهر الهجري المختار (ميلادي). يُستدعى عند تحديد التاريخ.
+  void updateMonthReportDates() {
+    final jhijri = selectedDate.value.jhijri;
+    if (jhijri == null) return;
+    final year = jhijri.year;
+    final month = jhijri.month;
+    final firstHijriDay = JHijri(fYear: year, fMonth: month, fDay: 1);
+    final fromDateTime = firstHijriDay.dateTime;
+    monthReportFromDate.value =
+        '${fromDateTime.year}-${fromDateTime.month.toString().padLeft(2, '0')}-${fromDateTime.day.toString().padLeft(2, '0')}';
+    final nextMonth = month == 12 ? 1 : month + 1;
+    final nextYear = month == 12 ? year + 1 : year;
+    final firstOfNextHijri =
+        JHijri(fYear: nextYear, fMonth: nextMonth, fDay: 1);
+    final toDateTime =
+        firstOfNextHijri.dateTime.subtract(const Duration(days: 1));
+    monthReportToDate.value =
+        '${toDateTime.year}-${toDateTime.month.toString().padLeft(2, '0')}-${toDateTime.day.toString().padLeft(2, '0')}';
+  }
 
   var groups = <GroupsGeneral>[].obs;
   var selectedGroupId = 0.obs;
@@ -26,10 +51,17 @@ class MonthlyStudentsReportsController extends GetxController {
   Future getMonthlyReport() async {
     try {
       isLoading.value = true;
-      var response = await _apiClient.dio
-          .get(
-              "/$monthlyReportURL?groupId=$selectedGroupId&year=${selectedDate.value.jhijri!.year}&month=${selectedDate.value.jhijri!.month}")
-          .timeout(const Duration(seconds: 20));
+      final fromDate = monthReportFromDate.value;
+      final toDate = monthReportToDate.value;
+      if (fromDate.isEmpty || toDate.isEmpty) {
+        messageSnackBar('يرجى اختيار الشهر أولاً');
+        isLoading.value = false;
+        return;
+      }
+      var url =
+          "/$monthlyReportURL?groupId=$selectedGroupId&fromDate=$fromDate&toDate=$toDate";
+      var response =
+          await _apiClient.dio.get(url).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         Map<String, dynamic> result = response.data;
 
@@ -101,8 +133,8 @@ class MonthlyStudentsReportsController extends GetxController {
         "title": title,
         "from": from,
         "to": to,
-        "month":
-            "${selectedDate.value.jhijri!.year}-${selectedDate.value.jhijri!.month.toString().padLeft(2, '0')}-01",
+        "date":
+            "${selectedDate.value.dateTime!.year}-${selectedDate.value.dateTime!.month.toString().padLeft(2, '0')}-${selectedDate.value.dateTime!.day.toString().padLeft(2, '0')}",
       };
 
       final response = await _apiClient.dio
@@ -134,8 +166,8 @@ class MonthlyStudentsReportsController extends GetxController {
         "title": title,
         "from": from,
         "to": to,
-        "month":
-            "${selectedDate.value.jhijri!.year}-${selectedDate.value.jhijri!.month.toString().padLeft(2, '0')}-01",
+        "date":
+            "${selectedDate.value.dateTime!.year}-${selectedDate.value.dateTime!.month.toString().padLeft(2, '0')}-${selectedDate.value.dateTime!.day.toString().padLeft(2, '0')}",
       };
 
       final response =
@@ -178,6 +210,7 @@ class MonthlyStudentsReportsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    updateMonthReportDates();
     getGroups();
   }
 
@@ -194,7 +227,7 @@ class MonthlyStudentsReportsController extends GetxController {
             result.map((item) => GroupsGeneral.fromJson(item)).toList();
         if (groups.isNotEmpty) {
           selectedGroupId.value = groups[0].id;
-          selectedGroupName.value = groups[0].groupName;
+          selectedGroupName.value = groups[0].name;
         }
       } else {
         messageSnackBar(response.data["message"]);
@@ -217,19 +250,18 @@ class MonthlyStudentsReportsController extends GetxController {
 
 class GroupsGeneral {
   int id;
-  String groupName;
+  String name;
 
-  GroupsGeneral({required this.id, required this.groupName});
+  GroupsGeneral({required this.id, required this.name});
 
   factory GroupsGeneral.fromJson(Map<String, dynamic> json) {
-    return GroupsGeneral(
-        id: json["id"] as int, groupName: json["groupName"] as String);
+    return GroupsGeneral(id: json["id"] as int, name: json["name"] as String);
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'groupName': groupName,
+      'name': name,
     };
   }
 }
@@ -341,14 +373,14 @@ class BooksData {
   String title;
   String from;
   String to;
-  DateTime month;
+  DateTime date;
 
   BooksData({
     required this.id,
     required this.title,
     required this.from,
     required this.to,
-    required this.month,
+    required this.date,
   });
 
   factory BooksData.fromJson(Map<String, dynamic> json) {
@@ -357,7 +389,7 @@ class BooksData {
       title: json["title"] as String,
       from: json["from"].toString(),
       to: json["to"].toString(),
-      month: DateTime.parse(json["month"]),
+      date: DateTime.parse(json["date"]),
     );
   }
 }

@@ -20,7 +20,8 @@ class StudentsPartialExamsController extends GetxController {
   var students = <PartialExamStudent>[].obs;
   var filteredStudents = <PartialExamStudent>[].obs;
   var searchText = TextEditingController().obs;
-  var selectedDate = JDateModel(jhijri: JHijri.now()).obs;
+  var selectedDate =
+      JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
 
   late int groupId;
   late String name;
@@ -225,7 +226,7 @@ class StudentsPartialExamsController extends GetxController {
                     children: [
                       _buildTableCell(rateValue, cellStyle),
                       _buildTableCell(student.part ?? '-', cellStyle),
-                      _buildTableCell(student.muhktabir ?? '-', cellStyle),
+                      _buildTableCell(student.tester ?? '-', cellStyle),
                       _buildTableCell(
                           student.totalScore?.toString() ?? '-', cellStyle),
                       _buildTableCell(
@@ -329,7 +330,7 @@ class PartialExamStudent {
   double? question9;
   double? question10;
   double? performance;
-  String? muhktabir;
+  String? tester;
   String? part;
   String? rate;
   String? notes;
@@ -350,7 +351,7 @@ class PartialExamStudent {
     this.question9,
     this.question10,
     this.performance,
-    this.muhktabir,
+    this.tester,
     this.part,
     this.rate,
     this.notes,
@@ -361,7 +362,7 @@ class PartialExamStudent {
 
   @override
   String toString() {
-    return 'studentName: $studentName, question1: $question1, question2: $question2, question3: $question3, question4: $question4, question5: $question5, question6: $question6, question7: $question7, question8: $question8, question9: $question9, question10: $question10, performance: $performance, muhktabir: $muhktabir, part: $part, rate: $rate, notes: $notes, totalScore: $totalScore, hasExam: $hasExam';
+    return 'studentName: $studentName, question1: $question1, question2: $question2, question3: $question3, question4: $question4, question5: $question5, question6: $question6, question7: $question7, question8: $question8, question9: $question9, question10: $question10, performance: $performance, tester: $tester, part: $part, rate: $rate, notes: $notes, totalScore: $totalScore, hasExam: $hasExam';
   }
 
   factory PartialExamStudent.fromJson(Map<String, dynamic> json) {
@@ -402,7 +403,7 @@ class PartialExamStudent {
       performance: json["performance"] != null
           ? (json["performance"] as num).toDouble()
           : null,
-      muhktabir: json["muhktabir"] as String?,
+      tester: json["tester"] as String?,
       part: json["part"] as String?,
       rate: json["rate"] as String?,
       notes: json["notes"] as String?,

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' hide Response;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,6 +14,8 @@ class ApiClient {
   ApiClient() {
     _dio.options.baseUrl = baseUrl;
     _dio.options.headers["Content-Type"] = 'application/json';
+    _dio.options.connectTimeout = const Duration(seconds: 20);
+    _dio.options.receiveTimeout = const Duration(seconds: 20);
 
     _cookieJar = CookieJar();
     _dio.interceptors.add(CookieManager(_cookieJar));
@@ -24,44 +27,77 @@ class ApiClient {
 
 class ApiInterceptors extends Interceptor {
   final CookieJar cookieJar;
+  
+  // Lock mechanism to prevent multiple simultaneous refresh token requests
+  static Completer<String?>? _refreshCompleter;
+  static bool _isRefreshing = false;
+
   ApiInterceptors(this.cookieJar);
 
   @override
   Future<void> onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
-    final prefs = await SharedPreferences.getInstance();
-    final accessToken = prefs.getString('accessToken');
-    if (accessToken != null) {
-      options.headers['Authorization'] = 'Bearer $accessToken';
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final accessToken = prefs.getString('accessToken');
+      if (accessToken != null && accessToken.isNotEmpty) {
+        options.headers['Authorization'] = 'Bearer $accessToken';
+      }
+      return handler.next(options);
+    } catch (e) {
+      return handler.next(options);
     }
-    return handler.next(options);
   }
 
   @override
   Future<void> onError(
       DioException err, ErrorInterceptorHandler handler) async {
     if (err.response?.statusCode == 401) {
-      final isRefreshing = err.requestOptions.path.contains('/auth/refresh');
-      if (isRefreshing) {
-        Get.offAll(() => Login());
+      final isRefreshRequest = err.requestOptions.path.contains('/auth/refresh');
+      
+      if (isRefreshRequest) {
+        await _logout();
         return handler.reject(err);
       }
 
       try {
+        // If a refresh is already in progress, wait for it
+        if (_isRefreshing && _refreshCompleter != null) {
+          final newAccessToken = await _refreshCompleter!.future;
+          if (newAccessToken != null) {
+            final retryResponse = await _retryRequest(err.requestOptions, newAccessToken);
+            return handler.resolve(retryResponse);
+          } else {
+            await _logout();
+            return handler.reject(err);
+          }
+        }
+
+        // Start a new refresh process
+        _isRefreshing = true;
+        _refreshCompleter = Completer<String?>();
+
         final newAccessToken = await _refreshToken();
-        if (newAccessToken != null) {
+        
+        if (newAccessToken != null && newAccessToken.isNotEmpty) {
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('accessToken', newAccessToken);
+          
+          _refreshCompleter!.complete(newAccessToken);
+          _isRefreshing = false;
 
-          final retryResponse =
-              await _retryRequest(err.requestOptions, newAccessToken);
+          final retryResponse = await _retryRequest(err.requestOptions, newAccessToken);
           return handler.resolve(retryResponse);
         } else {
-          Get.offAll(() => Login());
+          _refreshCompleter!.complete(null);
+          _isRefreshing = false;
+          await _logout();
           return handler.reject(err);
         }
       } catch (e) {
-        Get.offAll(() => Login());
+        _refreshCompleter?.complete(null);
+        _isRefreshing = false;
+        await _logout();
         return handler.reject(err);
       }
     }
@@ -69,28 +105,43 @@ class ApiInterceptors extends Interceptor {
   }
 
   Future<String?> _refreshToken() async {
-    final dio = Dio(BaseOptions(
-      baseUrl: baseUrl,
-      headers: {'Content-Type': 'application/json'},
-    ));
-    dio.interceptors.add(CookieManager(cookieJar));
+    try {
+      final dio = Dio(BaseOptions(
+        baseUrl: baseUrl,
+        headers: {'Content-Type': 'application/json'},
+        connectTimeout: const Duration(seconds: 15),
+        receiveTimeout: const Duration(seconds: 15),
+      ));
+      dio.interceptors.add(CookieManager(cookieJar));
 
-    final response = await dio.post(
-      '/auth/refresh',
-      options: Options(
-        followRedirects: false,
-        validateStatus: (status) => status != null && status < 500,
-      ),
-    );
-    if (response.statusCode == 200) {
-      return response.data['accessToken'];
+      final response = await dio.post(
+        '/auth/refresh',
+        options: Options(
+          followRedirects: false,
+          validateStatus: (status) => status != null && status < 500,
+        ),
+      );
+      
+      if (response.statusCode == 200 && response.data != null) {
+        final accessToken = response.data['accessToken'];
+        if (accessToken != null && accessToken is String && accessToken.isNotEmpty) {
+          return accessToken;
+        }
+      }
+      return null;
+    } catch (e) {
+      return null;
     }
-    return null;
   }
 
   Future<Response<dynamic>> _retryRequest(
       RequestOptions requestOptions, String accessToken) async {
-    final dio = Dio(BaseOptions(baseUrl: baseUrl));
+    final dio = Dio(BaseOptions(
+      baseUrl: baseUrl,
+      connectTimeout: requestOptions.connectTimeout,
+      receiveTimeout: requestOptions.receiveTimeout,
+      sendTimeout: requestOptions.sendTimeout,
+    ));
     dio.interceptors.add(CookieManager(cookieJar));
 
     final options = Options(
@@ -99,6 +150,13 @@ class ApiInterceptors extends Interceptor {
         ...requestOptions.headers,
         'Authorization': 'Bearer $accessToken',
       },
+      contentType: requestOptions.contentType,
+      responseType: requestOptions.responseType,
+      validateStatus: requestOptions.validateStatus,
+      receiveDataWhenStatusError: requestOptions.receiveDataWhenStatusError,
+      followRedirects: requestOptions.followRedirects,
+      maxRedirects: requestOptions.maxRedirects,
+      extra: requestOptions.extra,
     );
 
     return dio.request<dynamic>(
@@ -106,6 +164,20 @@ class ApiInterceptors extends Interceptor {
       data: requestOptions.data,
       queryParameters: requestOptions.queryParameters,
       options: options,
+      cancelToken: requestOptions.cancelToken,
+      onReceiveProgress: requestOptions.onReceiveProgress,
+      onSendProgress: requestOptions.onSendProgress,
     );
+  }
+
+  Future<void> _logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      await cookieJar.deleteAll();
+      Get.offAll(() => Login());
+    } catch (e) {
+      Get.offAll(() => Login());
+    }
   }
 }

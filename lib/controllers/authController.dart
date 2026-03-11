@@ -45,10 +45,9 @@ class AuthController extends GetxController {
         await prefs.setString("phone", data.user.phoneNumber);
         await prefs.setString("role", data.user.role.toString());
         isAdmin.value = data.user.role == 1;
-        if (!isAdmin.value) {
-          await _firebaseMessaging.subscribeToTopic("public");
-        }
-        await _firebaseMessaging.subscribeToTopic("newVersion");
+
+        await subscribeToTopics();
+
         isLoggedIn.value = true;
         Get.snackbar(
           '',
@@ -97,14 +96,28 @@ class AuthController extends GetxController {
     }
   }
 
+  Future<void> subscribeToTopics() async {
+    if (isAdmin.value) {
+      await _firebaseMessaging.subscribeToTopic("check-attendance");
+    } else {
+      await _firebaseMessaging.subscribeToTopic("public");
+    }
+    await _firebaseMessaging.subscribeToTopic("newVersion");
+  }
+
+  Future<void> unsubscribeFromTopics() async {
+    await _firebaseMessaging.unsubscribeFromTopic("public");
+    await _firebaseMessaging.unsubscribeFromTopic("newVersion");
+    await _firebaseMessaging.unsubscribeFromTopic("check-attendance");
+  }
+
   var isLoadingLogout = false.obs;
   Future<void> logout() async {
     isLoadingLogout.value = true;
     isLoggedIn.value = false;
 
     await _firebaseMessaging.deleteToken();
-    await _firebaseMessaging.unsubscribeFromTopic("public");
-    await _firebaseMessaging.unsubscribeFromTopic("newVersion");
+    await unsubscribeFromTopics();
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
@@ -180,9 +193,7 @@ class LoginModel {
   User user;
   String accessToken;
 
-  LoginModel(
-      {required this.user,
-      required this.accessToken});
+  LoginModel({required this.user, required this.accessToken});
 
   factory LoginModel.fromJson(Map<String, dynamic> json) {
     return LoginModel(

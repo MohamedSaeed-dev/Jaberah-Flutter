@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaberah/pages/admin/reports/monthlyPartialExamReport.dart';
 import 'package:jaberah/pages/admin/reports/monthlyReports.dart';
+import 'package:jaberah/pages/admin/reports/prayersReport.dart';
 import 'package:jaberah/pages/admin/reports/semesterReports.dart';
 
 class Reports extends StatelessWidget {
@@ -40,6 +42,24 @@ class Reports extends StatelessWidget {
               color: Colors.green,
               onTap: () {
                 Get.to(() => MonthlyReportPage());
+              },
+            ),
+            _buildCard(
+              context: context,
+              title: 'تقرير كشف الصلوات',
+              icon: Icons.mosque,
+              color: Colors.orange,
+              onTap: () {
+                Get.to(() => PrayersReportPage());
+              },
+            ),
+            _buildCard(
+              context: context,
+              title: 'تقرير الاختبارات الجزئية الشهري',
+              icon: Icons.quiz_outlined,
+              color: Colors.amber,
+              onTap: () {
+                Get.to(() => MonthlyPartialExamReportPage());
               },
             ),
           ],

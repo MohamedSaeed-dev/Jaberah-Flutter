@@ -86,7 +86,7 @@ class AddTeacher extends StatelessWidget {
                         title: Text(" الحلقات المتاحة"),
                         items: addTeacherController.groups
                             .map((group) =>
-                                MultiSelectItem(group['id'], group['groupName']))
+                                MultiSelectItem(group['id'], group['name']))
                             .toList(),
                         initialValue: addTeacherController.selectedGroups,
                         listType: MultiSelectListType.CHIP,
@@ -100,7 +100,7 @@ class AddTeacher extends StatelessWidget {
                             final group = addTeacherController.groups
                                 .firstWhere((group) => group['id'] == groupId);
                             return MultiSelectItem(
-                                group['id'], group['groupName']);
+                                group['id'], group['name']);
                           }).toList(),
                         ),
                       ),

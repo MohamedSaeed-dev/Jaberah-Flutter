@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/reportTeachersAttendancesController.dart';
+import 'package:jaberah/helpers/timeHelpers.dart';
+import 'package:jhijri/_src/_jHijri.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
 
 class TeachersAttendanceReport extends StatelessWidget {
@@ -83,7 +85,7 @@ class TeachersAttendanceReport extends StatelessWidget {
             color: Colors.white,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: _buildHijriDatePicker(context, "الشهر:"),
+              child: _buildHijriDatePicker(context, "اليوم:"),
             ),
           ),
           const Divider(),
@@ -148,11 +150,18 @@ class TeachersAttendanceReport extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Attendance Summary Row
+            if (teacher.groupName.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                  "الحلقة: ${teacher.groupName}",
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+              ),
+            // Attendance Summary (new shape: excuseNo, presentNo, lateNo, absentNo)
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                // Excused Absences
                 Column(
                   children: [
                     Container(
@@ -177,7 +186,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${teacher.isExcuseNo}",
+                      "${teacher.excuseNo}",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -186,8 +195,6 @@ class TeachersAttendanceReport extends StatelessWidget {
                     ),
                   ],
                 ),
-
-                // Present
                 Column(
                   children: [
                     Container(
@@ -212,11 +219,77 @@ class TeachersAttendanceReport extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      "${teacher.signatureNo}",
+                      "${teacher.presentNo}",
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.amber[700],
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.schedule,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "متأخر",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      "${teacher.lateNo}",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber[800],
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.red[300],
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.cancel_outlined,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "غائب",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    Text(
+                      "${teacher.absentNo}",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red[700],
                       ),
                     ),
                   ],
@@ -232,64 +305,191 @@ class TeachersAttendanceReport extends StatelessWidget {
 
   Widget _buildDayAttendanceCard(
       BuildContext context, TeacherAttendanceForDayReport teacher) {
-    var key = teacher.signature == true
-        ? 'حاضر'
-        : teacher.isExcuse == true
-            ? 'بعذر'
-            : 'غائب';
+    final status = teacher.status;
+    final statusAr = _dayStatusToArabic(status);
+    final statusColor = _dayStatusColor(status);
+    final hasTimes = teacher.checkInTime != null &&
+        teacher.checkOutTime != null &&
+        teacher.checkInTime!.isNotEmpty &&
+        teacher.checkOutTime!.isNotEmpty;
+    final durationStr = hasTimes
+        ? _formatDayReportDuration(teacher.checkInTime!, teacher.checkOutTime!)
+        : null;
 
     return Card(
-      elevation: 4,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      elevation: 3,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       color: Colors.white,
+      margin: const EdgeInsets.symmetric(vertical: 6),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Teacher Name Row
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Flexible(
-                  child: Text(
-                    "المعلم: ${teacher.teacherName}",
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 10),
                 Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: key == "حاضر"
-                        ? Colors.green
-                        : key == "بعذر"
-                            ? Colors.orange[200]
-                            : Colors.redAccent[200],
-                    shape: BoxShape.circle,
+                    color: statusColor.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: statusColor, width: 1.2),
                   ),
-                  child: Icon(
-                    key == "حاضر"
-                        ? Icons.check_circle
-                        : key == "بعذر"
-                            ? Icons.warning_amber_rounded
-                            : Icons.cancel_outlined,
-                    color: Colors.white,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(_dayStatusIcon(status), size: 18, color: statusColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        statusAr,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: statusColor,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                const Spacer(),
+                if (durationStr != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF3FB56C).withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      durationStr,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF3FB56C),
+                      ),
+                    ),
+                  ),
               ],
             ),
             const SizedBox(height: 12),
-            // Attendance Options Row
+            Text(
+              teacher.teacherName,
+              style: const TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (teacher.groupName != null && teacher.groupName!.isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                "الحلقة: ${teacher.groupName}",
+                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+              ),
+            ],
+            if (teacher.checkInTime != null || teacher.checkOutTime != null) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Icon(Icons.login, size: 18, color: Colors.grey[600]),
+                  const SizedBox(width: 6),
+                  Text(
+                    "دخول: ${formatTime12(teacher.checkInTime) ?? '—'}",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
+                  const SizedBox(width: 16),
+                  Icon(Icons.logout, size: 18, color: Colors.grey[600]),
+                  const SizedBox(width: 6),
+                  Text(
+                    "خروج: ${formatTime12(teacher.checkOutTime) ?? '—'}",
+                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  static String _dayStatusToArabic(String status) {
+    switch (status) {
+      case 'Present':
+        return 'حاضر';
+      case 'Excused':
+        return 'مستأذن';
+      case 'Absent':
+        return 'غائب';
+      case 'Late':
+        return 'متأخر';
+      default:
+        return status.isNotEmpty ? status : '—';
+    }
+  }
+
+  static Color _dayStatusColor(String status) {
+    switch (status) {
+      case 'حاضر':
+      case 'Present':
+        return Colors.green;
+      case 'مستأذن':
+      case 'غائب بعذر':
+      case 'بعذر':
+      case 'Excused':
+        return Colors.orange;
+      case 'متأخر':
+      case 'Late':
+        return Colors.amber;
+      case 'غائب':
+      case 'Absent':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  static IconData _dayStatusIcon(String status) {
+    switch (status) {
+      case 'حاضر':
+      case 'Present':
+        return Icons.check_circle;
+      case 'مستأذن':
+      case 'غائب بعذر':
+      case 'بعذر':
+      case 'Excused':
+        return Icons.warning_amber_rounded;
+      case 'متأخر':
+      case 'Late':
+        return Icons.schedule;
+      default:
+        return Icons.cancel_outlined;
+    }
+  }
+
+  static String _formatDayReportDuration(String checkIn, String checkOut) {
+    int? minFromMidnight(String time) {
+      final parts = time.trim().split(':');
+      if (parts.length < 2) return null;
+      final h = int.tryParse(parts[0]);
+      final m = int.tryParse(parts[1]);
+      if (h == null || m == null || h < 0 || h >= 24 || m < 0 || m >= 60) return null;
+      return h * 60 + m;
+    }
+
+    final inM = minFromMidnight(checkIn);
+    final outM = minFromMidnight(checkOut);
+    if (inM == null || outM == null) return '—';
+    int diff = outM - inM;
+    if (diff < 0) diff += 24 * 60;
+    final hours = diff ~/ 60;
+    final minutes = diff % 60;
+    if (minutes == 0) return hours == 1 ? '1 ساعة' : '$hours ساعات';
+    if (hours == 0) return minutes == 1 ? '1 دقيقة' : '$minutes دقيقة';
+    final hStr = hours == 1 ? '1 ساعة' : '$hours ساعات';
+    final mStr = minutes == 1 ? '1 دقيقة' : '$minutes دقيقة';
+    return '$hStr و $mStr';
   }
 
   Widget _buildLoadingDayIndicator() {
@@ -488,7 +688,7 @@ class TeachersAttendanceReport extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
-      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
       await controller.getTeachersAttendancesReportByDay();
     }
   }
@@ -507,7 +707,10 @@ class TeachersAttendanceReport extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
-      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri);
+      final firstHijriDay = JHijri(fYear: picked.jhijri.year, fMonth: picked.jhijri.month, fDay: 1);
+      final firstGregorianDay = firstHijriDay.dateTime;
+      controller.selectedDate.value = JDateModel(jhijri: firstHijriDay, dateTime: firstGregorianDay);
+      controller.updateMonthReportDates();
       await controller.getTeachersAttendancesReportByMonth();
     }
   }

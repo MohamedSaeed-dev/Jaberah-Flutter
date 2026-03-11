@@ -162,7 +162,8 @@ class MonthlyReportPage extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
-      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
+      controller.updateMonthReportDates();
     }
   }
 
@@ -207,7 +208,7 @@ class MonthlyReportPage extends StatelessWidget {
                 value: controller.selectedGroupId.value != 0
                     ? "${controller.selectedGroupId.value},${controller.selectedGroupName.value}"
                     : controller.groups.isNotEmpty
-                        ? "${controller.groups[0].id},${controller.groups[0].groupName}"
+                        ? "${controller.groups[0].id},${controller.groups[0].name}"
                         : null,
                 onChanged: (value) {
                   var valueMap = value.toString().split(',');
@@ -216,8 +217,8 @@ class MonthlyReportPage extends StatelessWidget {
                 },
                 items: controller.groups.map((group) {
                   return DropdownMenuItem(
-                    value: '${group.id},${group.groupName}',
-                    child: Text(group.groupName),
+                    value: '${group.id},${group.name}',
+                    child: Text(group.name),
                   );
                 }).toList(),
               ),
@@ -262,7 +263,9 @@ class MonthlyReportPage extends StatelessWidget {
             _buildSectionTitle('التقييمات'),
             const SizedBox(height: 10),
             _buildStudentRow('درجة الحفظ:', "${student.saveGrade}"),
+            _buildStudentRow('عدد صفحات الحفظ:', "${student.savePages}"),
             _buildStudentRow('درجة المراجعة:', "${student.reviewGrade}"),
+            _buildStudentRow('عدد صفحات المراجعة:', "${student.reviewPages}"),
             _buildStudentRow('درجة الحضور:', "${student.attendanceGrade}"),
             _buildStudentRow('درجة السلوك:', "${student.behaviorGrade}"),
             _buildStudentRow('الاختبار الورقي:', "${student.paperGrade}"),

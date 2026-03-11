@@ -101,60 +101,57 @@ class MonthlyStudentsReports extends StatelessWidget {
       context: context,
       builder: (_) {
         return Dialog(
-          insetPadding: const EdgeInsets.all(16), // Reduce side padding
-          child: Container(
-            width:
-                MediaQuery.of(context).size.width * 0.95, // almost full width
+          child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text("كتب الحلقة", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                SizedBox(
-                  height: 400, // adjust if needed
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: books.length,
-                    separatorBuilder: (_, __) => const Divider(),
-                    itemBuilder: (_, index) {
-                      final book = books[index];
-                      return ListTile(
-                        leading: const Icon(Icons.book),
-                        title: Text(
-                          book.title,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        subtitle: Text(
-                          "من ${book.from} إلى ${book.to} — الشهر: ${book.month.year}-${book.month.month.toString().padLeft(2, '0')}",
-                          textAlign: TextAlign.right,
-                        ),
-                        trailing: Wrap(
-                          spacing: 8,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit, color: Colors.blue),
-                              onPressed: () {
-                                Get.back();
-                                _showAddOrEditBookDialog(context, book: book);
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () async {
-                                await controller.deleteBook(book.id);
-                              },
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                const SizedBox(height: 12),
+                if (books.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 24),
+                    child: Text("لا توجد كتب", style: TextStyle(color: Colors.grey)),
+                  )
+                else
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 320),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: books.length,
+                      separatorBuilder: (_, __) => const Divider(height: 1),
+                      itemBuilder: (_, index) {
+                        final book = books[index];
+                        return ListTile(
+                          leading: const Icon(Icons.book_outlined),
+                          title: Text(book.title, overflow: TextOverflow.ellipsis),
+                          subtitle: Text("من ${book.from} إلى ${book.to}", textAlign: TextAlign.right),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 22),
+                                onPressed: () {
+                                  Get.back();
+                                  _showAddOrEditBookDialog(context, book: book);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 22),
+                                onPressed: () => controller.deleteBook(book.id),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
                 const SizedBox(height: 12),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    TextButton(onPressed: () => Get.back(), child: const Text("إغلاق")),
                     TextButton(
                       onPressed: () {
                         Get.back();
@@ -162,12 +159,8 @@ class MonthlyStudentsReports extends StatelessWidget {
                       },
                       child: const Text("إضافة كتاب"),
                     ),
-                    TextButton(
-                      onPressed: () => Get.back(),
-                      child: const Text("إغلاق"),
-                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),
@@ -184,7 +177,7 @@ class MonthlyStudentsReports extends StatelessWidget {
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dismissing during loading
+      barrierDismissible: false,
       builder: (_) => AlertDialog(
         title: Text(book == null ? "إضافة كتاب" : "تعديل كتاب"),
         content: SingleChildScrollView(
@@ -220,26 +213,20 @@ class MonthlyStudentsReports extends StatelessWidget {
                         final title = titleController.text.trim();
                         final from = fromController.text.trim();
                         final to = toController.text.trim();
-
                         if (title.isEmpty || from.isEmpty || to.isEmpty) {
                           Get.snackbar("خطأ", "يرجى تعبئة جميع الحقول");
                           return;
                         }
-
                         if (book == null) {
-                          await controller.addBook(
-                              title: title, from: from, to: to);
+                          await controller.addBook(title: title, from: from, to: to);
                         } else {
                           await controller.updateBook(
-                            bookId: book.id,
-                            title: title,
-                            from: from,
-                            to: to,
+                            bookId: book.id, title: title, from: from, to: to,
                           );
                         }
                       },
                 child: Text(controller.isLoading.value
-                    ? (book == null ? 'جاري الاضافة...' : 'جاري التحديث...')
+                    ? (book == null ? 'جاري الإضافة...' : 'جاري التحديث...')
                     : (book == null ? "إضافة" : "تحديث")),
               )),
         ],
@@ -316,7 +303,8 @@ class MonthlyStudentsReports extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
-      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
+      controller.updateMonthReportDates();
     }
   }
 
@@ -361,7 +349,7 @@ class MonthlyStudentsReports extends StatelessWidget {
                 value: controller.selectedGroupId.value != 0
                     ? "${controller.selectedGroupId.value},${controller.selectedGroupName.value}"
                     : controller.groups.isNotEmpty
-                        ? "${controller.groups[0].id},${controller.groups[0].groupName}"
+                        ? "${controller.groups[0].id},${controller.groups[0].name}"
                         : null,
                 onChanged: (value) {
                   var valueMap = value.toString().split(',');
@@ -370,8 +358,8 @@ class MonthlyStudentsReports extends StatelessWidget {
                 },
                 items: controller.groups.map((group) {
                   return DropdownMenuItem(
-                    value: '${group.id},${group.groupName}',
-                    child: Text(group.groupName),
+                    value: '${group.id},${group.name}',
+                    child: Text(group.name),
                   );
                 }).toList(),
               ),
@@ -517,7 +505,9 @@ class MonthlyStudentsReports extends StatelessWidget {
             _buildSectionTitle('التقييمات'),
             const SizedBox(height: 10),
             _buildStudentRow('درجة الحفظ:', "${student.saveGrade}"),
+            _buildStudentRow('عدد صفحات الحفظ:', "${student.savePages}"),
             _buildStudentRow('درجة المراجعة:', "${student.reviewGrade}"),
+            _buildStudentRow('عدد صفحات المراجعة:', "${student.reviewPages}"),
             _buildStudentRow('درجة الحضور:', "${student.attendanceGrade}"),
             _buildStudentRow('درجة السلوك:', "${student.behaviorGrade}"),
             _buildStudentRow('الاختبار الورقي:', "${student.paperGrade}"),

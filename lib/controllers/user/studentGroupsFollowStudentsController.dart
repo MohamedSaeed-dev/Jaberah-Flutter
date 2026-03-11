@@ -15,7 +15,7 @@ class StudentGroupsFollowStudentsController extends GetxController {
   final id = Get.arguments['id'];
   var name = '';
 
-  var selectedDate = JDateModel(jhijri: JHijri.now()).obs;
+  var selectedDate = JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
 
   var isLoading = false.obs;
   var students = <FollowStudent>[].obs;
@@ -35,7 +35,7 @@ class StudentGroupsFollowStudentsController extends GetxController {
       isLoading.value = true;
       var response = await _apiClient.dio
           .get(
-              "/$followStudentsForGroup/$id/for-day?date=${selectedDate.value.jhijri!.year}-${selectedDate.value.jhijri!.month}-${selectedDate.value.jhijri!.day}&searchText=${searchText.value.text}")
+              "/$followStudentsForGroup/$id/for-day?date=${selectedDate.value.dateTime!.year}-${selectedDate.value.dateTime!.month}-${selectedDate.value.dateTime!.day}&searchText=${searchText.value.text}")
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;

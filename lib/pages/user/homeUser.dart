@@ -8,6 +8,8 @@ import 'package:jaberah/controllers/user/notificationsUserController.dart';
 import 'package:jaberah/controllers/versionsController.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/user/myAttendances.dart';
+import 'package:jaberah/pages/user/mySalary.dart';
+import 'package:jaberah/pages/user/dailyPrayers.dart';
 import 'package:jaberah/pages/user/notificationsUser.dart';
 import 'package:jaberah/pages/admin/homeAdmin.dart';
 import 'package:jaberah/pages/user/followStudents/groups_followStudents.dart';
@@ -131,10 +133,11 @@ class HomePageUser extends StatelessWidget {
                         },
                       ),
                     ListTile(
-                      leading: const Icon(Icons.fingerprint_sharp),
-                      title: const Text('حضوري'),
+                      leading: const Icon(Icons.payments),
+                      title: const Text('راتبي'),
                       onTap: () {
-                        Get.to(() => MyAttendances());
+                        Navigator.of(context).pop();
+                        Get.to(() => MySalary());
                       },
                     ),
                     ListTile(
@@ -287,7 +290,7 @@ class HomePageUser extends StatelessWidget {
             Center(
               child: SizedBox(
                 width: 400,
-                height: 200,
+                height: 420,
                 child: GridView(
                   padding: const EdgeInsets.all(10),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -309,6 +312,18 @@ class HomePageUser extends StatelessWidget {
                         icon: Icons.event_note,
                         color: Colors.purple,
                         route: () => StudentsReport()),
+                    _buildCard(
+                        context: context,
+                        title: 'حضوري',
+                        icon: Icons.fingerprint_sharp,
+                        color: Colors.orange,
+                        route: () => MyAttendances()),
+                    _buildCard(
+                        context: context,
+                        title: 'كشف الصلوات',
+                        icon: Icons.mosque_outlined,
+                        color: Colors.teal,
+                        route: () => DailyPrayers()),
                   ],
                 ),
               ),

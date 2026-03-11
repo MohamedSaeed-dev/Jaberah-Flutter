@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/myAttendancesController.dart';
-import 'package:hijri/hijri_calendar.dart';
-import 'package:table_calendar/table_calendar.dart';
 
 class MyAttendances extends StatelessWidget {
   final controller = Get.put(MyAttendancesController());
@@ -18,23 +16,15 @@ class MyAttendances extends StatelessWidget {
         elevation: 2,
         actions: [
           Obx(() {
-            final hijri = HijriCalendar.now();
-            final today = DateTime(hijri.hYear, hijri.hMonth, hijri.hDay);
-
-            final isTodayFocused =
-                controller.focusedDay.value.day == today.day &&
-                    controller.focusedDay.value.month == today.month &&
-                    controller.focusedDay.value.year == today.year;
+            final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+            final sel = controller.selectedDay.value;
+            final isTodaySelected = sel.year == today.year &&
+                sel.month == today.month &&
+                sel.day == today.day;
 
             return IconButton(
               icon: const Icon(Icons.today, color: Colors.black),
-              onPressed: isTodayFocused
-                  ? null
-                  : () {
-                      controller.selectedDay.value = today;
-                      controller.focusedDay.value = today;
-                      controller.getAttendanceForMonth();
-                    },
+              onPressed: isTodaySelected ? null : () => controller.goToToday(),
               tooltip: 'العودة إلى اليوم',
             );
           }),
@@ -46,11 +36,7 @@ class MyAttendances extends StatelessWidget {
             return Obx(() {
               return !controller.isAdmin.value
                   ? FloatingActionButton.extended(
-                      onPressed: controller.isLoading.value ||
-                              controller.selectedAttendance.value.signature ==
-                                  true
-                          ? null
-                          : () async {},
+                      onPressed: controller.isLoading.value ? null : () async {},
                       label: Text(
                         "رفع طلب",
                         style: TextStyle(
@@ -119,13 +105,7 @@ class MyAttendances extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
-                onPressed: () {
-                  controller.focusedDay.value = DateTime(
-                      controller.focusedDay.value.year,
-                      controller.focusedDay.value.month - 1,
-                      controller.focusedDay.value.day);
-                  controller.getAttendanceForMonth();
-                },
+                onPressed: () => controller.goToPrevHijriMonth(),
               ),
               Text(
                 controller.getHijriMonthName(controller.focusedDay.value),
@@ -134,105 +114,172 @@ class MyAttendances extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.arrow_forward_ios),
-                onPressed: () {
-                  controller.focusedDay.value = DateTime(
-                      controller.focusedDay.value.year,
-                      controller.focusedDay.value.month + 1,
-                      controller.focusedDay.value.day);
-                  controller.getAttendanceForMonth();
-                },
+                onPressed: () => controller.goToNextHijriMonth(),
               ),
             ],
           ),
         ));
   }
 
-  Widget _buildCalendar() {
-    return Obx(() => TableCalendar(
-          locale: 'ar',
-          firstDay: DateTime.utc(1, 1, 1),
-          lastDay: DateTime.utc(2999, 12, 31),
-          focusedDay: controller.focusedDay.value,
-          selectedDayPredicate: (day) =>
-              isSameDay(controller.selectedDay.value, day),
-          calendarStyle: CalendarStyle(
-            defaultTextStyle: const TextStyle(color: Colors.black),
-            weekendTextStyle: const TextStyle(color: Colors.red),
-            selectedDecoration: BoxDecoration(
-              color: Colors.blue.shade700,
-              shape: BoxShape.circle,
+  static Widget _dayCell(
+      MyAttendancesController controller, DateTime date, Color? selectedColor, bool isToday) {
+    final status = controller.getStatusForDate(date);
+    Color color;
+    if (selectedColor != null) {
+      color = selectedColor;
+    } else {
+      switch (status) {
+        case 'Present':
+          color = Colors.green;
+          break;
+        case 'Excused':
+          color = Colors.orange;
+          break;
+        case 'Late':
+          color = Colors.amber;
+          break;
+        case 'Absent':
+          color = Colors.red;
+          break;
+        default:
+          color = Colors.grey.shade300;
+      }
+    }
+    return SizedBox(
+      width: 40,
+      height: 40,
+      child: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+          border: isToday
+              ? Border.all(color: Colors.black87, width: 2)
+              : null,
+        ),
+        alignment: Alignment.center,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            '${controller.getHijriDay(date)}',
+            style: TextStyle(
+              color: selectedColor != null ? Colors.white : Colors.black,
+              fontSize: 16,
             ),
           ),
-          onPageChanged: (focusedDay) {
-            controller.focusedDay.value = focusedDay;
-            controller.getAttendanceForMonth();
-          },
-          onDaySelected: controller.onDaySelected,
-          weekendDays: [DateTime.friday, DateTime.saturday],
-          headerVisible: false,
-          calendarFormat: CalendarFormat.month,
-          daysOfWeekVisible: true,
-          startingDayOfWeek: StartingDayOfWeek.sunday,
-          availableGestures: AvailableGestures.all,
-          daysOfWeekStyle: const DaysOfWeekStyle(
-            weekendStyle: TextStyle(color: Colors.red),
-            weekdayStyle: TextStyle(color: Colors.black),
-          ),
-          calendarBuilders: CalendarBuilders(
-            defaultBuilder: (context, date, _) {
-              final att = controller.getAttendanceForDate(date);
-              Color color;
-              if (att == null) {
-                color = Colors.grey.shade300;
-              } else if (att.signature == true) {
-                color = Colors.green;
-              } else if (att.signature == false) {
-                color = Colors.red;
-              } else if (att.isExcuse == true) {
-                color = Colors.orange;
-              } else {
-                color = Colors.grey.shade400;
-              }
+        ),
+      ),
+    );
+  }
 
-              return Container(
-                margin: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: color,
-                ),
-                alignment: Alignment.center,
+  static const _weekDays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+  Widget _buildCalendar() {
+    return Obx(() {
+      final grid = controller.getHijriMonthGrid();
+      final sel = controller.selectedDay.value;
+      final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+      final cells = <({int? day, DateTime? date})>[
+        ...List.filled(grid.firstWeekday, (day: null, date: null)),
+        ...grid.days.map((d) => (day: d.day, date: d.date)),
+      ];
+      const rowLength = 7;
+      final rows = <List<({int? day, DateTime? date})>>[];
+      for (var i = 0; i < cells.length; i += rowLength) {
+        var row = cells.skip(i).take(rowLength).toList();
+        while (row.length < rowLength) row.add((day: null, date: null));
+        rows.add(row);
+      }
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: List.generate(7, (i) => Expanded(
+              child: Center(
                 child: Text(
-                  '${date.day}',
-                  style: const TextStyle(color: Colors.black),
+                  _weekDays[i],
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: (i == 5 || i == 6) ? Colors.red : Colors.black,
+                  ),
                 ),
-              );
-            },
+              ),
+            )),
           ),
-        ));
+          const SizedBox(height: 8),
+          ...rows.map((row) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Row(
+                  children: row.map((cell) {
+                    return Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: Center(
+                          child: (cell.day == null || cell.date == null)
+                              ? const SizedBox.shrink()
+                              : GestureDetector(
+                                  onTap: () => controller.onDaySelected(cell.date!, cell.date!),
+                                  child: _dayCell(
+                                    controller,
+                                    cell.date!,
+                                    (cell.date!.year == sel.year &&
+                                            cell.date!.month == sel.month &&
+                                            cell.date!.day == sel.day)
+                                        ? Colors.blue.shade700
+                                        : null,
+                                    cell.date!.year == today.year &&
+                                        cell.date!.month == today.month &&
+                                        cell.date!.day == today.day,
+                                  ),
+                                ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              )),
+        ],
+      );
+    });
+  }
+
+  static String _statusLabel(String status) {
+    switch (status) {
+      case 'Present':
+        return 'حاضر';
+      case 'Excused':
+        return 'معتذر';
+      case 'Late':
+        return 'متأخر';
+      case 'Absent':
+      default:
+        return 'غائب';
+    }
+  }
+
+  static Color _statusColor(String status) {
+    switch (status) {
+      case 'Present':
+        return Colors.green;
+      case 'Excused':
+        return Colors.orange;
+      case 'Late':
+        return Colors.amber;
+      case 'Absent':
+      default:
+        return Colors.red;
+    }
   }
 
   Widget _buildHijriDay() {
     return Obx(() {
       final date = controller.selectedDay.value;
-      final attendance = controller.selectedAttendance.value;
-
-      // Determine attendance status and color
-      String statusText;
-      Color statusColor;
-
-      if (attendance.signature == true) {
-        statusText = "حاضر";
-        statusColor = Colors.green;
-      } else if (attendance.isExcuse == true) {
-        statusText = "معتذر";
-        statusColor = Colors.orange;
-      } else {
-        statusText = "غائب";
-        statusColor = Colors.red;
-      }
+      final dayItems = controller.dataForDay;
 
       return Container(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -249,14 +296,12 @@ class MyAttendances extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Hijri Date
             Row(
               children: [
-                const Icon(Icons.calendar_today,
-                    size: 18, color: Colors.blueGrey),
+                const Icon(Icons.calendar_today, size: 18, color: Colors.blueGrey),
                 const SizedBox(width: 8),
                 Text(
-                  'اليوم: ${date.day} - ${date.month} - ${date.year} هـ',
+                  controller.formatDateHijri(date),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -266,43 +311,127 @@ class MyAttendances extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
+            if (dayItems.isEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Text('لا توجد بيانات حضور لهذا اليوم', style: TextStyle(color: Colors.grey)),
+              )
+            else
+              ...dayItems.map((item) {
+                final today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+                final isToday = date.year == today.year &&
+                    date.month == today.month &&
+                    date.day == today.day;
+                final hasGroupId = item.groupId != 0;
+                final showCheckIn = isToday && item.checkInTime == null && hasGroupId;
+                final showCheckOut = isToday && item.checkOutTime == null;
+                final canCheckOut = item.checkInTime != null && hasGroupId;
 
-            // Status
-            Row(
-              children: [
-                const Icon(Icons.check_circle_outline,
-                    size: 18, color: Colors.blueGrey),
-                const SizedBox(width: 8),
-                Text(
-                  statusText,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: statusColor,
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.groupName,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _statusColor(item.status).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              _statusLabel(item.status),
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: _statusColor(item.status),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.login_rounded, size: 18, color: Colors.grey.shade600),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'حضور',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  controller.formatTime(item.checkInTime),
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.logout_rounded, size: 18, color: Colors.grey.shade600),
+                                const SizedBox(width: 6),
+                                Text(
+                                  'انصراف',
+                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  controller.formatTime(item.checkOutTime),
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (showCheckIn || showCheckOut) ...[
+                        const SizedBox(height: 8),
+                        Obx(() {
+                          final loading = controller.isCheckInOutLoading.value;
+                          return Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              if (showCheckIn)
+                                ElevatedButton.icon(
+                                  onPressed: loading ? null : () => controller.checkIn(item.groupId),
+                                  icon: const Icon(Icons.login, size: 18),
+                                  label: const Text('تسجيل الحضور'),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF3FB56C),
+                                    foregroundColor: Colors.white,
+                                  ),
+                                ),
+                              if (showCheckOut)
+                                OutlinedButton.icon(
+                                  onPressed: (loading || !canCheckOut) ? null : () => controller.checkOut(item.groupId),
+                                  icon: const Icon(Icons.logout, size: 18),
+                                  label: const Text('تسجيل الانصراف'),
+                                ),
+                            ],
+                          );
+                        }),
+                      ],
+                    ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Creation time
-            Row(
-              children: [
-                const Icon(Icons.access_time, size: 18, color: Colors.blueGrey),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    attendance.createdAt != null
-                        ? "تم الإنشاء في ${controller.formatCreatedAt(attendance.createdAt!)}"
-                        : "تاريخ الإنشاء غير متوفر",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+                );
+              }),
           ],
         ),
       );

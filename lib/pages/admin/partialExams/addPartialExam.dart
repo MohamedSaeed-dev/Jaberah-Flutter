@@ -107,14 +107,14 @@ class AddPartialExam extends StatelessWidget {
 
             SizedBox(height: 20),
 
-            // Muhktabir and Part
+            // tester and Part
             Row(
               children: [
                 Expanded(
                   child: _buildTextField(
                     'المختبر',
                     'نص',
-                    controller.muhktabirController.value,
+                    controller.testerController.value,
                     isNumber: false,
                   ),
                 ),

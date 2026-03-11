@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/teachersSalariesController.dart';
+import 'package:jaberah/helpers/timeHelpers.dart';
+import 'package:jhijri/jHijri.dart';
 
 class TeachersSalaries extends StatelessWidget {
   final TeachersSalariesController controller =
@@ -168,30 +170,96 @@ class TeachersSalaries extends StatelessWidget {
   }
 
   Widget _buildSalaryCard(BuildContext context, TeacherSalaries salaryData) {
+    final isPaid = salaryData.isPaid;
+    final paidAtStr = salaryData.paidAt != null
+        ? _formatPaidAt(salaryData.paidAt!)
+        : null;
+
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 8,
-      shadowColor: Colors.indigo[300],
-      color: Colors.indigo[50],
+      elevation: 3,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      margin: const EdgeInsets.symmetric(vertical: 6),
       child: Padding(
-        padding: const EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDetailRow('اسم المعلم:', salaryData.teacherName),
-            _buildDetailRow('راتب:', salaryData.salary),
-            _buildDetailRow('أيام الغياب:', salaryData.daysAbsence),
-            _buildDetailRow('الراتب بعد الخصم:', salaryData.netSalary),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    salaryData.teacherName,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: isPaid
+                        ? const Color(0xFF3FB56C).withOpacity(0.15)
+                        : Colors.orange.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isPaid
+                          ? const Color(0xFF3FB56C)
+                          : Colors.orange,
+                      width: 1.2,
+                    ),
+                  ),
+                  child: Text(
+                    isPaid ? 'مسدّد' : 'غير مسدّد',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: isPaid
+                          ? const Color(0xFF3FB56C)
+                          : Colors.orange[800],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _buildDetailRow('الحلقة:', salaryData.groupName),
             _buildDetailRow(
-                'استلم المبلغ؟', salaryData.signature ? 'نعم' : 'لا'),
-            ElevatedButton(
-              onPressed: () => _editSalary(context, salaryData),
-              child: const Text('تعديل'),
+              'الراتب:',
+              salaryData.salary != null
+                  ? '${salaryData.salary!.toStringAsFixed(0)} ريال يمني'
+                  : '—',
+            ),
+            if (isPaid && paidAtStr != null)
+              _buildDetailRow('تاريخ الاستلام:', paidAtStr),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => _editSalary(context, salaryData),
+                icon: const Icon(Icons.edit_outlined, size: 20),
+                label: const Text('تعديل'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF3FB56C),
+                  side: const BorderSide(color: Color(0xFF3FB56C)),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _formatPaidAt(DateTime dateTime) {
+    final h = JHijri(fDate: dateTime);
+    final time24 = '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+    final time12 = formatTime12(time24) ?? time24;
+    return '${h.day} ${h.monthName} ${h.year} هـ — $time12';
   }
 
   Widget _buildDetailRow(String label, dynamic value) {
@@ -217,61 +285,63 @@ class TeachersSalaries extends StatelessWidget {
   }
 
   void _editSalary(BuildContext context, TeacherSalaries salaryData) {
-    final TextEditingController salaryController =
-        TextEditingController(text: salaryData.salary.toString());
-    controller.currentSignature.value = salaryData.signature;
+    final TextEditingController salaryController = TextEditingController(
+      text: salaryData.salary?.toStringAsFixed(0) ?? '',
+    );
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('تعديل معلومات الراتب لـ ${salaryData.teacherName}'),
+          title: Text('تعديل الراتب — ${salaryData.teacherName}'),
           content: SingleChildScrollView(
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (salaryData.groupName.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Text(
+                      'الحلقة: ${salaryData.groupName}',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                  ),
                 TextField(
                   controller: salaryController,
                   keyboardType:
                       const TextInputType.numberWithOptions(decimal: true),
-                  decoration: InputDecoration(
-                    labelText: 'الراتب',
+                  decoration: const InputDecoration(
+                    labelText: 'الراتب (ريال يمني)',
                     border: OutlineInputBorder(),
                   ),
-                ),
-                Row(
-                  children: [
-                    const Text("استلم المبلغ؟"),
-                    Obx(
-                      () => Checkbox(
-                        value: controller.currentSignature.value,
-                        onChanged: (value) {
-                          controller.currentSignature.value = value!;
-                        },
-                      ),
-                    ),
-                  ],
                 ),
               ],
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () {
-                Get.back();
-              },
+              onPressed: () => Get.back(),
               child: const Text('إلغاء'),
             ),
             TextButton(
               onPressed: () async {
+                final salary = double.tryParse(salaryController.text);
+                if (salary == null || salary < 0) {
+                  return;
+                }
                 await controller.updateTeachersSalaries(
                   salaryData.teacherId.toString(),
-                  double.parse(salaryController.text),
-                  controller.currentSignature.value,
+                  salaryData.groupId,
+                  salary,
+                  salaryData.isPaid,
                 );
               },
-              child: Obx(() =>
-                  Text(controller.isLoading.value ? 'جاري الحفظ...' : 'حفظ')),
+              child: Obx(() => Text(
+                  controller.isLoading.value ? 'جاري الحفظ...' : 'حفظ')),
             ),
           ],
         );

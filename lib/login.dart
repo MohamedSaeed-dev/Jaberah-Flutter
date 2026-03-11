@@ -5,7 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/connectivity.dart';
-import 'package:jaberah/firebase/firebaseAPI.dart';
+import 'package:jaberah/config/firebase/firebaseAPI.dart';
 import 'package:jaberah/pages/admin/homeAdmin.dart';
 import 'package:jaberah/pages/user/homeUser.dart';
 import 'package:get/get.dart';

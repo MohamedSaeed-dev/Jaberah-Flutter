@@ -15,24 +15,28 @@ class TeacherAttendancesController extends GetxController {
   // A list to store attendance entries
   var entries = <EntryAttendance>[].obs;
 
-  // Update or add an entry in the list
-  void updateEntry(int teacherId, {bool? signature, bool? isExcuse}) {
-    // Find existing entry
-    var entry = entries.firstWhereOrNull((e) => e.teacherId == teacherId);
+  // Update or add an entry (DTO: TeacherId, GroupId, CheckInTime, CheckOutTime, IsExcused)
+  void updateEntry(int teacherId,
+      {required int groupId,
+      String? checkInTime,
+      String? checkOutTime,
+      bool? isExcused}) {
+    var entry = entries.firstWhereOrNull((e) => e.teacherId == teacherId && e.groupId == groupId);
 
     if (entry != null) {
-      // Update existing entry
-      entry.signature = isExcuse == null ? signature : null;
-      entry.isExcuse = signature == null ? isExcuse : null;
+      entry.groupId = groupId;
+      entry.checkInTime = checkInTime;
+      entry.checkOutTime = checkOutTime;
+      entry.isExcused = isExcused;
     } else {
-      // Add new entry if it doesn't exist
       entries.add(EntryAttendance(
         teacherId: teacherId,
-        signature: signature,
-        isExcuse: isExcuse,
+        groupId: groupId,
+        checkInTime: checkInTime,
+        checkOutTime: checkOutTime,
+        isExcused: isExcused,
       ));
     }
-    // Ensure reactive updates
     entries.refresh();
   }
 
@@ -42,17 +46,20 @@ class TeacherAttendancesController extends GetxController {
 
   var isLoading = false.obs;
 
+  /// مفتاح السجل الذي يتم تحديثه حالياً (مثال: "teacherId_groupId") لعرض التحميل على زر التحديث فقط.
+  var savingEntryKey = Rxn<String>();
+
   var pageNumber = 1.obs;
   var pageSize = 5.obs;
 
-  var selectedDate = JDateModel(jhijri: JHijri.now()).obs;
+  var selectedDate = JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
 
   Future getTeachersAttendances() async {
     try {
       isLoading.value = true;
       var response = await _apiClient.dio
           .get(
-              "/$teachersAttendancesForReportByDayURL?date=${selectedDate.value.jhijri!.year}-${selectedDate.value.jhijri!.month}-${selectedDate.value.jhijri!.day}")
+              "/$teachersAttendancesForReportByDayURL?date=${selectedDate.value.dateTime!.year}-${selectedDate.value.dateTime!.month}-${selectedDate.value.dateTime!.day}")
           .timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
@@ -80,19 +87,19 @@ class TeacherAttendancesController extends GetxController {
     }
   }
 
-  Future updateTeachersAttendances() async {
+  /// تحديث حضور معلم واحد (الـ API يستقبل body لمعلم واحد فقط).
+  Future<void> updateTeacherAttendance(EntryAttendance entry) async {
+    final key = '${entry.teacherId}_${entry.groupId}';
     try {
-      isLoading.value = true;
-      var response = await _apiClient.dio
+      savingEntryKey.value = key;
+      final response = await _apiClient.dio
           .post(
-              "/$teachersAttendancesURL?date=${selectedDate.value.jhijri!.year}-${selectedDate.value.jhijri!.month}-${selectedDate.value.jhijri!.day}",
-              data: entries.map((e) => e.toJson()).toList())
+              "/$teachersAttendancesURL?date=${selectedDate.value.dateTime!.year}-${selectedDate.value.dateTime!.month}-${selectedDate.value.dateTime!.day}",
+              data: entry.toJson())
           .timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
-        entries.clear();
-        successSnackBar(
-            "تم تحديث حضور المعلمين ليوم ${selectedDate.value.jhijri!.day} في شهر ${selectedDate.value.jhijri!.monthName}");
+        successSnackBar("تم تحديث حضور المعلم");
         await getTeachersAttendances();
       } else {
         messageSnackBar(response.data["message"]);
@@ -104,7 +111,7 @@ class TeacherAttendancesController extends GetxController {
     } catch (e) {
       catchSnackBar();
     } finally {
-      isLoading.value = false;
+      savingEntryKey.value = null;
     }
   }
 
@@ -115,18 +122,30 @@ class TeacherAttendancesController extends GetxController {
   }
 }
 
+/// Matches UpsertTeachersAttendancesDTO: TeacherId, GroupId, CheckInTime, CheckOutTime, IsExcused
 class EntryAttendance {
   int teacherId;
-  bool? signature;
-  bool? isExcuse;
+  int groupId;
+  String? checkInTime;  // "HH:mm" for TimeOnly
+  String? checkOutTime;
+  bool? isExcused;      // مستأذن
 
-  EntryAttendance({required this.teacherId, this.signature, this.isExcuse});
+  EntryAttendance({
+    required this.teacherId,
+    required this.groupId,
+    this.checkInTime,
+    this.checkOutTime,
+    this.isExcused,
+  });
 
   Map<String, dynamic> toJson() {
+    // عند مستأذن نرسل للأي بي أي أوقاتاً null، مع الإبقاء على القيم في الـ entry للواجهة
     return {
       'teacherId': teacherId,
-      'signature': signature,
-      'isExcuse': isExcuse
+      'groupId': groupId,
+      'checkInTime': isExcused == true ? null : checkInTime,
+      'checkOutTime': isExcused == true ? null : checkOutTime,
+      'isExcused': isExcused,
     };
   }
 }

@@ -132,10 +132,13 @@ class AddStudent extends StatelessWidget {
                         child: DropdownButtonHideUnderline(
                           child:Obx(()=> DropdownButton<String>(
                             isExpanded: true,
-                            value: controller.selectedSchoolLevel.value,
+                            value: controller.selectedSchoolLevel.value.isEmpty
+                                ? null
+                                : controller.selectedSchoolLevel.value,
+                            hint: Text('اختر المرحلة الدراسية'),
                             onChanged: (value) {
                               controller.selectedSchoolLevel.value =
-                                  value.toString();
+                                  value ?? "";
                             },
                             items: [
                               DropdownMenuItem(

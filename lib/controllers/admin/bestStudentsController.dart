@@ -18,7 +18,7 @@ import 'package:pdf/widgets.dart';
 class BestStudentsController extends GetxController {
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
-  var selectedDate = JDateModel(jhijri: JHijri.now()).obs;
+  var selectedDate = JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
 
   var groups = [].obs;
   var selectedGroupId = ''.obs;
@@ -34,7 +34,7 @@ class BestStudentsController extends GetxController {
       isLoading.value = true;
       var response = await _apiClient.dio
           .get(
-              "/$bestStudentForGroupReportURL?groupId=$selectedGroupId&year=${selectedDate.value.jhijri!.year}&month=${selectedDate.value.jhijri!.month}&take=${take.value}")
+              "/$bestStudentForGroupReportURL?groupId=$selectedGroupId&year=${selectedDate.value.dateTime!.year}&month=${selectedDate.value.dateTime!.month}&take=${take.value}")
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;
@@ -66,7 +66,7 @@ class BestStudentsController extends GetxController {
       isLoading.value = true;
       var response = await _apiClient.dio
           .get(
-              "/$bestStudentReportURL?year=${selectedDate.value.jhijri!.year}&month=${selectedDate.value.jhijri!.month}&take=${take.value}")
+              "/$bestStudentReportURL?year=${selectedDate.value.dateTime!.year}&month=${selectedDate.value.dateTime!.month}&take=${take.value}")
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;
@@ -108,7 +108,7 @@ class BestStudentsController extends GetxController {
         groups.value = response.data;
         if (groups.isNotEmpty) {
           selectedGroupId.value = groups[0]["id"].toString();
-          selectedGroupName.value = groups[0]["groupName"];
+          selectedGroupName.value = groups[0]["name"];
         }
       } else {
         messageSnackBar(response.data["message"]);

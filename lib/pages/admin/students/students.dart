@@ -245,10 +245,13 @@ class Students extends StatelessWidget {
                       child: DropdownButtonHideUnderline(
                         child: Obx(() => DropdownButton<String>(
                               isExpanded: true,
-                              value: controller.selectedAddSchoolClass.value,
+                              value: controller.selectedAddSchoolClass.value.isEmpty
+                                  ? null
+                                  : controller.selectedAddSchoolClass.value,
+                              hint: Text('اختر المرحلة الدراسية'),
                               onChanged: (value) {
                                 controller.selectedAddSchoolClass.value =
-                                    value.toString();
+                                    value ?? "";
                               },
                               items: [
                                 DropdownMenuItem(
@@ -399,7 +402,19 @@ class Students extends StatelessWidget {
   void _showEditStudentDialog(BuildContext context, Student student) async {
     controller.nameEditController.value.text = student.studentName;
     controller.phoneEditController.value.text = student.phoneNumber;
-    controller.selectedEditSchoolClass.value = student.schoolClass ?? "";
+    
+    // Validate and map schoolClass value to match dropdown items
+    final validSchoolClasses = [
+      'المرحلة الابتدائية',
+      'المرحلة الاعدادية',
+      'المرحلة الثانوية'
+    ];
+    String schoolClassValue = student.schoolClass ?? "";
+    if (!validSchoolClasses.contains(schoolClassValue)) {
+      schoolClassValue = "";
+    }
+    controller.selectedEditSchoolClass.value = schoolClassValue;
+    
     controller.rateEditController.value.text = student.memoRate.toString();
     controller.levelEditController.value.text = student.schoolLevel ?? "";
     controller.notesEditController.value.text = student.notes ?? "";
@@ -480,10 +495,13 @@ class Students extends StatelessWidget {
                       child: DropdownButtonHideUnderline(
                         child: Obx(() => DropdownButton<String>(
                               isExpanded: true,
-                              value: controller.selectedEditSchoolClass.value,
+                              value: controller.selectedEditSchoolClass.value.isEmpty
+                                  ? null
+                                  : controller.selectedEditSchoolClass.value,
+                              hint: Text('اختر المرحلة الدراسية'),
                               onChanged: (value) {
                                 controller.selectedEditSchoolClass.value =
-                                    value.toString();
+                                    value ?? "";
                               },
                               items: [
                                 DropdownMenuItem(

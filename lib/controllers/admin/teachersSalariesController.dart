@@ -51,8 +51,6 @@ class TeachersSalariesController extends GetxController {
   var selectedMonth = JHijri.now().month.obs;
   var monthName = JHijri.now().monthName.obs;
 
-  var currentSignature = false.obs;
-
   Future getTeachersSalaries() async {
     try {
       isLoading.value = true;
@@ -85,21 +83,21 @@ class TeachersSalariesController extends GetxController {
   }
 
   Future updateTeachersSalaries(
-      String teacherId, double salary, bool signature) async {
+      String teacherId, int groupId, double salary, bool isPaid) async {
     try {
       isLoading.value = true;
       var response = await _apiClient.dio.post(
           "/$teachersSalariesURL?year=$currentYear&month=$selectedMonth",
           data: {
             "teacherId": teacherId,
+            "groupId": groupId,
             "salary": salary,
-            "signature": signature
+            "isPaid": isPaid
           }).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         Get.back();
         successSnackBar("تم تحديث رواتب المعلمين لشهر $monthName");
         await getTeachersSalaries();
-        currentSignature.value = false;
       } else {
         messageSnackBar(response.data["message"]);
       }
@@ -152,18 +150,20 @@ class Entry {
 class TeacherSalaries {
   int teacherId;
   String teacherName;
-  double salary;
-  double netSalary;
-  int daysAbsence;
-  bool signature;
+  int groupId;
+  String groupName;
+  double? salary;
+  bool isPaid;
+  DateTime? paidAt;
 
   TeacherSalaries(
       {required this.teacherId,
       required this.teacherName,
       required this.salary,
-      required this.netSalary,
-      required this.daysAbsence,
-      required this.signature});
+      required this.groupId,
+      required this.groupName,
+      required this.isPaid,
+      required this.paidAt});
 
   factory TeacherSalaries.fromJson(Map<String, dynamic> json) {
     return TeacherSalaries(
@@ -171,11 +171,10 @@ class TeacherSalaries {
         teacherName: json["teacherName"] as String,
         salary: (json["salary"] is int)
             ? (json["salary"] as int).toDouble()
-            : double.parse(json["salary"].toString()),
-        netSalary: (json["netSalary"] is int)
-            ? (json["netSalary"] as int).toDouble()
-            : double.parse(json["netSalary"].toString()),
-        daysAbsence: json["daysAbsence"] as int,
-        signature: json["signature"] as bool);
+            : json["salary"] != null ? double.parse(json["salary"].toString()) : null,
+        groupId: json["groupId"] as int,
+        groupName: json["groupName"] as String,
+        isPaid: json["isPaid"] as bool,
+        paidAt: json["paidAt"] != null ? DateTime.parse(json["paidAt"]) : null);
   }
 }

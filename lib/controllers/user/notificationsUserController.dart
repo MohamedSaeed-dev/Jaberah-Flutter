@@ -7,6 +7,7 @@ import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jhijri/_src/_jHijri.dart';
 
 class NotificationsCountController extends GetxController {
   var newNotificationCount = 0.obs;
@@ -124,6 +125,25 @@ class NotificationModel {
       body: json["body"] as String,
       createdAt: DateTime.parse(json["createdAt"] as String),
     );
+  }
+
+  String getHijriDate() {
+    final hijri = JHijri(
+      fYear: createdAt.year,
+      fMonth: createdAt.month,
+      fDay: createdAt.day,
+    );
+    return "${hijri.year}-${hijri.monthName}-${hijri.day}";
+  }
+
+  String getHijriTime() {
+    final hour = createdAt.hour == 0 || createdAt.hour == 12 
+        ? 12 
+        : createdAt.hour % 12;
+    final minute = createdAt.minute.toString().padLeft(2, '0');
+    final second = createdAt.second.toString().padLeft(2, '0');
+    final period = createdAt.hour >= 12 ? 'مساءاً' : 'صباحاً';
+    return "$hour:$minute:$second $period";
   }
 }
 

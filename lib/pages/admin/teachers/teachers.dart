@@ -297,9 +297,12 @@ class Teachers extends StatelessWidget {
   void _showEditDialog(BuildContext context, Teacher teacher) {
     controller.nameEditController.value.text = teacher.teacherName;
     controller.phoneEditController.value.text = teacher.phoneNumber;
+    controller.windowStartEdit.value = teacher.windowStart ?? '';
+    controller.windowEndEdit.value = teacher.windowEnd ?? '';
+    controller.flexibleMinutesEditController.value.text =
+        teacher.flexibleMinutes?.toString() ?? '';
     controller.selectedGroupsEdit.clear();
-    var groupIds =
-        teacher.groups?.map((group) => group.id.toString()).toList() ?? [];
+    final groupIds = teacher.groups?.map((g) => g.id).toList() ?? <int>[];
     controller.selectedGroupsEdit.addAll(groupIds);
 
     var key = GlobalKey<FormState>();
@@ -311,13 +314,18 @@ class Teachers extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
           ),
           title: const Text('تعديل معلومات المعلم'),
-          content: Form(
-            key: key,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: controller.nameEditController.value,
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.6,
+            ),
+            child: SingleChildScrollView(
+              child: Form(
+                key: key,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: controller.nameEditController.value,
                   validator: (value) {
                     final arabicRegex =
                         RegExp(r'^[\u0621-\u064A\u0660-\u0669\s]+$');
@@ -350,40 +358,74 @@ class Teachers extends StatelessWidget {
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(
-                  height: 10,
+                const SizedBox(height: 10),
+                Obx(() => _buildTimeEditRow(
+                      context,
+                      label: 'وقت بداية فترة المعلم خلال اليوم',
+                      value: controller.windowStartEdit.value,
+                      onTap: () => _pickTimeForTeacher(context, controller.windowStartEdit.value).then((v) {
+                        if (v != null) controller.windowStartEdit.value = v;
+                      }),
+                    )),
+                const SizedBox(height: 10),
+                Obx(() => _buildTimeEditRow(
+                      context,
+                      label: 'وقت نهاية فترة المعلم خلال اليوم',
+                      value: controller.windowEndEdit.value,
+                      onTap: () => _pickTimeForTeacher(context, controller.windowEndEdit.value).then((v) {
+                        if (v != null) controller.windowEndEdit.value = v;
+                      }),
+                    )),
+                const SizedBox(height: 10),
+                TextFormField(
+                  controller: controller.flexibleMinutesEditController.value,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'الدقائق المرنة قبل احتساب التأخر',
+                    hintText: 'مثال: 15',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-                Obx(() => MultiSelectDialogField(
-                      cancelText: Text("الغاء"),
-                      confirmText: Text("تأكيد"),
-                      title: Text(" الحلقات المتاحة"),
-                      items: controller.groupsSpecial
-                          .map((group) => MultiSelectItem(
-                              group.id.toString(), group.groupName))
-                          .toList(),
-                      initialValue: controller.selectedGroupsEdit,
-                      listType: MultiSelectListType.CHIP,
-                      onConfirm: (values) {
-                        controller.selectedGroupsEdit.value =
-                            values.cast<String>();
-                      },
-                      buttonText: Text(controller.isGroupLoading.value
-                          ? "جاري التحميل..."
-                          : "اختر الحلقات"),
-                      chipDisplay: MultiSelectChipDisplay(
-                        items: controller.selectedGroupsEdit.map((groupId) {
-                          final group = controller.groupsSpecial.firstWhere(
-                              (group) =>
-                                  group.id.toString() == groupId.toString(),
-                              orElse: () =>
-                                  GroupsSpecial(id: groupId, groupName: ""));
-
-                          return MultiSelectItem(
-                              group.id.toString(), group.groupName);
-                        }).toList(),
-                      ),
-                    ))
-              ],
+                const SizedBox(height: 10),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 180),
+                  child: SingleChildScrollView(
+                    child: Obx(() => MultiSelectDialogField<int>(
+                          cancelText: const Text("الغاء"),
+                          confirmText: const Text("تأكيد"),
+                          title: const Text("الحلقات المتاحة"),
+                          items: controller.groupsSpecial
+                              .map((group) => MultiSelectItem<int>(
+                                  group.id, group.name))
+                              .toList(),
+                          initialValue: controller.selectedGroupsEdit.toList(),
+                          listType: MultiSelectListType.CHIP,
+                          onConfirm: (values) {
+                            controller.selectedGroupsEdit.value =
+                                values.cast<int>();
+                          },
+                          buttonText: Text(controller.isGroupLoading.value
+                              ? "جاري التحميل..."
+                              : "اختر الحلقات"),
+                          chipDisplay: MultiSelectChipDisplay<int>(
+                            items: controller.selectedGroupsEdit
+                                .map((groupId) {
+                                  final group =
+                                      controller.groupsSpecial.firstWhere(
+                                    (g) => g.id == groupId,
+                                    orElse: () =>
+                                        GroupsSpecial(id: groupId, name: ""),
+                                  );
+                                  return MultiSelectItem<int>(
+                                      group.id, group.name);
+                                }).toList(),
+                          ),
+                        )),
+                  ),
+                ),
+                  ],
+                ),
+              ),
             ),
           ),
           actions: [
@@ -452,7 +494,7 @@ class Teachers extends StatelessWidget {
                       items: controller.groups.length > 0
                           ? controller.groups
                               .map((group) => MultiSelectItem(
-                                  group.id.toString(), group.groupName))
+                                  group.id.toString(), group.name))
                               .toList()
                           : [],
                       initialValue: controller.selectedGroupsAdd,
@@ -467,7 +509,7 @@ class Teachers extends StatelessWidget {
                           final group = controller.groups.firstWhere(
                               (group) => group.id.toString() == groupId);
                           return MultiSelectItem(
-                              group.id.toString(), group.groupName);
+                              group.id.toString(), group.name);
                         }).toList(),
                       ),
                     ))
@@ -495,5 +537,59 @@ class Teachers extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget _buildTimeEditRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          suffixIcon: const Icon(Icons.access_time),
+        ),
+        child: Text(
+          value.isEmpty ? '—' : value,
+          style: TextStyle(
+            fontSize: 16,
+            color: value.isEmpty ? Colors.grey : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<String?> _pickTimeForTeacher(BuildContext context, [String? initialStr]) async {
+    TimeOfDay initial = TimeOfDay.now();
+    if (initialStr != null && initialStr.contains(':')) {
+      final parts = initialStr.split(':');
+      if (parts.length >= 2) {
+        final h = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        if (h != null && m != null && h >= 0 && h < 24 && m >= 0 && m < 60) {
+          initial = TimeOfDay(hour: h, minute: m);
+        }
+      }
+    }
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(primary: Color(0xFF3FB56C)),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked == null) return null;
+    return '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
   }
 }

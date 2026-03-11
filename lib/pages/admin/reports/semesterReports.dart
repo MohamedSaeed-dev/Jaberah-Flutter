@@ -164,7 +164,7 @@ class SemesterReportPage extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedFromDate.value.jhijri) {
-      controller.selectedFromDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedFromDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
       var fromDateHijri = picked.jhijri;
       var newToYear = fromDateHijri.year;
@@ -183,7 +183,8 @@ class SemesterReportPage extends StatelessWidget {
         fDay: fromDateHijri.day,
       );
 
-      controller.selectedToDate.value = JDateModel(jhijri: newToDateHijri);
+      controller.selectedToDate.value = JDateModel(jhijri: newToDateHijri, dateTime: picked.date);
+      controller.updateSemesterReportDates();
     }
 
   }
@@ -220,7 +221,7 @@ class SemesterReportPage extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedToDate.value.jhijri) {
-      controller.selectedToDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedToDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
       var toDateHijri = picked.jhijri;
       var newFromYear = toDateHijri.year;
@@ -239,7 +240,8 @@ class SemesterReportPage extends StatelessWidget {
         fDay: toDateHijri.day,
       );
 
-      controller.selectedFromDate.value = JDateModel(jhijri: newFromDateHijri);
+      controller.selectedFromDate.value = JDateModel(jhijri: newFromDateHijri, dateTime: picked.date);
+      controller.updateSemesterReportDates();
     }
 
   }
@@ -311,7 +313,7 @@ class SemesterReportPage extends StatelessWidget {
                 value: controller.selectedGroupId.value != 0
                     ? "${controller.selectedGroupId.value},${controller.selectedGroupName.value}"
                     : controller.groups.isNotEmpty
-                        ? "${controller.groups[0].id},${controller.groups[0].groupName}"
+                        ? "${controller.groups[0].id},${controller.groups[0].name}"
                         : null,
                 onChanged: (value) {
                   var valueMap = value.toString().split(',');
@@ -320,8 +322,8 @@ class SemesterReportPage extends StatelessWidget {
                 },
                 items: controller.groups.map((group) {
                   return DropdownMenuItem(
-                    value: '${group.id},${group.groupName}',
-                    child: Text(group.groupName),
+                    value: '${group.id},${group.name}',
+                    child: Text(group.name),
                   );
                 }).toList(),
               ),

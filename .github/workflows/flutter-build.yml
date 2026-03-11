@@ -3,10 +3,8 @@ name: Flutter Build
 on:
   push:
     branches:
-      - main
       - master
-      - dev
-      - feature/*
+      - main-v2
 
 jobs:
   build:
@@ -38,12 +36,20 @@ jobs:
       - name: Rename APK
         run: mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/jaberah-${VERSION}.apk
 
-      - name: Update Version in Backend
+      # Deploy for MASTER
+      - name: Update Version in Backend (MASTER)
+        if: github.ref == 'refs/heads/master'
         run: |
           response=$(curl -X PUT "${{ secrets.BACKEND_API }}?version=${{ env.VERSION }}" \
             -H "Content-Type: multipart/form-data" \
             -F "apkFile=@build/app/outputs/flutter-apk/jaberah-${VERSION}.apk")
           echo "Response from backend: $response"
 
-
-
+      # Deploy for MAIN
+      - name: Update Version in Backend (MAIN)
+        if: github.ref == 'refs/heads/main-v2'
+        run: |
+          response=$(curl -X PUT "${{ secrets.BACKEND_API_V2 }}?version=${{ env.VERSION }}" \
+            -H "Content-Type: multipart/form-data" \
+            -F "apkFile=@build/app/outputs/flutter-apk/jaberah-${VERSION}.apk")
+          echo "Response from backend: $response"

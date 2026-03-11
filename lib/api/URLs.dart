@@ -4,9 +4,11 @@ const server_node = "https://jaberahapp-server.onrender.com";
 
 const local_asp = "http://10.0.2.2:5291/api";
 const server_asp = "https://jaberah.runasp.net/api";
-const IP = "http://192.168.1.20:9632";
+const newServerASP = "https://jaberah-new.tryasp.net/api";
 
-const baseUrl = server_asp;
+const IP = "http://10.251.226.198:5291/api";
+
+const baseUrl = newServerASP;
 
 const loginURL = "auth/login";
 
@@ -33,6 +35,7 @@ const teachersAttendancesForReportByMonthURL =
 
 const monthlyReportURL = "reports/monthly-report";
 const semesterReportURL = "reports/semester-report";
+const monthlyPartialExamReportURL = "reports/monthly-partial-exam";
 
 const bestStudentReportURL = "reports/best-students-report";
 const bestStudentForGroupReportURL = "reports/best-students-for-group-report";
@@ -48,3 +51,6 @@ const notificationsURL = "notifications";
 const sendNotificationURL = "$notificationsURL/send";
 
 const refreshFCMTokenURL = "auth/update-fcm-token";
+
+const prayersURL = "prayers";
+const prayersMonthlyReportURL = "$prayersURL/monthly-report";

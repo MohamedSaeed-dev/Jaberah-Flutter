@@ -66,7 +66,6 @@ class NotificationsUser extends StatelessWidget {
                       itemCount: controller.notifications.length,
                       itemBuilder: (context, index) {
                         final notification = controller.notifications[index];
-                        final createdAt = notification.createdAt;
                         return Card(
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
@@ -100,13 +99,13 @@ class NotificationsUser extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                    "${createdAt.year}-${createdAt.month}-${createdAt.day}",
+                                    notification.getHijriDate(),
                                     style: TextStyle(
                                       fontSize: 15,
                                       color: Colors.black87,
                                     )),
                                 Text(
-                                  "${createdAt.hour == 0 || createdAt.hour == 12 ? 12 : createdAt.hour % 12}:${createdAt.minute.toString().padLeft(2, '0')}:${createdAt.second.toString().padLeft(2, '0')} ${createdAt.hour >= 12 ? 'مساءاً' : 'صباحاً'}",
+                                  notification.getHijriTime(),
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: Colors.black54,

@@ -12,7 +12,7 @@ import 'package:jhijri_picker/_src/_jWidgets.dart';
 
 class DataFollowStudentController extends GetxController {
   final ApiClient _apiClient = Get.find();
-  var selectedDate = JDateModel(jhijri: JHijri.now()).obs;
+  var selectedDate = JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
   var searchText = TextEditingController(text: "").obs;
 
   var dataFollowStudent = [].obs;

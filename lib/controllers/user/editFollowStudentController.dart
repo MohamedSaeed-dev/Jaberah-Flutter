@@ -162,7 +162,7 @@ class EditFollowStudentController extends GetxController {
     try {
       isLoading.value = true;
       var response = await _apiClient.dio.post(
-          "/$followStudentsURL?date=${date.jhijri!.year}-${date.jhijri!.month}-${date.jhijri!.day}",
+          "/$followStudentsURL?date=${date.dateTime!.year}-${date.dateTime!.month}-${date.dateTime!.day}",
           data: {
             "studentId": student.studentId,
             "surahFromTeacher": selectedSurahFromSave.value,
@@ -177,9 +177,40 @@ class EditFollowStudentController extends GetxController {
             "verseToFriend": int.parse(verseToReview.value.text),
             "rateFriend": selectedRateReview.value,
             "pagesFriend": double.parse(pageReview.value.text),
+            "notes": notes.value.text
+          }).timeout(const Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        isEdited.value = true;
+        successSnackBar("تم التعديل بنجاح");
+      } else {
+        messageSnackBar(response.data["message"]);
+      }
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        socketSnackBar();
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        timeoutSnackBar();
+      } else {
+        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+      }
+    } catch (e) {
+      catchSnackBar();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future upsertAttendance() async {
+    try {
+      isLoading.value = true;
+      var response = await _apiClient.dio.post(
+          "/$followStudentsURL/attendance?date=${date.dateTime!.year}-${date.dateTime!.month}-${date.dateTime!.day}",
+          data: {
+            "studentId": student.studentId,
             "attendance": double.parse(attendance.value.text),
             "behavior": double.parse(behavior.value.text),
-            "notes": notes.value.text
           }).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         isEdited.value = true;

@@ -29,7 +29,7 @@ class AddPartialExamController extends GetxController {
   // Additional fields
   var performanceController =
       TextEditingController(text: '0').obs; // الأداء من 5
-  var muhktabirController = TextEditingController().obs; // المحتبر
+  var testerController = TextEditingController().obs; // المحتبر
   var partController = TextEditingController().obs; // الجزء
   var notesController = TextEditingController().obs; // الملاحظات
 
@@ -95,7 +95,7 @@ class AddPartialExamController extends GetxController {
     question10Controller.value.text = examData["question10"]?.toString() ?? '0';
     performanceController.value.text =
         examData["performance"]?.toString() ?? '0';
-    muhktabirController.value.text = examData["muhktabir"] ?? '';
+    testerController.value.text = examData["tester"] ?? '';
     partController.value.text = examData["part"] ?? '';
     rateController.value = examData["rate"] ?? 'ممتاز';
     notesController.value.text = examData["notes"] ?? '';
@@ -212,7 +212,7 @@ class AddPartialExamController extends GetxController {
         "question9": double.tryParse(question9Controller.value.text) ?? 0.0,
         "question10": double.tryParse(question10Controller.value.text) ?? 0.0,
         "performance": double.tryParse(performanceController.value.text) ?? 0.0,
-        "muhktabir": muhktabirController.value.text,
+        "tester": testerController.value.text,
         "part": partController.value.text,
         "rate": rateController.value,
         "notes": notesController.value.text,
@@ -258,7 +258,7 @@ class AddPartialExamController extends GetxController {
         "question9": double.tryParse(question9Controller.value.text) ?? 0.0,
         "question10": double.tryParse(question10Controller.value.text) ?? 0.0,
         "performance": double.tryParse(performanceController.value.text) ?? 0.0,
-        "muhktabir": muhktabirController.value.text,
+        "tester": testerController.value.text,
         "part": partController.value.text,
         "rate": rateController.value,
         "notes": notesController.value.text,
@@ -302,7 +302,7 @@ class AddPartialExamController extends GetxController {
     question9Controller.value.dispose();
     question10Controller.value.dispose();
     performanceController.value.dispose();
-    muhktabirController.value.dispose();
+    testerController.value.dispose();
     partController.value.dispose();
     notesController.value.dispose();
     super.onClose();

@@ -151,16 +151,24 @@ class SemesterStudentsReports extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedFromDate.value.jhijri) {
-      controller.selectedFromDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedFromDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
       var fromDateHijri = picked.jhijri;
-      var newToYear = fromDateHijri.year;
-      var newToMonth = fromDateHijri.month + 3;
+      var fromDateDateTime = picked.date;
 
+      var newToYear = fromDateHijri.year;
+      var newToYearDateTime = fromDateDateTime.year;
+
+      var newToMonth = fromDateHijri.month + 3;
+      var newToMonthDateTime = fromDateDateTime.month + 3;
       // Adjust year and month if month addition results in greater than 12
       if (newToMonth > 12) {
         newToYear += 1;
         newToMonth -= 12;
+      }
+      if (newToMonthDateTime > 12) {
+        newToYearDateTime += 1;
+        newToMonthDateTime -= 12;
       }
 
       // Preserve the same day of the month
@@ -170,7 +178,10 @@ class SemesterStudentsReports extends StatelessWidget {
         fDay: fromDateHijri.day,
       );
 
-      controller.selectedToDate.value = JDateModel(jhijri: newToDateHijri);
+      var newToDateDateTime = DateTime(newToYearDateTime, newToMonthDateTime, fromDateDateTime.day);
+
+      controller.selectedToDate.value = JDateModel(jhijri: newToDateHijri, dateTime: newToDateDateTime);
+      controller.updateSemesterReportDates();
     }
   }
 
@@ -206,16 +217,25 @@ class SemesterStudentsReports extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedToDate.value.jhijri) {
-      controller.selectedToDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedToDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
       var toDateHijri = picked.jhijri;
+      var toDateDateTime = picked.date;
+
       var newFromYear = toDateHijri.year;
+      var newFromYearDateTime = toDateDateTime.year;
+
       var newFromMonth = toDateHijri.month - 3;
+      var newFromMonthDateTime = toDateDateTime.month - 3;
 
       // Adjust year and month if month subtraction results in less than 1
       if (newFromMonth < 1) {
         newFromYear -= 1;
         newFromMonth += 12;
+      }
+      if (newFromMonthDateTime < 1) {
+        newFromYearDateTime -= 1;
+        newFromMonthDateTime += 12;
       }
 
       // Preserve the same day of the month
@@ -224,8 +244,11 @@ class SemesterStudentsReports extends StatelessWidget {
         fMonth: newFromMonth,
         fDay: toDateHijri.day,
       );
+      
+      var newFromDateDateTime = DateTime(newFromYearDateTime, newFromMonthDateTime, toDateDateTime.day);
 
-      controller.selectedFromDate.value = JDateModel(jhijri: newFromDateHijri);
+      controller.selectedFromDate.value = JDateModel(jhijri: newFromDateHijri, dateTime: newFromDateDateTime);
+      controller.updateSemesterReportDates();
     }
   }
 
@@ -296,7 +319,7 @@ class SemesterStudentsReports extends StatelessWidget {
                 value: controller.selectedGroupId.value != 0
                     ? "${controller.selectedGroupId.value},${controller.selectedGroupName.value}"
                     : controller.groups.isNotEmpty
-                        ? "${controller.groups[0].id},${controller.groups[0].groupName}"
+                        ? "${controller.groups[0].id},${controller.groups[0].name}"
                         : null,
                 onChanged: (value) {
                   var valueMap = value.toString().split(',');
@@ -305,8 +328,8 @@ class SemesterStudentsReports extends StatelessWidget {
                 },
                 items: controller.groups.map((group) {
                   return DropdownMenuItem(
-                    value: '${group.id},${group.groupName}',
-                    child: Text(group.groupName),
+                    value: '${group.id},${group.name}',
+                    child: Text(group.name),
                   );
                 }).toList(),
               ),

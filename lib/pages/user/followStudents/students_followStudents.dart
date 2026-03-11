@@ -160,7 +160,7 @@ class StudentGroupsFollowStudents extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
-      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri);
+      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
       await controller.getStudents();
     }
   }

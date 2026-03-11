@@ -245,7 +245,19 @@ class GroupStudents extends StatelessWidget {
   void _showEditStudentDialog(BuildContext context, StudentGroup student) {
     studentController.nameController.value.text = student.studentName;
     studentController.phoneController.value.text = student.phoneNumber;
-    studentController.selectedSchoolClass.value = student.schoolClass ?? "";
+    
+    // Validate and map schoolClass value to match dropdown items
+    final validSchoolClasses = [
+      'المرحلة الابتدائية',
+      'المرحلة الاعدادية',
+      'المرحلة الثانوية'
+    ];
+    String schoolClassValue = student.schoolClass ?? "";
+    if (!validSchoolClasses.contains(schoolClassValue)) {
+      schoolClassValue = "";
+    }
+    studentController.selectedSchoolClass.value = schoolClassValue;
+    
     studentController.rateController.value.text = student.memoRate.toString();
     studentController.levelController.value.text = student.schoolLevel ?? "";
     studentController.notesController.value.text = student.notes ?? "";
@@ -317,11 +329,13 @@ class GroupStudents extends StatelessWidget {
                       child: DropdownButtonHideUnderline(
                         child: Obx(() => DropdownButton<String>(
                               isExpanded: true,
-                              value:
-                                  studentController.selectedSchoolClass.value,
+                              value: studentController.selectedSchoolClass.value.isEmpty
+                                  ? null
+                                  : studentController.selectedSchoolClass.value,
+                              hint: Text('اختر المرحلة الدراسية'),
                               onChanged: (value) {
                                 studentController.selectedSchoolClass.value =
-                                    value.toString();
+                                    value ?? "";
                               },
                               items: [
                                 DropdownMenuItem(

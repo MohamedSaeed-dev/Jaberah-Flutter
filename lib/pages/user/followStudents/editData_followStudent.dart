@@ -418,6 +418,32 @@ class EditFollowStudent extends StatelessWidget {
                             ))
                           ],
                         ),
+                        const SizedBox(height: 15),
+                        MaterialButton(
+                          onPressed: controller.isLoading.value
+                              ? null
+                              : () async {
+                                  if (formKey.currentState!.validate()) {
+                                    await controller.upsertAttendance();
+                                  }
+                                },
+                          minWidth: double.infinity,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          color: const Color.fromARGB(255, 63, 181, 108),
+                          padding: EdgeInsets.symmetric(vertical: 15),
+                          child: Obx(() => Text(
+                                controller.isLoading.value
+                                    ? "جاري التحديث..."
+                                    : "تحديث الحضور والسلوك",
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                ),
+                              )),
+                        ),
                         const SizedBox(height: 10),
                         TextFormField(
                           controller: controller.notes.value,
