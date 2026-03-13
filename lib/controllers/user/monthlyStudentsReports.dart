@@ -87,15 +87,17 @@ class MonthlyStudentsReportsController extends GetxController {
   }
 
   Future UpdateExams(
-      {required int followStudentId,
+      {required int studentId,
       double? paperExam,
       double? oralExam}) async {
     try {
       isLoadingUpdate.value = true;
       var response = await _apiClient.dio
-          .post("/$monthlyExamsURL?followStudentId=$followStudentId", data: {
+          .post("/$monthlyExamsURL", data: {
         "paperExam": paperExam,
-        "oralExam": oralExam
+        "oralExam": oralExam,
+        "date": "${selectedDate.value.dateTime!.year}-${selectedDate.value.dateTime!.month.toString().padLeft(2, '0')}-${selectedDate.value.dateTime!.day.toString().padLeft(2, '0')}",
+        "studentId": studentId
       }).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
@@ -286,7 +288,7 @@ class MonthlyReportResponse {
 }
 
 class MonthlyReportModel {
-  int followStudentId;
+  int studentId;
   String studentName;
 
   String saveFromSurah;
@@ -312,7 +314,7 @@ class MonthlyReportModel {
   double total;
 
   MonthlyReportModel({
-    required this.followStudentId,
+    required this.studentId,
     required this.studentName,
     required this.saveFromSurah,
     required this.saveFromVerse,
@@ -337,7 +339,7 @@ class MonthlyReportModel {
 
   factory MonthlyReportModel.fromJson(Map<String, dynamic> json) {
     return MonthlyReportModel(
-      followStudentId: json["followStudentId"] as int,
+      studentId: json["studentId"] as int,
       studentName: json["studentName"] as String,
       saveFromSurah: json["saveData"]["from"]["surahName"] as String,
       saveFromVerse: json["saveData"]["from"]["verse"] as int,

@@ -471,8 +471,8 @@ class MonthlyStudentsReports extends StatelessWidget {
                                               paperExamController.text);
 
                                           await controller.UpdateExams(
-                                              followStudentId:
-                                                  student.followStudentId,
+                                              studentId:
+                                                  student.studentId,
                                               paperExam: paper,
                                               oralExam: oral);
                                         }

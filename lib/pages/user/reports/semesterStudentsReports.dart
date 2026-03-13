@@ -436,7 +436,7 @@ class SemesterStudentsReports extends StatelessWidget {
             _buildStudentRow('الحضور:', "${student.attendanceSum}"),
             _buildStudentRow('السلوك', "${student.behaviorSum}"),
             _buildStudentRow('درجة الشفهي:', "${student.oralGradeSum}"),
-            _buildStudentRow('درجة الاختبارات:', "${student.paperGradeSum}"),
+            _buildStudentRow('درجة الورقي:', "${student.paperGradeSum}"),
             _buildStudentRow(
                 'درجة الامتحان النصفي:', "${student.midFinalGrade}"),
 

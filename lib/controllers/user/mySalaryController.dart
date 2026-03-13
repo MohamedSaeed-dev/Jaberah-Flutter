@@ -4,9 +4,9 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
+import 'package:jaberah/config/biometrics/biometricService.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jhijri/jHijri.dart';
-import 'package:local_auth/local_auth.dart';
 
 class MySalaryController extends GetxController {
   final ApiClient _apiClient = Get.find();
@@ -78,24 +78,15 @@ class MySalaryController extends GetxController {
       isLoading.value = false;
     }
   }
+  final biometric = BiometricService();
 
   /// Confirms salary receipt: uses fingerprint/biometric when available, otherwise proceeds with button only.
   Future<void> confirmSalaryReceipt(int id) async {
-    final localAuth = LocalAuthentication();
-    final canCheck = await localAuth.canCheckBiometrics;
-    final biometrics = await localAuth.getAvailableBiometrics();
-    final hasBiometric = canCheck && biometrics.isNotEmpty;
-
-    if (hasBiometric) {
-      try {
-        final authenticated = await localAuth.authenticate(
-          localizedReason: 'استخدم البصمة أو قفل الجهاز لتأكيد استلام الراتب',
-        );
-        if (!authenticated) return;
-      } catch (_) {
-        messageSnackBar("لم يتم التحقق من البصمة. حاول مرة أخرى.");
-        return;
-      }
+    final canUseBiometrics = await biometric.canUseBiometrics();
+    if (canUseBiometrics) {
+      await biometric.authenticate(
+        reason: 'استخدم البصمة أو قفل الجهاز لتأكيد استلام الراتب',
+      );
     }
     await markAsPaid(id);
   }
@@ -104,7 +95,8 @@ class MySalaryController extends GetxController {
     try {
       markingReceivedId.value = id.toString();
       final response = await _apiClient.dio
-          .patch("/$teachersSalariesURL/my-salaries/$id/mark-as-paid").timeout(const Duration(seconds: 20));
+          .patch("/$teachersSalariesURL/my-salaries/$id/mark-as-paid")
+          .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         successSnackBar("تم تسجيل دفع الراتب");
         await getSalariesForYear();

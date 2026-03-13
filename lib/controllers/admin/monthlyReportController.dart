@@ -486,7 +486,7 @@ class MonthlyReportResponse {
 }
 
 class MonthlyReportModel {
-  int followStudentId;
+  int studentId;
   String studentName;
 
   String saveFromSurah;
@@ -512,7 +512,7 @@ class MonthlyReportModel {
   double total;
 
   MonthlyReportModel({
-    required this.followStudentId,
+    required this.studentId,
     required this.studentName,
     required this.saveFromSurah,
     required this.saveFromVerse,
@@ -537,7 +537,7 @@ class MonthlyReportModel {
 
   factory MonthlyReportModel.fromJson(Map<String, dynamic> json) {
     return MonthlyReportModel(
-      followStudentId: json["followStudentId"] as int,
+      studentId: json["studentId"] as int,
       studentName: json["studentName"] as String,
       saveFromSurah: json["saveData"]["from"]["surahName"] as String,
       saveFromVerse: json["saveData"]["from"]["verse"] as int,
