@@ -135,6 +135,27 @@ class HomePageAdmin extends StatelessWidget {
                       },
                     ),
                     ListTile(
+                      leading: const Icon(Icons.book_sharp),
+                      title: const Text('قسم الحلقات'),
+                      onTap: () {
+                        Get.off(() => HomePageUser());
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.quiz),
+                      title: const Text('اختبارات الجزئي'),
+                      onTap: () {
+                        Get.to(() => GroupsPartialExams());
+                      },
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.data_thresholding),
+                      title: const Text('التقارير المصدرة'),
+                      onTap: () {
+                        Get.to(() => ExportedReportsPage());
+                      },
+                    ),
+                    ListTile(
                       leading: const Icon(Icons.notification_important),
                       title: const Text('الإشعارات'),
                       onTap: () {
@@ -146,27 +167,6 @@ class HomePageAdmin extends StatelessWidget {
                       title: const Text('سلة المحذوفات'),
                       onTap: () {
                         Get.to(() => TrashPage());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.book_sharp),
-                      title: const Text('قسم الحلقات'),
-                      onTap: () {
-                        Get.off(() => HomePageUser());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.data_thresholding),
-                      title: const Text('التقارير المصدرة'),
-                      onTap: () {
-                        Get.to(() => ExportedReportsPage());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.quiz),
-                      title: const Text('اختبارات الجزئي'),
-                      onTap: () {
-                        Get.to(() => GroupsPartialExams());
                       },
                     ),
                     ListTile(

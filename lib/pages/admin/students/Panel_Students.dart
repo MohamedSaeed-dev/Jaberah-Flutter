@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaberah/pages/admin/students/bestStudents.dart';
 import 'package:jaberah/pages/admin/students/students.dart';
 
 class Panel_Students extends StatelessWidget {
@@ -33,15 +32,6 @@ class Panel_Students extends StatelessWidget {
               color: Colors.orange,
               onTap: () {
                 Get.to(() => Students());
-              },
-            ),
-            _buildCard(
-              context: context,
-              title: 'الطلاب المتميزون',
-              icon: Icons.star,
-              color: Colors.purple,
-              onTap: () {
-                Get.to(() => BestStudentsReport());
               },
             ),
           ],

@@ -4,6 +4,7 @@ import 'package:jaberah/pages/admin/reports/monthlyPartialExamReport.dart';
 import 'package:jaberah/pages/admin/reports/monthlyReports.dart';
 import 'package:jaberah/pages/admin/reports/prayersReport.dart';
 import 'package:jaberah/pages/admin/reports/semesterReports.dart';
+import 'package:jaberah/pages/admin/students/bestStudents.dart';
 
 class Reports extends StatelessWidget {
   const Reports({super.key});
@@ -22,9 +23,10 @@ class Reports extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: GridView.count(
-          crossAxisCount: 2, // Number of columns (2 cards in this case)
-          crossAxisSpacing: 10, // Space between columns
-          mainAxisSpacing: 10, // Space between rows
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 0.82,
           children: [
             _buildCard(
               context: context,
@@ -62,6 +64,15 @@ class Reports extends StatelessWidget {
                 Get.to(() => MonthlyPartialExamReportPage());
               },
             ),
+            _buildCard(
+              context: context,
+              title: 'تقرير الطلاب المتميزين',
+              icon: Icons.star,
+              color: Colors.purple,
+              onTap: () {
+                Get.to(() => BestStudentsReport());
+              },
+            ),
           ],
         ),
       ),
@@ -86,14 +97,17 @@ class Reports extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(icon, size: 50, color: color),
-              const SizedBox(height: 20),
+              const SizedBox(height: 12),
               Text(
                 title,
                 textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   fontFamily: 'GE_SS_Two',
                 ),

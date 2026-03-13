@@ -125,8 +125,7 @@ class MySalary extends StatelessWidget {
   Widget _buildSalaryRow(BuildContext context, MySalaryItem item) {
     final isPaid = item.isPaid;
     final paidAtStr = item.paidAt != null ? _formatPaidAt(item.paidAt!) : null;
-    final requestId = '${item.year}-${item.month}-${item.groupId}';
-    final isMarking = controller.markingReceivedId.value == requestId;
+    final isMarking = controller.markingReceivedId.value == item.id.toString();
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
@@ -186,17 +185,15 @@ class MySalary extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: isMarking
                     ? null
-                    : () => controller.markAsPaid(
-                          item.id,
-                        ),
+                    : () => controller.confirmSalaryReceipt(item.id),
                 icon: isMarking
                     ? const SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Icon(Icons.check_circle_outline, size: 20),
-                label: Text(isMarking ? 'جاري التسجيل...' : 'تم استلام المبلغ'),
+                    : const Icon(Icons.fingerprint, size: 22),
+                label: Text(isMarking ? 'جاري التسجيل...' : 'تأكيد الاستلام (بصمة / زر)'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3FB56C),
                   foregroundColor: Colors.white,

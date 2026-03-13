@@ -438,6 +438,11 @@ class DailyPrayers extends StatelessWidget {
                                                     setState(() {
                                                       inGroupByPrayerId[prayer
                                                           .id] = v ?? false;
+                                                      if (v == true) {
+                                                        rakatControllers[prayer.id]
+                                                            ?.text =
+                                                            '${prayer.defaultRakats}';
+                                                      }
                                                     });
                                                   },
                                                   activeColor:

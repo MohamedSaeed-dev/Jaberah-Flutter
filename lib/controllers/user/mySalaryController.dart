@@ -6,6 +6,7 @@ import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jhijri/jHijri.dart';
+import 'package:local_auth/local_auth.dart';
 
 class MySalaryController extends GetxController {
   final ApiClient _apiClient = Get.find();
@@ -30,7 +31,7 @@ class MySalaryController extends GetxController {
 
   var salariesForYear = <MySalaryItem>[].obs;
   var isLoading = false.obs;
-  var markingReceivedId = ''.obs; // "year-month-groupId" for loading state
+  var markingReceivedId = ''.obs; // salary record id for loading state
 
   /// تجميع الرواتب حسب الشهر للعرض
   List<Map<String, dynamic>> get salariesByMonth {
@@ -76,6 +77,27 @@ class MySalaryController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Confirms salary receipt: uses fingerprint/biometric when available, otherwise proceeds with button only.
+  Future<void> confirmSalaryReceipt(int id) async {
+    final localAuth = LocalAuthentication();
+    final canCheck = await localAuth.canCheckBiometrics;
+    final biometrics = await localAuth.getAvailableBiometrics();
+    final hasBiometric = canCheck && biometrics.isNotEmpty;
+
+    if (hasBiometric) {
+      try {
+        final authenticated = await localAuth.authenticate(
+          localizedReason: 'استخدم البصمة أو قفل الجهاز لتأكيد استلام الراتب',
+        );
+        if (!authenticated) return;
+      } catch (_) {
+        messageSnackBar("لم يتم التحقق من البصمة. حاول مرة أخرى.");
+        return;
+      }
+    }
+    await markAsPaid(id);
   }
 
   Future<void> markAsPaid(int id) async {
