@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/myAttendancesController.dart';
+import 'package:jaberah/helpers/timeHelpers.dart';
 
 class MyAttendances extends StatelessWidget {
   final controller = Get.put(MyAttendancesController());
@@ -318,8 +319,10 @@ class MyAttendances extends StatelessWidget {
                     date.day == today.day;
                 final hasGroupId = item.groupId != 0;
                 final showCheckIn = isToday && item.checkInTime == null && hasGroupId;
-                final showCheckOut = isToday && item.checkOutTime == null;
-                final canCheckOut = item.checkInTime != null && hasGroupId;
+                final showCheckOut = isToday &&
+                    item.checkInTime != null &&
+                    item.checkOutTime == null &&
+                    hasGroupId;
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 12),
@@ -351,6 +354,24 @@ class MyAttendances extends StatelessWidget {
                               ),
                             ),
                           ),
+                          if (item.checkInTime != null &&
+                              item.checkOutTime != null &&
+                              item.checkInTime!.trim().isNotEmpty &&
+                              item.checkOutTime!.trim().isNotEmpty) ...[
+                            const SizedBox(width: 10),
+                            Flexible(
+                              child: Text(
+                                formatAttendanceTimeDifference(
+                                    item.checkInTime!, item.checkOutTime!),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF3FB56C),
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: 8),
@@ -398,27 +419,31 @@ class MyAttendances extends StatelessWidget {
                         const SizedBox(height: 8),
                         Obx(() {
                           final loading = controller.isCheckInOutLoading.value;
-                          return Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            children: [
-                              if (showCheckIn)
-                                ElevatedButton.icon(
-                                  onPressed: loading ? null : () => controller.confirmCheckIn(item.groupId),
-                                  icon: const Icon(Icons.fingerprint, size: 18),
-                                  label: const Text('تسجيل الحضور'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF3FB56C),
-                                    foregroundColor: Colors.white,
-                                  ),
+                          if (showCheckIn) {
+                            return SizedBox(
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: loading ? null : () => controller.confirmCheckIn(item.groupId),
+                                icon: const Icon(Icons.fingerprint, size: 18),
+                                label: const Text('تسجيل الحضور'),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF3FB56C),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
                                 ),
-                              if (showCheckOut)
-                                OutlinedButton.icon(
-                                  onPressed: (loading || !canCheckOut) ? null : () => controller.confirmCheckOut(item.groupId),
-                                  icon: const Icon(Icons.fingerprint, size: 18),
-                                  label: const Text('تسجيل الانصراف'),
-                                ),
-                            ],
+                              ),
+                            );
+                          }
+                          return SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: loading ? null : () => controller.confirmCheckOut(item.groupId),
+                              icon: const Icon(Icons.fingerprint, size: 18),
+                              label: const Text('تسجيل الانصراف'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                              ),
+                            ),
                           );
                         }),
                       ],

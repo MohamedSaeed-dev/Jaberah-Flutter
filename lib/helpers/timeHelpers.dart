@@ -12,3 +12,28 @@ String? formatTime12(String? time24) {
   final suffix = isPM ? 'م' : 'ص';
   return '$h:${m.toString().padLeft(2, '0')} $suffix';
 }
+
+/// فارق الوقت بين دخول وانصراف (HH:mm أو HH:mm:ss) — مثل صفحة حضور المعلمين.
+String formatAttendanceTimeDifference(String checkIn, String checkOut) {
+  int? minutesFromMidnight(String time) {
+    final parts = time.trim().split(':');
+    if (parts.length < 2) return null;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h == null || m == null || h < 0 || h >= 24 || m < 0 || m >= 60) return null;
+    return h * 60 + m;
+  }
+
+  final inM = minutesFromMidnight(checkIn);
+  final outM = minutesFromMidnight(checkOut);
+  if (inM == null || outM == null) return '—';
+  var diff = outM - inM;
+  if (diff < 0) diff += 24 * 60;
+  final hours = diff ~/ 60;
+  final minutes = diff % 60;
+  if (minutes == 0) return hours == 1 ? '1 ساعة' : '$hours ساعات';
+  if (hours == 0) return minutes == 1 ? '1 دقيقة' : '$minutes دقيقة';
+  final hStr = hours == 1 ? '1 ساعة' : '$hours ساعات';
+  final mStr = minutes == 1 ? '1 دقيقة' : '$minutes دقيقة';
+  return '$hStr و $mStr';
+}

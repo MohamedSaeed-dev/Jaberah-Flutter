@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/mySalaryController.dart';
 import 'package:jaberah/helpers/timeHelpers.dart';
 import 'package:jhijri/jHijri.dart';
+import 'package:jaberah/widgets/hijri_year_only_picker/hijri_year_only_picker_dialog.dart';
 
 class MySalary extends StatelessWidget {
   final MySalaryController controller = Get.put(MySalaryController());
@@ -45,9 +46,10 @@ class MySalary extends StatelessWidget {
                               fontSize: 18, fontWeight: FontWeight.bold),
                         )),
                     IconButton(
-                      onPressed: () => _showYearPicker(context),
+                      onPressed: () => _openHijriCalendarForYear(context),
                       icon: const Icon(Icons.calendar_month, size: 28),
                       color: const Color(0xFF3FB56C),
+                      tooltip: 'تقويم هجري',
                     ),
                   ],
                 ),
@@ -215,33 +217,11 @@ class MySalary extends StatelessWidget {
     return '${h.day} ${h.monthName} ${h.year} هـ — $time12';
   }
 
-  void _showYearPicker(BuildContext context) {
-    final currentYear = JHijri.now().year;
-    final years = List.generate(5, (i) => currentYear - 2 + i);
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("اختر السنة الهجرية"),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: years.length,
-              itemBuilder: (context, index) {
-                final y = years[index];
-                return ListTile(
-                  title: Text('$y هـ'),
-                  onTap: () {
-                    controller.setYear(y);
-                    Navigator.of(context).pop();
-                  },
-                );
-              },
-            ),
-          ),
-        );
-      },
+  Future<void> _openHijriCalendarForYear(BuildContext context) async {
+    await HijriYearOnlyPickerDialog.show(
+      context,
+      initialYear: controller.selectedYear.value,
+      onConfirm: controller.setYear,
     );
   }
 }

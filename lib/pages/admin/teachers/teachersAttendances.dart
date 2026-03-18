@@ -302,7 +302,7 @@ class TeachersAttendancePage extends StatelessWidget {
                       style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                     ),
                     Text(
-                      _formatTimeDifference(
+                      formatAttendanceTimeDifference(
                           entryToSave.checkInTime!, entryToSave.checkOutTime!),
                       style: const TextStyle(
                         fontSize: 14,
@@ -485,31 +485,6 @@ class TeachersAttendancePage extends StatelessWidget {
     );
     if (picked == null) return null;
     return '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-  }
-
-  /// يحسب فارق الساعات بين وقتين بصيغة "HH:mm" ويعيد نصاً مثل "6 ساعات" أو "6 ساعات و 30 دقيقة".
-  static String _formatTimeDifference(String checkIn, String checkOut) {
-    int? minutesFromMidnight(String time) {
-      final parts = time.trim().split(':');
-      if (parts.length < 2) return null;
-      final h = int.tryParse(parts[0]);
-      final m = int.tryParse(parts[1]);
-      if (h == null || m == null || h < 0 || h >= 24 || m < 0 || m >= 60) return null;
-      return h * 60 + m;
-    }
-
-    final inM = minutesFromMidnight(checkIn);
-    final outM = minutesFromMidnight(checkOut);
-    if (inM == null || outM == null) return '—';
-    int diff = outM - inM;
-    if (diff < 0) diff += 24 * 60;
-    final hours = diff ~/ 60;
-    final minutes = diff % 60;
-    if (minutes == 0) return hours == 1 ? '1 ساعة' : '$hours ساعات';
-    if (hours == 0) return minutes == 1 ? '1 دقيقة' : '$minutes دقيقة';
-    final hStr = hours == 1 ? '1 ساعة' : '$hours ساعات';
-    final mStr = minutes == 1 ? '1 دقيقة' : '$minutes دقيقة';
-    return '$hStr و $mStr';
   }
 
   /// هل الحالة تعني مستأذن (من API أو محلياً).
