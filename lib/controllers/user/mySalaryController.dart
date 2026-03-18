@@ -84,9 +84,13 @@ class MySalaryController extends GetxController {
   Future<void> confirmSalaryReceipt(int id) async {
     final canUseBiometrics = await biometric.canUseBiometrics();
     if (canUseBiometrics) {
-      await biometric.authenticate(
+      final isAuthenticated = await biometric.authenticate(
         reason: 'استخدم البصمة أو قفل الجهاز لتأكيد استلام الراتب',
       );
+      if (!isAuthenticated) {
+        messageSnackBar("فشل التحقق من البصمة، يرجى المحاولة مرة أخرى");
+        return;
+      }
     }
     await markAsPaid(id);
   }

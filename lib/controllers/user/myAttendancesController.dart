@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
+import 'package:jaberah/config/biometrics/biometricService.dart';
 import 'package:jaberah/helpers/timeHelpers.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jhijri/jHijri.dart';
@@ -84,6 +85,7 @@ class MyAttendancesController extends GetxController {
   Rx<DateTime> selectedDay = DateTime.now().obs;
 
   final ApiClient _apiClient = Get.find();
+  final biometric = BiometricService();
   var isLoading = false.obs;
   var isCheckInOutLoading = false.obs;
 
@@ -333,6 +335,35 @@ class MyAttendancesController extends GetxController {
 
   /// تنسيق وقت من النص (مثل 07:04:00) للعرض بصيغة 12 ساعة.
   String formatTime(String? time) => formatTime12(time) ?? '—';
+
+  /// يطابق نمط [MySalaryController.confirmSalaryReceipt]: بصمة/قفل الجهاز عند التوفّر ثم تنفيذ الطلب.
+  Future<void> confirmCheckIn(int groupId) async {
+    final canUseBiometrics = await biometric.canUseBiometrics();
+    if (canUseBiometrics) {
+      final isAuthenticated = await biometric.authenticate(
+        reason: 'استخدم البصمة أو قفل الجهاز لتأكيد تسجيل الحضور',
+      );
+      if (!isAuthenticated) {
+        messageSnackBar("فشل التحقق من البصمة، يرجى المحاولة مرة أخرى");
+        return;
+      }
+    }
+    await checkIn(groupId);
+  }
+
+  Future<void> confirmCheckOut(int groupId) async {
+    final canUseBiometrics = await biometric.canUseBiometrics();
+    if (canUseBiometrics) {
+      final isAuthenticated = await biometric.authenticate(
+        reason: 'استخدم البصمة أو قفل الجهاز لتأكيد تسجيل الانصراف',
+      );
+      if (!isAuthenticated) {
+        messageSnackBar("فشل التحقق من البصمة، يرجى المحاولة مرة أخرى");
+        return;
+      }
+    }
+    await checkOut(groupId);
+  }
 
   Future<void> checkIn(int groupId) async {
     try {

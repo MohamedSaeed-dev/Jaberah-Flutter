@@ -193,7 +193,7 @@ class MySalary extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.fingerprint, size: 22),
-                label: Text(isMarking ? 'جاري التسجيل...' : 'تأكيد الاستلام (بصمة / زر)'),
+                label: Text(isMarking ? 'جاري التسجيل...' : 'تأكيد الاستلام'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3FB56C),
                   foregroundColor: Colors.white,

@@ -9,7 +9,7 @@ class MyAttendances extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Obx(() => Scaffold(
       appBar: AppBar(
         title: const Text('حضوري'),
         backgroundColor: const Color(0xFF3FB56C),
@@ -30,32 +30,26 @@ class MyAttendances extends StatelessWidget {
           }),
         ],
       ),
-      bottomNavigationBar: BottomAppBar(
-        child: Builder(
-          builder: (BuildContext newContext) {
-            return Obx(() {
-              return !controller.isAdmin.value
-                  ? FloatingActionButton.extended(
-                      onPressed: controller.isLoading.value ? null : () async {},
-                      label: Text(
-                        "رفع طلب",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      icon: Icon(
-                        Icons.cloud_upload_rounded,
-                        color: Colors.black,
-                      ),
-                      backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-                    )
-                  : SizedBox();
-            });
-          },
-        ),
-      ),
+      bottomNavigationBar: controller.isAdmin.value
+          ? null
+          : BottomAppBar(
+              child: FloatingActionButton.extended(
+                onPressed: controller.isLoading.value ? null : () async {},
+                label: Text(
+                  "رفع طلب",
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                icon: Icon(
+                  Icons.cloud_upload_rounded,
+                  color: Colors.black,
+                ),
+                backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+              ),
+            ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return Center(
@@ -90,7 +84,7 @@ class MyAttendances extends StatelessWidget {
           ),
         );
       }),
-    );
+    ));
   }
 
   Widget _buildMonthNavigation() {
@@ -410,8 +404,8 @@ class MyAttendances extends StatelessWidget {
                             children: [
                               if (showCheckIn)
                                 ElevatedButton.icon(
-                                  onPressed: loading ? null : () => controller.checkIn(item.groupId),
-                                  icon: const Icon(Icons.login, size: 18),
+                                  onPressed: loading ? null : () => controller.confirmCheckIn(item.groupId),
+                                  icon: const Icon(Icons.fingerprint, size: 18),
                                   label: const Text('تسجيل الحضور'),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF3FB56C),
@@ -420,8 +414,8 @@ class MyAttendances extends StatelessWidget {
                                 ),
                               if (showCheckOut)
                                 OutlinedButton.icon(
-                                  onPressed: (loading || !canCheckOut) ? null : () => controller.checkOut(item.groupId),
-                                  icon: const Icon(Icons.logout, size: 18),
+                                  onPressed: (loading || !canCheckOut) ? null : () => controller.confirmCheckOut(item.groupId),
+                                  icon: const Icon(Icons.fingerprint, size: 18),
                                   label: const Text('تسجيل الانصراف'),
                                 ),
                             ],
