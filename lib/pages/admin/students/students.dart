@@ -174,10 +174,12 @@ class Students extends StatelessWidget {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: AlertDialog(
+        return AlertDialog(
             title: const Text('إضافة طالب جديد'),
-            content: Form(
+            content: SizedBox(
+              width: double.maxFinite,
+              child: SingleChildScrollView(
+                child: Form(
               key: _formKeyAddStudent,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -282,17 +284,17 @@ class Students extends StatelessWidget {
                                   horizontal: 12), // Adjust padding
                             ),
                             child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
+                              child: DropdownButton<int?>(
                                 isExpanded:
                                     true, // Ensures the dropdown expands to full width
                                 value: controller
                                     .selectedGroupAddId.value, // Default value
-                                onChanged: (value) {
+                                onChanged: (int? value) {
                                   controller.selectedGroupAddId.value =
                                       value; // Update selected group
                                 },
                                 items: controller.groups.map((group) {
-                                  return DropdownMenuItem(
+                                  return DropdownMenuItem<int?>(
                                     value: group.id, // Group ID as value
                                     child: Text(group
                                         .groupName), // Group name as the displayed text
@@ -305,6 +307,8 @@ class Students extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ),
             actions: [
               TextButton(
                 onPressed: () {
@@ -323,8 +327,7 @@ class Students extends StatelessWidget {
                     : ' إضافة الطالب')),
               ),
             ],
-          ),
-        );
+          );
       },
     );
   }
@@ -532,16 +535,16 @@ class Students extends StatelessWidget {
                                   horizontal: 12), // Adjust padding
                             ),
                             child: DropdownButtonHideUnderline(
-                              child: DropdownButton(
+                              child: DropdownButton<int?>(
                                 isExpanded:
                                     true, // Ensures the dropdown expands to full width
                                 value: controller.selectedGroupEditId.value,
-                                onChanged: (value) {
+                                onChanged: (int? value) {
                                   controller.selectedGroupEditId.value =
                                       value; // Update selected group
                                 },
                                 items: controller.groups.map((group) {
-                                  return DropdownMenuItem(
+                                  return DropdownMenuItem<int?>(
                                     value: group.id, // Group ID as value
                                     child: Text(group
                                         .groupName), // Group name as the displayed text

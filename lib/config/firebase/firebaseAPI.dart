@@ -72,9 +72,15 @@ class FirebaseAPI {
     await _firebaseMessaging.requestPermission();
 
     _firebaseMessaging.onTokenRefresh.listen((token) async {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      var id = prefs.getString("id");
-      var accessToken = prefs.getString('accessToken');
+      try {
+        final auth = Get.find<AuthController>();
+        if (!auth.isLoggedIn.value) return;
+      } catch (_) {
+        return;
+      }
+      final prefs = await SharedPreferences.getInstance();
+      final id = prefs.getString("id");
+      final accessToken = prefs.getString('accessToken');
       if (id != null && accessToken != null) await updateToken(id, token);
     });
 
@@ -124,6 +130,12 @@ class FirebaseAPI {
 
   Future<void> updateToken(String userId, String token) async {
     try {
+      final auth = Get.find<AuthController>();
+      if (!auth.isLoggedIn.value) return;
+    } catch (_) {
+      return;
+    }
+    try {
       var response = await _apiClient.dio.patch("/$refreshFCMTokenURL", data: {
         "userId": userId,
         "token": token,
@@ -133,6 +145,12 @@ class FirebaseAPI {
         messageSnackBar("الرجاء اعادة تشغيل التطبيق");
       }
     } catch (e) {
+      try {
+        final auth = Get.find<AuthController>();
+        if (!auth.isLoggedIn.value) return;
+      } catch (_) {
+        return;
+      }
       messageSnackBar("الرجاء اعادة تشغيل التطبيق");
     }
   }

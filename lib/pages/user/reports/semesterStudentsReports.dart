@@ -153,34 +153,28 @@ class SemesterStudentsReports extends StatelessWidget {
         picked.jhijri != controller.selectedFromDate.value.jhijri) {
       controller.selectedFromDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
-      var fromDateHijri = picked.jhijri;
-      var fromDateDateTime = picked.date;
+      final fromDateHijri = picked.jhijri;
 
       var newToYear = fromDateHijri.year;
-      var newToYearDateTime = fromDateDateTime.year;
-
       var newToMonth = fromDateHijri.month + 3;
-      var newToMonthDateTime = fromDateDateTime.month + 3;
-      // Adjust year and month if month addition results in greater than 12
       if (newToMonth > 12) {
         newToYear += 1;
         newToMonth -= 12;
       }
-      if (newToMonthDateTime > 12) {
-        newToYearDateTime += 1;
-        newToMonthDateTime -= 12;
-      }
 
-      // Preserve the same day of the month
-      var newToDateHijri = JHijri(
+      // بعض الأشهر الهجرية 29 يوماً فقط؛ تجنّب يوم 30 غير صالح في شهر الوجهة
+      final maxDayTo = getDaysInAMonth(newToYear, newToMonth);
+      final dayTo =
+          fromDateHijri.day > maxDayTo ? maxDayTo : fromDateHijri.day;
+
+      final newToDateHijri = JHijri(
         fYear: newToYear,
         fMonth: newToMonth,
-        fDay: fromDateHijri.day,
+        fDay: dayTo,
       );
 
-      var newToDateDateTime = DateTime(newToYearDateTime, newToMonthDateTime, fromDateDateTime.day);
-
-      controller.selectedToDate.value = JDateModel(jhijri: newToDateHijri, dateTime: newToDateDateTime);
+      controller.selectedToDate.value = JDateModel(
+          jhijri: newToDateHijri, dateTime: newToDateHijri.dateTime);
       controller.updateSemesterReportDates();
     }
   }
@@ -219,35 +213,27 @@ class SemesterStudentsReports extends StatelessWidget {
         picked.jhijri != controller.selectedToDate.value.jhijri) {
       controller.selectedToDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
-      var toDateHijri = picked.jhijri;
-      var toDateDateTime = picked.date;
+      final toDateHijri = picked.jhijri;
 
       var newFromYear = toDateHijri.year;
-      var newFromYearDateTime = toDateDateTime.year;
-
       var newFromMonth = toDateHijri.month - 3;
-      var newFromMonthDateTime = toDateDateTime.month - 3;
-
-      // Adjust year and month if month subtraction results in less than 1
       if (newFromMonth < 1) {
         newFromYear -= 1;
         newFromMonth += 12;
       }
-      if (newFromMonthDateTime < 1) {
-        newFromYearDateTime -= 1;
-        newFromMonthDateTime += 12;
-      }
 
-      // Preserve the same day of the month
-      var newFromDateHijri = JHijri(
+      final maxDayFrom = getDaysInAMonth(newFromYear, newFromMonth);
+      final dayFrom =
+          toDateHijri.day > maxDayFrom ? maxDayFrom : toDateHijri.day;
+
+      final newFromDateHijri = JHijri(
         fYear: newFromYear,
         fMonth: newFromMonth,
-        fDay: toDateHijri.day,
+        fDay: dayFrom,
       );
-      
-      var newFromDateDateTime = DateTime(newFromYearDateTime, newFromMonthDateTime, toDateDateTime.day);
 
-      controller.selectedFromDate.value = JDateModel(jhijri: newFromDateHijri, dateTime: newFromDateDateTime);
+      controller.selectedFromDate.value = JDateModel(
+          jhijri: newFromDateHijri, dateTime: newFromDateHijri.dateTime);
       controller.updateSemesterReportDates();
     }
   }

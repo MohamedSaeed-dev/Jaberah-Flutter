@@ -26,7 +26,7 @@ class StudentsReport extends StatelessWidget {
           children: [
             _buildCard(
               context: context,
-              title: 'التقارير الفصلية',
+              title: 'التقرير الفصلي',
               icon: Icons.calendar_month,
               color: Colors.blue,
               onTap: () {
@@ -35,7 +35,7 @@ class StudentsReport extends StatelessWidget {
             ),
             _buildCard(
               context: context,
-              title: 'التقارير الشهرية',
+              title: 'التقرير الشهري',
               icon: Icons.calendar_view_month,
               color: Colors.green,
               onTap: () {

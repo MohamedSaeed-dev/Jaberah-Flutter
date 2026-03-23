@@ -10,194 +10,133 @@ class BestStudentsReport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BuildContext c = context;
-    return DefaultTabController(
-      length: 2, // Number of tabs
-      child: Scaffold(
-        bottomNavigationBar: BottomAppBar(
-          child: Builder(
-            builder: (BuildContext newContext) {
-              c = newContext;
-              final tabController = DefaultTabController.of(newContext);
-              return Obx(()=> FloatingActionButton.extended(
-                    onPressed: controller.selectedGroupId.value.isEmpty || controller.isLoading.value
-                        ? null
-                        : () async {
-                      if (tabController.index == 0) {
-                        await controller.getBestStudentsForMonthByGroupReport();
-                      } else if (tabController.index == 1) {
-                        await controller.getBestStudentsForMonthReport();
-                      }
+    return Scaffold(
+      bottomNavigationBar: BottomAppBar(
+        child: SizedBox(
+          width: double.infinity,
+          child: Obx(
+            () => FloatingActionButton.extended(
+              onPressed: controller.isLoading.value
+                  ? null
+                  : () async {
+                      await controller.fetchBestStudentsReport();
                     },
-                    label: Text(
-                      "عـرض الـتـقـريـر",
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    icon: Icon(
-                      Icons.document_scanner_outlined,
-                      color: Colors.black,
-                    ),
-                    backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-                  ));
-            },
+              label: const Text(
+                "عـرض الـتـقـريـر",
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              icon: const Icon(
+                Icons.document_scanner_outlined,
+                color: Colors.black,
+              ),
+              backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+            ),
           ),
         ),
-        appBar: AppBar(
-          actions: [
-            Obx(() => IconButton(
-                onPressed: (controller.isLoading.value ||
-                        (controller.bestStudentsInMonthReport.isEmpty &&
-                            controller
-                                .bestStudentsInMonthOfGroupReport.isEmpty))
-                    ? null
-                    : () {
-                        TabController tabController =
-                            DefaultTabController.of(c);
-                        if (tabController.index == 0) {
-                          controller.exportAsPDF(
-                              "تقرير الطلاب المتميزون لـ ${controller.selectedGroupName.value} لشهر ${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
-                              controller.bestStudentsInMonthOfGroupReport);
-                        } else if (tabController.index == 1) {
-                          controller.exportAsPDF(
-                              "تقرير الطلاب المتميزون على جميع الحلقات لشهر ${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
-                              controller.bestStudentsInMonthReport);
-                        }
-                      },
-                icon:const Icon(
-                  Icons.save,
-                  color: Colors.black,
-                ))),
-            PopupMenuButton(
-              iconColor: Colors.black,
-              icon: const Icon(Icons.numbers),
-              onSelected: (value) {
+      ),
+      appBar: AppBar(
+        actions: [
+          Obx(
+            () => IconButton(
+              onPressed: (controller.isLoading.value ||
+                      controller.bestStudentsReport.isEmpty)
+                  ? null
+                  : () {
+                      final monthName =
+                          controller.selectedDate.value.jhijri!.monthName;
+                      final year = controller.selectedDate.value.jhijri!.year;
+                      final title = controller.isAllGroupsSelected
+                          ? "تقرير الطلاب المتميزون على جميع الحلقات لشهر $monthName - $year"
+                          : "تقرير الطلاب المتميزون لـ ${controller.selectedGroupName.value} لشهر $monthName - $year";
+                      controller.exportAsPDF(
+                          title, controller.bestStudentsReport.toList());
+                    },
+              icon: const Icon(
+                Icons.save,
+                color: Colors.black,
+              ),
+            ),
+          ),
+          PopupMenuButton<int>(
+            iconColor: Colors.black,
+            icon: const Icon(Icons.numbers),
+            onSelected: (value) {
               controller.take.value = value;
-            }, itemBuilder: (context) {
+            },
+            itemBuilder: (context) {
               return [
-                PopupMenuItem(
+                const PopupMenuItem(
                   child: Text("5"),
                   value: 5,
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   child: Text("6"),
                   value: 6,
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   child: Text("7"),
                   value: 7,
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   child: Text("8"),
                   value: 8,
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   child: Text("9"),
                   value: 9,
                 ),
-                PopupMenuItem(
+                const PopupMenuItem(
                   child: Text("10"),
                   value: 10,
                 ),
               ];
-            })
-          ],
-          title: const Text('تقرير الطلاب المتميزون'),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'بحسب حلقة معينة'),
-              Tab(text: 'على جميع الحلقات'),
-            ],
-          ),
-        ),
-        body: TabBarView(
+            },
+          )
+        ],
+        title: const Text('تقرير الطلاب المتميزون'),
+        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildClassAndMonthSearch(context),
-            _buildMonthAcrossClassesSearch(context),
+            Obx(() => _buildHijriMonthDatePicker(context, 'الشهر الهجري:')),
+            const SizedBox(height: 10),
+            _buildGroupDropdown(),
+            const SizedBox(height: 10),
+            const Divider(),
+            Obx(() {
+              if (controller.isLoading.value) {
+                return _buildLoadingIndicator(
+                  controller.isAllGroupsSelected
+                      ? "جاري تحميل تقرير الطلاب المتميزين على جميع الحلقات"
+                      : "جاري تحميل تقرير الطلاب المتميزين لحلقة ${controller.selectedGroupName.value}",
+                );
+              } else if (controller.bestStudentsReport.isEmpty) {
+                return _buildEmptyDataIndicator();
+              } else {
+                return Expanded(
+                  child: ListView.builder(
+                    itemCount: controller.bestStudentsReport.length,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return _buildStudentsCard(
+                            controller.bestStudentsReport[index], true);
+                      }
+                      return _buildStudentsCard(
+                          controller.bestStudentsReport[index], false);
+                    },
+                  ),
+                );
+              }
+            }),
           ],
         ),
-      ),
-    );
-  }
-
-  // Tab: Best Students by Specific Class and Month
-  Widget _buildClassAndMonthSearch(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Obx(() => _buildHijriMonthDatePicker(context, 'الشهر الهجري:')),
-          const SizedBox(height: 10),
-          _buildGroupDropdown(),
-          const SizedBox(height: 10),
-          const Divider(),
-          Obx(() {
-            if (controller.isLoading.value) {
-              return _buildLoadingIndicator(
-                  "جاري تحميل تقرير الطلاب المتميزين لحلقة ${controller.selectedGroupName.value}");
-            } else if (controller.bestStudentsInMonthOfGroupReport.isEmpty) {
-              return _buildEmptyDataIndicator();
-            } else {
-              return Expanded(
-                child: ListView.builder(
-                  itemCount: controller.bestStudentsInMonthOfGroupReport.length,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return _buildStudentsCard(
-                          controller.bestStudentsInMonthOfGroupReport[index],
-                          true);
-                    }
-                    return _buildStudentsCard(
-                        controller.bestStudentsInMonthOfGroupReport[index],
-                        false);
-                  },
-                ),
-              );
-            }
-          }),
-        ],
-      ),
-    );
-  }
-
-  // Tab: Best Students Across All Classes by Month
-  Widget _buildMonthAcrossClassesSearch(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Obx(() => _buildHijriMonthDatePicker(context, 'الشهر الهجري:')),
-          const Divider(),
-          const SizedBox(height: 20),
-          Obx(() {
-            if (controller.isLoading.value) {
-              return _buildLoadingIndicator(
-                  "جاري تحميل تقرير الطلاب المتميزين على جميع الحلقات");
-            } else if (controller.bestStudentsInMonthReport.isEmpty) {
-              return _buildEmptyDataIndicator();
-            } else {
-              return Expanded(
-                child: ListView.builder(
-                  itemCount: controller.bestStudentsInMonthReport.length,
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return _buildStudentsCard(
-                          controller.bestStudentsInMonthReport[index], true);
-                    }
-                    return _buildStudentsCard(
-                        controller.bestStudentsInMonthReport[index], false);
-                  },
-                ),
-              );
-            }
-          }),
-        ],
       ),
     );
   }
@@ -219,7 +158,7 @@ class BestStudentsReport extends StatelessWidget {
               children: [
                 // Student Name
                 Container(
-                  margin: EdgeInsets.only(top: 10),
+                  margin: const EdgeInsets.only(top: 10),
                   child: Text(
                     '${student.studentName} ${student.groupName != null ? '- ${student.groupName}' : ''}',
                     style: const TextStyle(
@@ -338,28 +277,44 @@ class BestStudentsReport extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Obx(() => InputDecorator(
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'الحلقة',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12),
             ),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton(
+              child: DropdownButton<String>(
                 isExpanded: true,
-                value: controller.selectedGroupId.value.isNotEmpty
-                    ? controller.selectedGroupId.value
-                    : controller.groups.isNotEmpty
-                        ? controller.groups[0]['id'].toString()
-                        : null,
+                value: controller.selectedGroupId.value,
                 onChanged: (value) {
-                  controller.selectedGroupId.value = value.toString();
+                  if (value == null) return;
+                  controller.selectedGroupId.value = value;
+                  if (value == BestStudentsController.kAllGroupsId) {
+                    controller.selectedGroupName.value = 'كل الحلقات';
+                  } else {
+                    for (final g in controller.groups) {
+                      final map = g as Map<String, dynamic>;
+                      if (map['id'].toString() == value) {
+                        controller.selectedGroupName.value =
+                            map['name']?.toString() ?? '';
+                        break;
+                      }
+                    }
+                  }
                 },
-                items: controller.groups.map((group) {
-                  return DropdownMenuItem(
-                    value: group["id"].toString(),
-                    child: Text(group['name']),
-                  );
-                }).toList(),
+                items: [
+                  const DropdownMenuItem<String>(
+                    value: BestStudentsController.kAllGroupsId,
+                    child: Text('كل الحلقات'),
+                  ),
+                  ...controller.groups.map((group) {
+                    final g = group as Map<String, dynamic>;
+                    return DropdownMenuItem<String>(
+                      value: g['id'].toString(),
+                      child: Text(g['name']?.toString() ?? ''),
+                    );
+                  }),
+                ],
               ),
             ),
           )),
@@ -373,11 +328,11 @@ class BestStudentsReport extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 20),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 20),
             Text(
               message,
-              style: TextStyle(fontSize: 20),
+              style: const TextStyle(fontSize: 20),
               textAlign: TextAlign.center,
             ),
           ],
@@ -410,7 +365,7 @@ class BestStudentsReport extends StatelessWidget {
         Row(
           children: [
             Text(label, style: const TextStyle(fontSize: 15)),
-            SizedBox(width: 20),
+            const SizedBox(width: 20),
             Text(
               "${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -419,7 +374,7 @@ class BestStudentsReport extends StatelessWidget {
         ),
         IconButton(
           onPressed: () => _selectHijriMonth(context),
-          icon: Icon(Icons.calendar_month),
+          icon: const Icon(Icons.calendar_month),
         ),
       ],
     );
@@ -454,8 +409,8 @@ class BestStudentsReport extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
-      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
-      // await controller.getBestStudentsByClassAndMonth();
+      controller.selectedDate.value =
+          JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
     }
   }
 }

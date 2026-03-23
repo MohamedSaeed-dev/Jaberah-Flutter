@@ -120,7 +120,10 @@ class Groups extends StatelessWidget {
                       "Id": data.id,
                       "Name": data.groupName,
                       "teacherId": data.teacherId,
-                      "period": data.period
+                      "period": data.period,
+                      "windowStart": data.windowStart,
+                      "windowEnd": data.windowEnd,
+                      "flexibleMinutes": data.flexibleMinutes,
                     });
                   },
                 );

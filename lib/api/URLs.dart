@@ -8,7 +8,7 @@ const newServerASP = "https://jaberah-new.tryasp.net/api";
 
 const IP = "http://10.251.226.198:5291/api";
 
-const baseUrl = newServerASP;
+const baseUrl = local_asp;
 
 const loginURL = "auth/login";
 

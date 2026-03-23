@@ -16,31 +16,44 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 
 class BestStudentsController extends GetxController {
+  /// قيمة اختيار «كل الحلقات» في القائمة المنسدلة
+  static const String kAllGroupsId = 'all';
+
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
   var selectedDate = JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
 
   var groups = [].obs;
-  var selectedGroupId = ''.obs;
-  var selectedGroupName = ''.obs;
+  var selectedGroupId = kAllGroupsId.obs;
+  var selectedGroupName = 'كل الحلقات'.obs;
 
   var take = 5.obs;
 
-  var bestStudentsInMonthOfGroupReport = <BestStudentsReportModel>[];
-  var bestStudentsInMonthReport = <BestStudentsReportModel>[];
+  final bestStudentsReport = <BestStudentsReportModel>[].obs;
+
+  bool get isAllGroupsSelected => selectedGroupId.value == kAllGroupsId;
+
+  /// يحمّل تقرير حلقة واحدة أو جميع الحلقات حسب الاختيار الحالي
+  Future<void> fetchBestStudentsReport() async {
+    if (isAllGroupsSelected) {
+      await getBestStudentsForMonthReport();
+    } else {
+      await getBestStudentsForMonthByGroupReport();
+    }
+  }
 
   Future getBestStudentsForMonthByGroupReport() async {
     try {
       isLoading.value = true;
       var response = await _apiClient.dio
           .get(
-              "/$bestStudentForGroupReportURL?groupId=$selectedGroupId&year=${selectedDate.value.dateTime!.year}&month=${selectedDate.value.dateTime!.month}&take=${take.value}")
+              "/$bestStudentForGroupReportURL?groupId=${selectedGroupId.value}&year=${selectedDate.value.dateTime!.year}&month=${selectedDate.value.dateTime!.month}&take=${take.value}")
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;
-        bestStudentsInMonthOfGroupReport = result
+        bestStudentsReport.assignAll(result
             .map((item) => BestStudentsReportModel.fromJson(item))
-            .toList();
+            .toList());
       } else {
         messageSnackBar(response.data["message"]);
       }
@@ -70,9 +83,9 @@ class BestStudentsController extends GetxController {
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         List<dynamic> result = response.data;
-        bestStudentsInMonthReport = result
+        bestStudentsReport.assignAll(result
             .map((item) => BestStudentsReportModel.fromJson(item))
-            .toList();
+            .toList());
       } else {
         messageSnackBar(response.data["message"]);
       }
@@ -106,10 +119,8 @@ class BestStudentsController extends GetxController {
           .timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         groups.value = response.data;
-        if (groups.isNotEmpty) {
-          selectedGroupId.value = groups[0]["id"].toString();
-          selectedGroupName.value = groups[0]["name"];
-        }
+        selectedGroupId.value = kAllGroupsId;
+        selectedGroupName.value = 'كل الحلقات';
       } else {
         messageSnackBar(response.data["message"]);
       }

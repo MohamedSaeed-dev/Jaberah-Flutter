@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
-import 'package:jaberah/controllers/admin/addStudentController.dart';
+import 'package:jaberah/models/admin/groups_for_general_use.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 
 class StudentsController extends GetxController {

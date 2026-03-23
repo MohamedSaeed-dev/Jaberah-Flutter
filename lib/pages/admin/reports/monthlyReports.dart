@@ -253,9 +253,9 @@ class MonthlyReportPage extends StatelessWidget {
             _buildSectionTitle('تفاصيل التسميع'),
             const SizedBox(height: 10),
             _buildStudentRowSaveReview('الحفظ:',
-                " من سورة ${student.saveFromSurah} آيه ${student.saveFromVerse} إلى سورة ${student.saveToSurah} آيه ${student.saveToVerse}"),
+                " من سورة ${student.saveFromSurah.isEmpty ? '-' : student.saveFromSurah} آيه ${student.saveFromVerse} إلى سورة ${student.saveToSurah.isEmpty ? '-' : student.saveToSurah} آيه ${student.saveToVerse}"),
             _buildStudentRowSaveReview('مراجعة:',
-                " من سورة ${student.reviewFromSurah} آيه ${student.reviewFromVerse} إلى سورة ${student.reviewToSurah} آيه ${student.reviewToVerse}"),
+                " من سورة ${student.reviewFromSurah.isEmpty ? '-' : student.reviewFromSurah} آيه ${student.reviewFromVerse} إلى سورة ${student.reviewToSurah.isEmpty ? '-' : student.reviewToSurah} آيه ${student.reviewToVerse}"),
 
             const Divider(height: 24, thickness: 1),
 

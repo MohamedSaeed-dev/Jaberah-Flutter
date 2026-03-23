@@ -17,6 +17,11 @@ class GroupStudentsController extends GetxController {
   final period1 = Get.arguments["period"];
   var period = "1".obs;
 
+  /// وقت بداية/نهاية الحلقة (HH:mm) والدقائق المرنة — تُعدَّل مع الحلقة وليس المعلم.
+  var windowStartEdit = ''.obs;
+  var windowEndEdit = ''.obs;
+  var flexibleMinutesEditController = TextEditingController().obs;
+
   var searchText = TextEditingController(text: "").obs;
 
   var groupNameText = TextEditingController(text: '').obs;
@@ -90,10 +95,15 @@ class GroupStudentsController extends GetxController {
     try {
       isLoadingOperation.value = true;
       var periodNumber = period.value == 'صباحية' ? 1 : 2;
+      final flexibleParsed =
+          int.tryParse(flexibleMinutesEditController.value.text.trim());
       var response = await _apiClient.dio.put("/$groupsURL/$id", data: {
         "groupName": groupNameText.value.text,
+        "teacherId": selectedTeacherId.value ?? 0,
         "period": periodNumber,
-        "teacherId": selectedTeacherId.value
+        "windowStart": windowStartEdit.value,
+        "windowEnd": windowEndEdit.value,
+        "flexibleMinutes": flexibleParsed ?? 0,
       }).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         groupName.value = groupNameText.value.text;
@@ -187,12 +197,18 @@ class GroupStudentsController extends GetxController {
     super.onInit();
     groupName.value = name;
     teacherIdText = teacherId;
-    period.value = period1.toString();
+    period.value = Group.periodToUiString(period1);
+    windowStartEdit.value = Get.arguments['windowStart']?.toString() ?? '';
+    windowEndEdit.value = Get.arguments['windowEnd']?.toString() ?? '';
+    final fm = Get.arguments['flexibleMinutes'];
+    flexibleMinutesEditController.value.text =
+        fm != null ? fm.toString() : '';
     getStudents();
   }
 
   @override
   void onClose() {
+    flexibleMinutesEditController.value.dispose();
     super.onClose();
     if (isGroupChanged.value || isGroupDeleted.value) {
       Get.find<GroupsController>().getGroups();

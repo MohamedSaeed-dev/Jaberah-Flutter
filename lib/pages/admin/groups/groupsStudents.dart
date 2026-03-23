@@ -488,13 +488,16 @@ class GroupStudents extends StatelessWidget {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('تعديل الحلقة '),
-          content: Form(
-            key: formKeyGroupName,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+          content: SizedBox(
+            width: double.maxFinite,
+            child: Form(
+              key: formKeyGroupName,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                 TextFormField(
                   controller: controller.groupNameText.value,
                   decoration: const InputDecoration(
@@ -534,7 +537,41 @@ class GroupStudents extends StatelessWidget {
                     )),
                 const SizedBox(height: 20),
                 _buildTeachersDropdown(),
-              ],
+                const SizedBox(height: 16),
+                Obx(() => _buildTimeEditRow(
+                      context,
+                      label: 'وقت بداية فترة الحلقة خلال اليوم',
+                      value: controller.windowStartEdit.value,
+                      onTap: () => _pickTimeForGroup(
+                              context, controller.windowStartEdit.value)
+                          .then((v) {
+                        if (v != null) controller.windowStartEdit.value = v;
+                      }),
+                    )),
+                const SizedBox(height: 12),
+                Obx(() => _buildTimeEditRow(
+                      context,
+                      label: 'وقت نهاية فترة الحلقة خلال اليوم',
+                      value: controller.windowEndEdit.value,
+                      onTap: () => _pickTimeForGroup(
+                              context, controller.windowEndEdit.value)
+                          .then((v) {
+                        if (v != null) controller.windowEndEdit.value = v;
+                      }),
+                    )),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: controller.flexibleMinutesEditController.value,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'الدقائق المرنة قبل احتساب التأخر',
+                    hintText: 'مثال: 15',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                  ],
+                ),
+              ),
             ),
           ),
           actions: [
@@ -587,6 +624,61 @@ class GroupStudents extends StatelessWidget {
             ),
           ),
         ));
+  }
+
+  Widget _buildTimeEditRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+          suffixIcon: const Icon(Icons.access_time),
+        ),
+        child: Text(
+          value.isEmpty ? '—' : value,
+          style: TextStyle(
+            fontSize: 16,
+            color: value.isEmpty ? Colors.grey : null,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<String?> _pickTimeForGroup(BuildContext context,
+      [String? initialStr]) async {
+    TimeOfDay initial = TimeOfDay.now();
+    if (initialStr != null && initialStr.contains(':')) {
+      final parts = initialStr.split(':');
+      if (parts.length >= 2) {
+        final h = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        if (h != null && m != null && h >= 0 && h < 24 && m >= 0 && m < 60) {
+          initial = TimeOfDay(hour: h, minute: m);
+        }
+      }
+    }
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: initial,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(primary: Color(0xFF3FB56C)),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked == null) return null;
+    return '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
   }
 
   Widget _buildBottomButton({

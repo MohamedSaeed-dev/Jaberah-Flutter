@@ -15,11 +15,6 @@ class TeachersController extends GetxController {
 
   var nameEditController = TextEditingController().obs;
   var phoneEditController = TextEditingController().obs;
-  /// وقت بداية فترة المعلم خلال اليوم (HH:mm)
-  var windowStartEdit = ''.obs;
-  /// وقت نهاية فترة المعلم خلال اليوم (HH:mm)
-  var windowEndEdit = ''.obs;
-  var flexibleMinutesEditController = TextEditingController().obs;
 
   var searchText = TextEditingController().obs;
 
@@ -218,14 +213,10 @@ class TeachersController extends GetxController {
   Future updateTeacher({required String id}) async {
     try {
       isLoadingOperation.value = true;
-      final flexibleMinutes = int.tryParse(flexibleMinutesEditController.value.text);
       var response = await _apiClient.dio.put("/$teachersURL/$id", data: {
         "teacherName": nameEditController.value.text,
         "phoneNumber": phoneEditController.value.text,
         "groupsId": selectedGroupsEdit,
-        if (windowStartEdit.value.isNotEmpty) "windowStart": windowStartEdit.value,
-        if (windowEndEdit.value.isNotEmpty) "windowEnd": windowEndEdit.value,
-        if (flexibleMinutes != null) "flexibleMinutes": flexibleMinutes,
       }).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         Get.back();
@@ -264,18 +255,12 @@ class Teacher {
   String teacherName;
   String phoneNumber;
   List<TeacherGroups>? groups;
-  String? windowStart;
-  String? windowEnd;
-  double? flexibleMinutes;
 
   Teacher(
       {required this.id,
       required this.teacherName,
       required this.phoneNumber,
-      this.groups,
-      this.windowStart,
-      this.windowEnd,
-      this.flexibleMinutes});
+      this.groups});
 
   factory Teacher.fromJson(Map<String, dynamic> json) {
     return Teacher(
@@ -285,11 +270,6 @@ class Teacher {
       groups: (json["groups"] as List<dynamic>?)
           ?.map((item) => TeacherGroups.fromJson(item as Map<String, dynamic>))
           .toList(),
-      windowStart: json["windowStart"] != null ? (json["windowStart"] as String?) : null,
-      windowEnd: json["windowEnd"] != null ? (json["windowEnd"] as String?) : null,
-      flexibleMinutes: (json["flexibleMinutes"] != null && json["flexibleMinutes"] is int)
-          ? (json["flexibleMinutes"] as int).toDouble()
-          : json["flexibleMinutes"] != null ? double.parse(json["flexibleMinutes"].toString()) : null,
     );
   }
 }

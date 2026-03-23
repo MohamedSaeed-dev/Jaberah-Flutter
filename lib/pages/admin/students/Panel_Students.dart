@@ -10,7 +10,7 @@ class Panel_Students extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'التقارير',
+          'الطلاب',
           style: TextStyle(
             fontFamily: 'GE_SS_Two',
             fontWeight: FontWeight.bold,
@@ -27,7 +27,7 @@ class Panel_Students extends StatelessWidget {
           children: [
             _buildCard(
               context: context,
-              title: 'معلومات الطلاب',
+              title: 'بيانات الطلاب',
               icon: Icons.person,
               color: Colors.orange,
               onTap: () {

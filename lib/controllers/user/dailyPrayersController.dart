@@ -110,11 +110,33 @@ class DailyPrayersController extends GetxController {
   Future<void> loadDailyPrayers() async {
     try {
       isLoadingDaily.value = true;
-      var path =
-          '/$prayersURL/daily?date=$dateStr&pageNumber=${pageNumber.value}&pageSize=$pageSize';
+
+      // // عند «كل الحلقات» يجب إرسال GroupsId لكل حلقات المعلم، وإلا الـ API يعيد كل الطلاب
+      // if (selectedGroupId.value == null && teacherGroups.isEmpty) {
+      //   await loadTeacherGroups();
+      //   if (teacherGroups.isEmpty) {
+      //     dailyStudents.clear();
+      //     totalCount.value = 0;
+      //     totalPages.value = 0;
+      //     hasNext.value = false;
+      //     hasPrevious.value = false;
+      //     return;
+      //   }
+      // }
+
+      final queryParts = <String>[
+        'Date=$dateStr',
+        'pageNumber=${pageNumber.value}',
+        'pageSize=$pageSize',
+      ];
       if (selectedGroupId.value != null) {
-        path += '&groupId=${selectedGroupId.value}';
+        queryParts.add('GroupsId=${selectedGroupId.value}');
+      } else {
+        for (final g in teacherGroups) {
+          queryParts.add('GroupsId=${g.id}');
+        }
       }
+      var path = '/$prayersURL/daily?${queryParts.join('&')}';
       if (searchText.value.text.trim().isNotEmpty) {
         path += '&search=${Uri.encodeComponent(searchText.value.text.trim())}';
       }
@@ -222,9 +244,11 @@ class DailyPrayersController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    loadTeacherGroups();
     loadPrayers();
-    loadDailyPrayers();
+    Future.microtask(() async {
+      await loadTeacherGroups();
+      await loadDailyPrayers();
+    });
   }
 
   @override

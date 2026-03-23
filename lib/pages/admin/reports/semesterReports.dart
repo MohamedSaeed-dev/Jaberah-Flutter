@@ -166,24 +166,27 @@ class SemesterReportPage extends StatelessWidget {
         picked.jhijri != controller.selectedFromDate.value.jhijri) {
       controller.selectedFromDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
-      var fromDateHijri = picked.jhijri;
+      final fromDateHijri = picked.jhijri!;
       var newToYear = fromDateHijri.year;
       var newToMonth = fromDateHijri.month + 3;
 
-      // Adjust year and month if month addition results in greater than 12
       if (newToMonth > 12) {
         newToYear += 1;
         newToMonth -= 12;
       }
 
-      // Preserve the same day of the month
-      var newToDateHijri = JHijri(
+      final maxDayTo = getDaysInAMonth(newToYear, newToMonth);
+      final dayTo =
+          fromDateHijri.day > maxDayTo ? maxDayTo : fromDateHijri.day;
+
+      final newToDateHijri = JHijri(
         fYear: newToYear,
         fMonth: newToMonth,
-        fDay: fromDateHijri.day,
+        fDay: dayTo,
       );
 
-      controller.selectedToDate.value = JDateModel(jhijri: newToDateHijri, dateTime: picked.date);
+      controller.selectedToDate.value = JDateModel(
+          jhijri: newToDateHijri, dateTime: newToDateHijri.dateTime);
       controller.updateSemesterReportDates();
     }
 
@@ -223,24 +226,27 @@ class SemesterReportPage extends StatelessWidget {
         picked.jhijri != controller.selectedToDate.value.jhijri) {
       controller.selectedToDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
-      var toDateHijri = picked.jhijri;
+      final toDateHijri = picked.jhijri;
       var newFromYear = toDateHijri.year;
       var newFromMonth = toDateHijri.month - 3;
 
-      // Adjust year and month if month subtraction results in less than 1
       if (newFromMonth < 1) {
         newFromYear -= 1;
         newFromMonth += 12;
       }
 
-      // Preserve the same day of the month
-      var newFromDateHijri = JHijri(
+      final maxDayFrom = getDaysInAMonth(newFromYear, newFromMonth);
+      final dayFrom =
+          toDateHijri.day > maxDayFrom ? maxDayFrom : toDateHijri.day;
+
+      final newFromDateHijri = JHijri(
         fYear: newFromYear,
         fMonth: newFromMonth,
-        fDay: toDateHijri.day,
+        fDay: dayFrom,
       );
 
-      controller.selectedFromDate.value = JDateModel(jhijri: newFromDateHijri, dateTime: picked.date);
+      controller.selectedFromDate.value = JDateModel(
+          jhijri: newFromDateHijri, dateTime: newFromDateHijri.dateTime);
       controller.updateSemesterReportDates();
     }
 

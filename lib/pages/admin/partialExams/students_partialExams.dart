@@ -28,7 +28,7 @@ class StudentsPartialExams extends StatelessWidget {
                   : () async {
                       var hijriDate = controller.selectedDate.value.jhijri!;
                       controller.exportAsPDF(
-                          "تقرير الاختبار الجزئي لـ ${controller.name} - ${hijriDate.day} ${hijriDate.monthName} ${hijriDate.year}");
+                          "تقرير الاختبار الجزئي لـ ${controller.selectedGroupName.value} - ${hijriDate.day} ${hijriDate.monthName} ${hijriDate.year}");
                     },
               icon: Icon(
                 Icons.save,
@@ -38,72 +38,103 @@ class StudentsPartialExams extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            // Date Picker
-            Obx(() => _buildHijriDatePicker(context)),
-            SizedBox(height: 10),
-            Obx(() => TextField(
-                  controller: controller.searchText.value,
-                  style: TextStyle(color: Colors.black),
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    hintText: 'ابحث عن طالب...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+        child: Obx(() {
+          if (controller.isLoadingGroups.value) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text(
+                    'جاري تحميل الحلقات...',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+            );
+          }
+          if (controller.groups.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.hourglass_empty, size: 48),
+                  SizedBox(height: 12),
+                  Text('لا توجد حلقات', style: TextStyle(fontSize: 20)),
+                ],
+              ),
+            );
+          }
+          return Column(
+            children: [
+              const SizedBox(height: 10),
+              Obx(() => _buildHijriDatePicker(context)),
+              _buildGroupDropdown(),
+              const SizedBox(height: 10),
+              Obx(() => TextField(
+                    controller: controller.searchText.value,
+                    style: const TextStyle(color: Colors.black),
+                    cursorColor: Colors.black,
+                    onChanged: (_) => controller.searchStudents(),
+                    decoration: InputDecoration(
+                      hintText: 'ابحث عن طالب...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
-                  ),
-                )),
-            const Divider(
-              height: 30,
-            ),
-            Obx(() {
-              if (controller.isLoading.value) {
-                return Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        Text(
-                          "جاري تحميل الطلاب...",
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
+                  )),
+              const Divider(
+                height: 30,
+              ),
+              Obx(() {
+                if (controller.isLoading.value) {
+                  return Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const CircularProgressIndicator(),
+                          Text(
+                            "جاري تحميل الطلاب...",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              } else if (controller.students.isEmpty &&
-                  !controller.isLoading.value) {
-                return Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.hourglass_empty),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text("لاتوجد بيانات", style: TextStyle(fontSize: 20))
-                      ],
+                  );
+                } else if (controller.students.isEmpty &&
+                    !controller.isLoading.value) {
+                  return Expanded(
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.hourglass_empty),
+                          SizedBox(
+                            height: 10,
+                          ),
+                          Text("لاتوجد بيانات", style: TextStyle(fontSize: 20))
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              } else {
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: controller.filteredStudents.length,
-                    itemBuilder: (context, index) {
-                      return _buildStudentCard(
-                          controller.filteredStudents[index], context);
-                    },
-                  ),
-                );
-              }
-            }),
-          ],
-        ),
+                  );
+                } else {
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: controller.filteredStudents.length,
+                      itemBuilder: (context, index) {
+                        return _buildStudentCard(
+                            controller.filteredStudents[index], context);
+                      },
+                    ),
+                  );
+                }
+              }),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -129,6 +160,36 @@ class StudentsPartialExams extends StatelessWidget {
             onPressed: () => _selectHijriDate(context),
             icon: Icon(Icons.calendar_month))
       ],
+    );
+  }
+
+  Widget _buildGroupDropdown() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+      child: Obx(() => InputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'الحلقة',
+              border: OutlineInputBorder(),
+              contentPadding: EdgeInsets.symmetric(horizontal: 12),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                isExpanded: true,
+                value: controller.selectedGroupId.value,
+                hint: const Text('اختر الحلقة'),
+                items: controller.groups.map((g) {
+                  return DropdownMenuItem<int>(
+                    value: g.id,
+                    child: Text(
+                      g.groupName,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  );
+                }).toList(),
+                onChanged: controller.onGroupSelected,
+              ),
+            ),
+          )),
     );
   }
 
@@ -207,7 +268,7 @@ class StudentsPartialExams extends StatelessWidget {
                       Map<String, dynamic> arguments = {
                         "studentId": student.studentId,
                         "studentName": student.studentName,
-                        "groupName": controller.name,
+                        "groupName": controller.selectedGroupName.value,
                         "selectedDate": controller.selectedDate.value,
                       };
 

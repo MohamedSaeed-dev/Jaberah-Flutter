@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -7,31 +8,114 @@ import 'package:get/get.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
+import 'package:jaberah/controllers/admin/groupsController.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/models/global/storage-permission.dart';
 import 'package:jhijri/_src/_jHijri.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class StudentsPartialExamsController extends GetxController {
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
+  var isLoadingGroups = false.obs;
+  var groups = <Group>[].obs;
+  Rxn<int> selectedGroupId = Rxn<int>();
+  var selectedGroupName = ''.obs;
+
   var students = <PartialExamStudent>[].obs;
   var filteredStudents = <PartialExamStudent>[].obs;
   var searchText = TextEditingController().obs;
   var selectedDate =
       JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
 
-  late int groupId;
-  late String name;
-
   @override
   void onInit() {
     super.onInit();
-    groupId = Get.arguments["id"];
-    name = Get.arguments["Name"];
-    getStudents();
+    _loadGroupsThenStudents();
+  }
+
+  Future<void> _loadGroupsThenStudents() async {
+    await loadGroups();
+    if (selectedGroupId.value != null) {
+      await getStudents();
+    }
+  }
+
+  Future<void> loadGroups() async {
+    try {
+      isLoadingGroups.value = true;
+      var response = await _apiClient.dio
+          .get("/$groupsURL")
+          .timeout(const Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        List<dynamic> result = response.data;
+        groups.value =
+            result.map((item) => Group.fromJson(item as Map<String, dynamic>)).toList();
+        await _applySavedOrder();
+        if (groups.isNotEmpty) {
+          selectedGroupId.value = groups.first.id;
+          selectedGroupName.value = groups.first.groupName;
+        }
+      } else {
+        messageSnackBar(response.data["message"]);
+      }
+    } on DioException catch (e) {
+      if (e.error is SocketException) {
+        socketSnackBar();
+      } else if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.sendTimeout ||
+          e.type == DioExceptionType.receiveTimeout) {
+        timeoutSnackBar();
+      } else {
+        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+      }
+    } catch (e) {
+      catchSnackBar();
+    } finally {
+      isLoadingGroups.value = false;
+    }
+  }
+
+  Future<void> _applySavedOrder() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedOrderJson = prefs.getString('groups_order');
+
+      if (savedOrderJson != null) {
+        List<int> savedOrder = List<int>.from(json.decode(savedOrderJson));
+
+        Map<int, Group> groupsMap = {for (var group in groups) group.id: group};
+
+        List<Group> orderedGroups = [];
+        for (int id in savedOrder) {
+          if (groupsMap.containsKey(id)) {
+            orderedGroups.add(groupsMap[id]!);
+            groupsMap.remove(id);
+          }
+        }
+
+        orderedGroups.addAll(groupsMap.values);
+
+        groups.value = orderedGroups;
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  void onGroupSelected(int? id) {
+    if (id == null) return;
+    for (final g in groups) {
+      if (g.id == id) {
+        selectedGroupId.value = id;
+        selectedGroupName.value = g.groupName;
+        getStudents();
+        return;
+      }
+    }
   }
 
   void searchStudents() {
@@ -47,6 +131,9 @@ class StudentsPartialExamsController extends GetxController {
   }
 
   Future<void> getStudents() async {
+    final gid = selectedGroupId.value;
+    if (gid == null) return;
+
     try {
       isLoading.value = true;
 
@@ -65,7 +152,7 @@ class StudentsPartialExamsController extends GetxController {
           "${gregorianDate.year}-${gregorianDate.month.toString().padLeft(2, '0')}-${gregorianDate.day.toString().padLeft(2, '0')}";
 
       var response = await _apiClient.dio
-          .get("/$partialExamsURL/group/$groupId?date=$dateString")
+          .get("/$partialExamsURL/group/$gid?date=$dateString")
           .timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {

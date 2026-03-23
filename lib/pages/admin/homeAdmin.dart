@@ -11,14 +11,12 @@ import 'package:jaberah/pages/admin/groups/groups.dart';
 import 'package:jaberah/pages/admin/notificationsAdmin.dart';
 import 'package:jaberah/pages/admin/reports/reports.dart';
 import 'package:jaberah/pages/admin/students/Panel_Students.dart';
-import 'package:jaberah/pages/admin/students/add_students.dart';
 import 'package:jaberah/pages/admin/teachers/Panel_teachers.dart';
-import 'package:jaberah/pages/admin/teachers/add_teacher.dart';
 import 'package:jaberah/pages/admin/teachers/profile.dart';
 import 'package:jaberah/pages/admin/trash.dart';
 import 'package:jaberah/pages/exportedReportsPage.dart';
 import 'package:jaberah/pages/user/homeUser.dart';
-import 'package:jaberah/pages/admin/partialExams/groups_partialExams.dart';
+import 'package:jaberah/pages/admin/partialExams/students_partialExams.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -121,20 +119,6 @@ class HomePageAdmin extends StatelessWidget {
                       ),
                     ),
                     ListTile(
-                      leading: const Icon(Icons.person_add),
-                      title: const Text('إضافة طالب'),
-                      onTap: () {
-                        Get.to(() => AddStudent());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.person_add),
-                      title: const Text('إضافة معلم'),
-                      onTap: () {
-                        Get.to(() => AddTeacher());
-                      },
-                    ),
-                    ListTile(
                       leading: const Icon(Icons.book_sharp),
                       title: const Text('قسم الحلقات'),
                       onTap: () {
@@ -145,7 +129,7 @@ class HomePageAdmin extends StatelessWidget {
                       leading: const Icon(Icons.quiz),
                       title: const Text('اختبارات الجزئي'),
                       onTap: () {
-                        Get.to(() => GroupsPartialExams());
+                        Get.to(() => StudentsPartialExams());
                       },
                     ),
                     ListTile(

@@ -178,6 +178,9 @@ class Group {
   String? teacherName;
   String period;
   int studentsNo;
+  String? windowStart;
+  String? windowEnd;
+  int? flexibleMinutes;
 
   Group(
       {required this.id,
@@ -185,7 +188,10 @@ class Group {
       this.teacherId,
       this.teacherName,
       required this.period,
-      required this.studentsNo});
+      required this.studentsNo,
+      this.windowStart,
+      this.windowEnd,
+      this.flexibleMinutes});
 
   factory Group.fromJson(Map<String, dynamic> json) {
     return Group(
@@ -194,8 +200,23 @@ class Group {
         teacherId: json["teacherId"] != null ? json["teacherId"] as int : null,
         teacherName:
             json["teacherName"] != null ? json["teacherName"] as String : null,
-        period: json["period"] as String,
-        studentsNo: json["studentsNo"] as int);
+        period: Group.periodToUiString(json["period"]),
+        studentsNo: json["studentsNo"] as int,
+        windowStart: json["windowStart"]?.toString(),
+        windowEnd: json["windowEnd"]?.toString(),
+        flexibleMinutes: json["flexibleMinutes"] != null
+            ? int.tryParse(json["flexibleMinutes"].toString())
+            : null);
+  }
+
+  /// يدعم الفترة كرقم (1/2) أو نص من الـ API.
+  static String periodToUiString(dynamic value) {
+    if (value == null) return 'صباحية';
+    if (value is int) return value == 1 ? 'صباحية' : 'مسائية';
+    final s = value.toString().trim();
+    if (s == '1' || s == 'صباحية') return 'صباحية';
+    if (s == '2' || s == 'مسائية') return 'مسائية';
+    return s;
   }
 }
 

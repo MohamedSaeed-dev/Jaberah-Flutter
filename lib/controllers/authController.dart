@@ -114,31 +114,44 @@ class AuthController extends GetxController {
   var isLoadingLogout = false.obs;
   Future<void> logout() async {
     isLoadingLogout.value = true;
+    // يمنع مستمع onTokenRefresh من استدعاء الـ API أثناء تسجيل الخروج
     isLoggedIn.value = false;
 
-    await _firebaseMessaging.deleteToken();
-    await unsubscribeFromTopics();
+    try {
+      try {
+        await _firebaseMessaging.deleteToken();
+      } catch (_) {
+        // تجاهل فشل حذف التوكن — نكمل تسجيل الخروج محلياً
+      }
+      try {
+        await unsubscribeFromTopics();
+      } catch (_) {}
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
 
-    usernameController.value.clear();
-    passwordController.value.clear();
+      usernameController.value.clear();
+      passwordController.value.clear();
 
-    isAdmin.value = false;
-    Get.find<UserNameController>().name.value = '';
+      isAdmin.value = false;
+      try {
+        Get.find<UserNameController>().name.value = '';
+      } catch (_) {}
+    } finally {
+      isLoadingLogout.value = false;
+    }
 
-    isLoadingLogout.value = false;
-
-    // Close the logout confirmation dialog before navigating
-    Get.back();
+    // إغلاق نافذة التأكيد أولاً ثم استبدال المكدس (تجنّب بقاء الـ overlay / حالة التحميل)
+    if (Get.isDialogOpen ?? false) {
+      Get.back();
+    }
     Get.offAll(() => Login());
 
     Get.snackbar(
       '',
       '',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red.withValues(alpha: 0.5),
+      backgroundColor: Colors.green.withValues(alpha: 0.7),
       colorText: Colors.white,
       margin: const EdgeInsets.all(10),
       duration: const Duration(seconds: 3),

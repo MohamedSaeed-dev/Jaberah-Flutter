@@ -179,20 +179,6 @@ class DailyPrayers extends StatelessWidget {
     );
   }
 
-
-  // Widget _buildGroupFilter() {
-  //   return Obx(() {
-  //     if (controller.teacherGroups.isEmpty &&
-  //         !controller.isLoadingGroups.value) {
-  //       return const SizedBox.shrink();
-  //     }
-  //     return Padding(
-  //       padding: const EdgeInsets.only(bottom: 8.0),
-  //       child: ,
-  //     );
-  //   });
-  // }
-
   String rakatWord(int n) {
     if (n == 0) return 'ف';
     if (n == 1) return 'ركعة';

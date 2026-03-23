@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaberah/pages/admin/teachers/Panel_teacherAttendances.dart';
 import 'package:jaberah/pages/admin/teachers/teachers.dart';
+import 'package:jaberah/pages/admin/teachers/teachersAttendances.dart';
 import 'package:jaberah/pages/admin/teachers/teachersSalaries.dart';
 
 class TeachersPanelPage extends StatelessWidget {
@@ -12,7 +12,7 @@ class TeachersPanelPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'لوحة تحكم المعلمين',
+          'المعلمين',
           style:
               TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
@@ -27,11 +27,20 @@ class TeachersPanelPage extends StatelessWidget {
           children: [
             _buildCard(
               context: context,
-              title: 'حضور المعلمين',
+              title: 'بيانات المعلمين',
+              icon: Icons.person,
+              color: Colors.orange,
+              onTap: () {
+                Get.to(() => Teachers());
+              },
+            ),
+            _buildCard(
+              context: context,
+              title: 'تسجيل الحضور اليومي',
               icon: Icons.schedule,
               color: Colors.blue,
               onTap: () {
-                Get.to(() => TeachersAttendancePanel());
+                Get.to(() => TeachersAttendancePage());
               },
             ),
             _buildCard(
@@ -41,15 +50,6 @@ class TeachersPanelPage extends StatelessWidget {
               color: Colors.green,
               onTap: () {
                 Get.to(() => TeachersSalaries());
-              },
-            ),
-            _buildCard(
-              context: context,
-              title: 'معلومات المعلمين',
-              icon: Icons.person,
-              color: Colors.orange,
-              onTap: () {
-                Get.to(() => Teachers());
               },
             ),
           ],

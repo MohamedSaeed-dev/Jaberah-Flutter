@@ -5,6 +5,7 @@ import 'package:jaberah/pages/admin/reports/monthlyReports.dart';
 import 'package:jaberah/pages/admin/reports/prayersReport.dart';
 import 'package:jaberah/pages/admin/reports/semesterReports.dart';
 import 'package:jaberah/pages/admin/students/bestStudents.dart';
+import 'package:jaberah/pages/admin/teachers/reportTeachersAttendances.dart';
 
 class Reports extends StatelessWidget {
   const Reports({super.key});
@@ -30,7 +31,7 @@ class Reports extends StatelessWidget {
           children: [
             _buildCard(
               context: context,
-              title: 'التقارير الفصلية',
+              title: 'التقرير الفصلي',
               icon: Icons.calendar_month,
               color: Colors.blue,
               onTap: () {
@@ -39,7 +40,7 @@ class Reports extends StatelessWidget {
             ),
             _buildCard(
               context: context,
-              title: 'التقارير الشهرية',
+              title: 'التقرير الشهري',
               icon: Icons.calendar_view_month,
               color: Colors.green,
               onTap: () {
@@ -71,6 +72,15 @@ class Reports extends StatelessWidget {
               color: Colors.purple,
               onTap: () {
                 Get.to(() => BestStudentsReport());
+              },
+            ),
+            _buildCard(
+              context: context,
+              title: 'تقرير حضور المعلمين',
+              icon: Icons.assessment,
+              color: Colors.teal,
+              onTap: () {
+                Get.to(() => TeachersAttendanceReport());
               },
             ),
           ],

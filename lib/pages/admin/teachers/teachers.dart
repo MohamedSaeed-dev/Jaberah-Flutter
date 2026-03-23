@@ -297,10 +297,6 @@ class Teachers extends StatelessWidget {
   void _showEditDialog(BuildContext context, Teacher teacher) {
     controller.nameEditController.value.text = teacher.teacherName;
     controller.phoneEditController.value.text = teacher.phoneNumber;
-    controller.windowStartEdit.value = teacher.windowStart ?? '';
-    controller.windowEndEdit.value = teacher.windowEnd ?? '';
-    controller.flexibleMinutesEditController.value.text =
-        teacher.flexibleMinutes?.toString() ?? '';
     controller.selectedGroupsEdit.clear();
     final groupIds = teacher.groups?.map((g) => g.id).toList() ?? <int>[];
     controller.selectedGroupsEdit.addAll(groupIds);
@@ -355,34 +351,6 @@ class Teachers extends StatelessWidget {
                   },
                   decoration: const InputDecoration(
                     labelText: 'رقم الجوال',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Obx(() => _buildTimeEditRow(
-                      context,
-                      label: 'وقت بداية فترة المعلم خلال اليوم',
-                      value: controller.windowStartEdit.value,
-                      onTap: () => _pickTimeForTeacher(context, controller.windowStartEdit.value).then((v) {
-                        if (v != null) controller.windowStartEdit.value = v;
-                      }),
-                    )),
-                const SizedBox(height: 10),
-                Obx(() => _buildTimeEditRow(
-                      context,
-                      label: 'وقت نهاية فترة المعلم خلال اليوم',
-                      value: controller.windowEndEdit.value,
-                      onTap: () => _pickTimeForTeacher(context, controller.windowEndEdit.value).then((v) {
-                        if (v != null) controller.windowEndEdit.value = v;
-                      }),
-                    )),
-                const SizedBox(height: 10),
-                TextFormField(
-                  controller: controller.flexibleMinutesEditController.value,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'الدقائق المرنة قبل احتساب التأخر',
-                    hintText: 'مثال: 15',
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -539,57 +507,4 @@ class Teachers extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeEditRow(
-    BuildContext context, {
-    required String label,
-    required String value,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-          suffixIcon: const Icon(Icons.access_time),
-        ),
-        child: Text(
-          value.isEmpty ? '—' : value,
-          style: TextStyle(
-            fontSize: 16,
-            color: value.isEmpty ? Colors.grey : null,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<String?> _pickTimeForTeacher(BuildContext context, [String? initialStr]) async {
-    TimeOfDay initial = TimeOfDay.now();
-    if (initialStr != null && initialStr.contains(':')) {
-      final parts = initialStr.split(':');
-      if (parts.length >= 2) {
-        final h = int.tryParse(parts[0]);
-        final m = int.tryParse(parts[1]);
-        if (h != null && m != null && h >= 0 && h < 24 && m >= 0 && m < 60) {
-          initial = TimeOfDay(hour: h, minute: m);
-        }
-      }
-    }
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: initial,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF3FB56C)),
-          ),
-          child: child!,
-        );
-      },
-    );
-    if (picked == null) return null;
-    return '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
-  }
 }
