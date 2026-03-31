@@ -31,40 +31,36 @@ class MyAttendances extends StatelessWidget {
           }),
         ],
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircularProgressIndicator(),
-                SizedBox(height: 10),
-                Text(
-                  "جاري تحميل الحضور...",
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w500,
+      body: controller.isLoading.value
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 10),
+                  Text(
+                    "جاري تحميل الحضور...",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildMonthNavigation(),
+                  const SizedBox(height: 16),
+                  _buildCalendar(),
+                  const SizedBox(height: 24),
+                  _buildHijriDay(),
+                ],
+              ),
             ),
-          );
-        }
-
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildMonthNavigation(),
-              const SizedBox(height: 16),
-              _buildCalendar(),
-              const SizedBox(height: 24),
-              _buildHijriDay(),
-            ],
-          ),
-        );
-      }),
     ));
   }
 
