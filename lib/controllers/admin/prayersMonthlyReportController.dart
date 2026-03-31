@@ -79,7 +79,6 @@ class PrayersMonthlyReportController extends GetxController {
       const pageSize = 500;
       final url =
           "/$prayersMonthlyReportURL?date=$date&daysInMonth=$days&groupId=${selectedGroupId.value}&pageNumber=1&pageSize=$pageSize";
-      print(url);
       final response =
           await _apiClient.dio.get(url).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {

@@ -31,26 +31,6 @@ class MyAttendances extends StatelessWidget {
           }),
         ],
       ),
-      bottomNavigationBar: controller.isAdmin.value
-          ? null
-          : BottomAppBar(
-              child: FloatingActionButton.extended(
-                onPressed: controller.isLoading.value ? null : () async {},
-                label: Text(
-                  "رفع طلب",
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                icon: Icon(
-                  Icons.cloud_upload_rounded,
-                  color: Colors.black,
-                ),
-                backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-              ),
-            ),
       body: Obx(() {
         if (controller.isLoading.value) {
           return Center(

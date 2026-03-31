@@ -29,7 +29,7 @@ class DailyPrayersController extends GetxController {
   var isUpserting = false.obs;
 
   var pageNumber = 1.obs;
-  final pageSize = 10;
+  final pageSize = 1;
   var totalCount = 0.obs;
   var totalPages = 0.obs;
   var hasNext = false.obs;
@@ -61,6 +61,9 @@ class DailyPrayersController extends GetxController {
         final list = response.data is List ? response.data as List : [];
         teacherGroups.value =
             list.map((e) => Group.fromJson(e as Map<String, dynamic>)).toList();
+        if (teacherGroups.isEmpty) {
+          selectedGroupId.value = null;
+        }
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -108,21 +111,17 @@ class DailyPrayersController extends GetxController {
   }
 
   Future<void> loadDailyPrayers() async {
+    if (teacherGroups.isEmpty) {
+      dailyStudents.clear();
+      totalCount.value = 0;
+      totalPages.value = 0;
+      hasNext.value = false;
+      hasPrevious.value = false;
+      return;
+    }
+
     try {
       isLoadingDaily.value = true;
-
-      // // عند «كل الحلقات» يجب إرسال GroupsId لكل حلقات المعلم، وإلا الـ API يعيد كل الطلاب
-      // if (selectedGroupId.value == null && teacherGroups.isEmpty) {
-      //   await loadTeacherGroups();
-      //   if (teacherGroups.isEmpty) {
-      //     dailyStudents.clear();
-      //     totalCount.value = 0;
-      //     totalPages.value = 0;
-      //     hasNext.value = false;
-      //     hasPrevious.value = false;
-      //     return;
-      //   }
-      // }
 
       final queryParts = <String>[
         'Date=$dateStr',

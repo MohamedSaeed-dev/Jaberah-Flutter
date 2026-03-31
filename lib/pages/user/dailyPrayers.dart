@@ -24,19 +24,25 @@ class DailyPrayers extends StatelessWidget {
             _buildHijriDatePicker(context, 'التاريخ الهجري:'),
             const SizedBox(height: 10),
             _buildGroupDropdown(),
-            TextField(
-              controller: controller.searchText.value,
-              style: const TextStyle(color: Colors.black),
-              cursorColor: Colors.black,
-              decoration: InputDecoration(
-                hintText: 'ابحث عن طالب...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-              onSubmitted: (_) => controller.applySearch(),
-            ),
+            Obx(() => TextField(
+                  controller: controller.searchText.value,
+                  style: const TextStyle(color: Colors.black),
+                  cursorColor: Colors.black,
+                  readOnly: controller.teacherGroups.isEmpty,
+                  enabled: controller.teacherGroups.isNotEmpty,
+                  decoration: InputDecoration(
+                    hintText: controller.teacherGroups.isEmpty
+                        ? 'تفعّل البحث بعد تعيينك في حلقة'
+                        : 'ابحث عن طالب...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onSubmitted: controller.teacherGroups.isEmpty
+                      ? null
+                      : (_) => controller.applySearch(),
+                )),
             const Divider(height: 30),
             Expanded(
               child: Obx(() {
@@ -72,22 +78,16 @@ class DailyPrayers extends StatelessWidget {
                     ),
                   );
                 }
-                return Column(
-                  children: [
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: controller.dailyStudents.length,
-                        itemBuilder: (context, index) {
-                          final student = controller.dailyStudents[index];
-                          return _buildStudentCard(context, student);
-                        },
-                      ),
-                    ),
-                    _buildPagination(context),
-                  ],
+                return ListView.builder(
+                  itemCount: controller.dailyStudents.length,
+                  itemBuilder: (context, index) {
+                    final student = controller.dailyStudents[index];
+                    return _buildStudentCard(context, student);
+                  },
                 );
               }),
             ),
+            Obx(() => _buildPaginationControls()),
           ],
         ),
       ),
@@ -155,27 +155,47 @@ class DailyPrayers extends StatelessWidget {
   Widget _buildGroupDropdown() {
     return Padding(
       padding: const EdgeInsets.all(10.0),
-      child: Obx(() => InputDecorator(
-            decoration: InputDecoration(
+      child: Obx(() {
+        if (controller.teacherGroups.isEmpty) {
+          return InputDecorator(
+            decoration: const InputDecoration(
               labelText: 'الحلقة',
               border: OutlineInputBorder(),
               contentPadding: EdgeInsets.symmetric(horizontal: 12),
             ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int?>(
-                value: controller.selectedGroupId.value,
-                isExpanded: true,
-                hint: const Text('كل الحلقات'),
-                items: [
-                  const DropdownMenuItem<int?>(
-                      value: null, child: Text('كل الحلقات')),
-                  ...controller.teacherGroups.map((g) => DropdownMenuItem<int?>(
-                      value: g.id, child: Text(g.groupName))),
-                ],
-                onChanged: (v) => controller.setGroupFilter(v),
+            child: Text(
+              controller.isLoadingGroups.value ? '...' : 'لا توجد حلقات',
+              style: TextStyle(
+                fontSize: 16,
+                color: controller.isLoadingGroups.value
+                    ? Colors.grey
+                    : Colors.black87,
               ),
             ),
-          )),
+          );
+        }
+        return InputDecorator(
+          decoration: const InputDecoration(
+            labelText: 'الحلقة',
+            border: OutlineInputBorder(),
+            contentPadding: EdgeInsets.symmetric(horizontal: 12),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<int?>(
+              value: controller.selectedGroupId.value,
+              isExpanded: true,
+              hint: const Text('كل الحلقات'),
+              items: [
+                const DropdownMenuItem<int?>(
+                    value: null, child: Text('كل الحلقات')),
+                ...controller.teacherGroups.map((g) => DropdownMenuItem<int?>(
+                    value: g.id, child: Text(g.groupName))),
+              ],
+              onChanged: (v) => controller.setGroupFilter(v),
+            ),
+          ),
+        );
+      }),
     );
   }
 
@@ -258,33 +278,35 @@ class DailyPrayers extends StatelessWidget {
     );
   }
 
-  Widget _buildPagination(BuildContext context) {
-    return Obx(() {
-      if (controller.totalPages.value <= 1) return const SizedBox.shrink();
-      return Padding(
-        padding: const EdgeInsets.only(top: 12),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            IconButton(
-              onPressed: controller.hasPrevious.value
-                  ? () => controller.prevPage()
-                  : null,
-              icon: const Icon(Icons.chevron_right),
-            ),
-            Text(
-              'صفحة ${controller.pageNumber.value} من ${controller.totalPages.value}',
-              style: const TextStyle(fontSize: 14),
-            ),
-            IconButton(
-              onPressed:
-                  controller.hasNext.value ? () => controller.nextPage() : null,
-              icon: const Icon(Icons.chevron_left),
-            ),
-          ],
-        ),
-      );
-    });
+  Widget _buildPaginationControls() {
+    final fetched = (controller.pageNumber.value - 1) * controller.pageSize +
+        controller.dailyStudents.length;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: controller.hasPrevious.value &&
+                    !controller.isLoadingDaily.value
+                ? () => controller.prevPage()
+                : null,
+          ),
+          Text(
+            '$fetched من ${controller.totalCount.value}',
+            style: const TextStyle(fontSize: 16),
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward),
+            onPressed: controller.hasNext.value &&
+                    !controller.isLoadingDaily.value
+                ? () => controller.nextPage()
+                : null,
+          ),
+        ],
+      ),
+    );
   }
 
   void _showEditDialog(BuildContext context, StudentDailyPrayer student) {
