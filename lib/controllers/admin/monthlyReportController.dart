@@ -15,11 +15,20 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:pdf/widgets.dart';
 
 class MonthlyReportController extends GetxController {
+  /// قيمة اختيار «كل الحلقات» في قائمة الحلقات المنسدلة.
+  /// تُرسل إلى الـ API كـ null ليتم جلب أفضل الطلاب على جميع الحلقات.
+  static const int kAllGroupsId = -1;
+
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
   var isLoadingUpdate = false.obs; // Add this for exam updates
   var selectedDate =
       JDateModel(jhijri: JHijri.now(), dateTime: DateTime.now()).obs;
+
+  /// عدد الطلاب المراد عرضهم (يستخدم عند اختيار كل الحلقات لجلب أفضل الطلاب).
+  var take = 5.obs;
+
+  bool get isAllGroupsSelected => selectedGroupId.value == kAllGroupsId;
 
   /// بداية ونهاية الشهر الهجري المختار بالميلادي (للـ API).
   var monthReportFromDate = ''.obs;
@@ -44,8 +53,8 @@ class MonthlyReportController extends GetxController {
   }
 
   var groups = <GroupsGeneral>[].obs;
-  var selectedGroupId = 0.obs;
-  var selectedGroupName = ''.obs;
+  var selectedGroupId = kAllGroupsId.obs;
+  var selectedGroupName = 'كل الحلقات'.obs;
 
   var monthlyReport = MonthlyReportResponse(books: [], data: []).obs;
 
@@ -59,8 +68,14 @@ class MonthlyReportController extends GetxController {
         isLoading.value = false;
         return;
       }
+      // عند اختيار «كل الحلقات» نرسل groupId كقيمة فارغة ليتم تمريرها null في السيرفر.
+      final groupIdParam =
+          isAllGroupsSelected ? null : '${selectedGroupId.value}';
       var url =
-          "/$monthlyReportURL?groupId=$selectedGroupId&fromDate=$fromDate&toDate=$toDate";
+          "/$monthlyReportURL?fromDate=$fromDate&toDate=$toDate&take=${take.value}";
+      if (groupIdParam != null) {
+        url = "$url&groupId=$groupIdParam";
+      }
       var response =
           await _apiClient.dio.get(url).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
@@ -102,10 +117,9 @@ class MonthlyReportController extends GetxController {
         List<dynamic> result = response.data;
         groups.value =
             result.map((item) => GroupsGeneral.fromJson(item)).toList();
-        if (groups.isNotEmpty) {
-          selectedGroupId.value = groups[0].id;
-          selectedGroupName.value = groups[0].name;
-        }
+        // الاختيار الافتراضي هو «كل الحلقات».
+        selectedGroupId.value = kAllGroupsId;
+        selectedGroupName.value = 'كل الحلقات';
       } else {
         messageSnackBar(response.data["message"]);
       }
@@ -488,6 +502,7 @@ class MonthlyReportResponse {
 class MonthlyReportModel {
   int studentId;
   String studentName;
+  String? groupName;
 
   String saveFromSurah;
   int saveFromVerse;
@@ -514,6 +529,7 @@ class MonthlyReportModel {
   MonthlyReportModel({
     required this.studentId,
     required this.studentName,
+    this.groupName,
     required this.saveFromSurah,
     required this.saveFromVerse,
     required this.saveToSurah,
@@ -539,6 +555,7 @@ class MonthlyReportModel {
     return MonthlyReportModel(
       studentId: json["studentId"] as int,
       studentName: json["studentName"] as String,
+      groupName: json["groupName"] as String?,
       saveFromSurah: json["saveData"]["from"]["surahName"] as String,
       saveFromVerse: json["saveData"]["from"]["verse"] as int,
       saveToSurah: json["saveData"]["to"]["surahName"] as String,

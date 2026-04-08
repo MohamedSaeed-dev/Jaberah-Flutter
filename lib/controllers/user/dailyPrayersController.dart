@@ -29,7 +29,7 @@ class DailyPrayersController extends GetxController {
   var isUpserting = false.obs;
 
   var pageNumber = 1.obs;
-  final pageSize = 1;
+  final pageSize = 10;
   var totalCount = 0.obs;
   var totalPages = 0.obs;
   var hasNext = false.obs;

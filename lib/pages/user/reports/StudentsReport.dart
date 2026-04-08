@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/pages/user/reports/monthlyStudentsReports.dart';
+import 'package:jaberah/pages/user/reports/prayersStudentsReport.dart';
 import 'package:jaberah/pages/user/reports/semesterStudentsReports.dart';
 
 class StudentsReport extends StatelessWidget {
@@ -20,9 +21,10 @@ class StudentsReport extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(10.0),
         child: GridView.count(
-          crossAxisCount: 2, // Number of columns (2 cards in this case)
-          crossAxisSpacing: 10, // Space between columns
-          mainAxisSpacing: 10, // Space between rows
+          crossAxisCount: 2,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          childAspectRatio: 0.82,
           children: [
             _buildCard(
               context: context,
@@ -40,6 +42,15 @@ class StudentsReport extends StatelessWidget {
               color: Colors.green,
               onTap: () {
                 Get.to(() => MonthlyStudentsReports());
+              },
+            ),
+            _buildCard(
+              context: context,
+              title: 'تقرير كشف الصلوات',
+              icon: Icons.mosque,
+              color: Colors.orange,
+              onTap: () {
+                Get.to(() => PrayersStudentsReportPage());
               },
             ),
           ],

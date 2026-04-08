@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/prayersMonthlyReportController.dart';
+import 'package:jaberah/controllers/user/prayersStudentsReportsController.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
 
-class PrayersReportPage extends StatelessWidget {
-  final PrayersMonthlyReportController controller =
-      Get.put(PrayersMonthlyReportController());
+class PrayersStudentsReportPage extends StatelessWidget {
+  final PrayersStudentsReportsController controller =
+      Get.put(PrayersStudentsReportsController());
+
+  PrayersStudentsReportPage({super.key});
 
   @override
   Widget build(BuildContext context) {

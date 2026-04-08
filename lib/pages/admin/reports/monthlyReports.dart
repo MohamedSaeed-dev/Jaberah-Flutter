@@ -14,8 +14,7 @@ class MonthlyReportPage extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: Obx(() => FloatingActionButton.extended(
-                    onPressed: controller.selectedGroupId.value == 0 ||
-                            controller.isLoading.value
+                    onPressed: controller.isLoading.value
                         ? null
                         : () async {
                             await controller.getMonthlyReport();
@@ -50,7 +49,38 @@ class MonthlyReportPage extends StatelessWidget {
                 icon: Icon(
                   Icons.save,
                   color: Colors.black,
-                )))
+                ))),
+            Obx(() => PopupMenuButton<int>(
+                  iconColor: Colors.black,
+                  icon: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.numbers, color: Colors.black),
+                      Text(
+                        '${controller.take.value}',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                  tooltip: 'عدد الطلاب',
+                  onSelected: (value) {
+                    controller.take.value = value;
+                  },
+                  itemBuilder: (context) {
+                    return const [
+                      PopupMenuItem(value: 5, child: Text('5')),
+                      PopupMenuItem(value: 6, child: Text('6')),
+                      PopupMenuItem(value: 7, child: Text('7')),
+                      PopupMenuItem(value: 8, child: Text('8')),
+                      PopupMenuItem(value: 9, child: Text('9')),
+                      PopupMenuItem(value: 10, child: Text('10')),
+                    ];
+                  },
+                )),
           ],
           title: const Text('التقارير الشهرية'),
           backgroundColor: const Color.fromARGB(255, 63, 181, 108),
@@ -82,6 +112,7 @@ class MonthlyReportPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         return _buildStudentsCard(
                           controller.monthlyReport.value.data[index],
+                          isBest: index == 0,
                         );
                       },
                     ),
@@ -203,52 +234,72 @@ class MonthlyReportPage extends StatelessWidget {
               contentPadding: EdgeInsets.symmetric(horizontal: 12),
             ),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton(
+              child: DropdownButton<int>(
                 isExpanded: true,
-                value: controller.selectedGroupId.value != 0
-                    ? "${controller.selectedGroupId.value},${controller.selectedGroupName.value}"
-                    : controller.groups.isNotEmpty
-                        ? "${controller.groups[0].id},${controller.groups[0].name}"
-                        : null,
+                value: controller.selectedGroupId.value,
                 onChanged: (value) {
-                  var valueMap = value.toString().split(',');
-                  controller.selectedGroupId.value = int.parse(valueMap[0]);
-                  controller.selectedGroupName.value = valueMap[1];
+                  if (value == null) return;
+                  controller.selectedGroupId.value = value;
+                  if (value == MonthlyReportController.kAllGroupsId) {
+                    controller.selectedGroupName.value = 'كل الحلقات';
+                  } else {
+                    for (final g in controller.groups) {
+                      if (g.id == value) {
+                        controller.selectedGroupName.value = g.name;
+                        break;
+                      }
+                    }
+                  }
                 },
-                items: controller.groups.map((group) {
-                  return DropdownMenuItem(
-                    value: '${group.id},${group.name}',
-                    child: Text(group.name),
-                  );
-                }).toList(),
+                items: [
+                  const DropdownMenuItem<int>(
+                    value: MonthlyReportController.kAllGroupsId,
+                    child: Text('كل الحلقات'),
+                  ),
+                  ...controller.groups.map((group) {
+                    return DropdownMenuItem<int>(
+                      value: group.id,
+                      child: Text(group.name),
+                    );
+                  }),
+                ],
               ),
             ),
           )),
     );
   }
 
-  Widget _buildStudentsCard(MonthlyReportModel student) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Student Name
-            Text(
-              student.studentName,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Divider(),
+  Widget _buildStudentsCard(MonthlyReportModel student, {bool isBest = false}) {
+    final hasGroupName =
+        student.groupName != null && student.groupName!.isNotEmpty;
+    return Stack(
+      children: [
+        Card(
+          elevation: 4,
+          margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Student Name (+ group name if present)
+                Container(
+                  margin: EdgeInsets.only(top: isBest ? 14 : 0),
+                  child: Text(
+                    hasGroupName
+                        ? '${student.studentName} - ${student.groupName}'
+                        : student.studentName,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
             // Saving and Reviewing sections
             _buildSectionTitle('تفاصيل التسميع'),
             const SizedBox(height: 10),
@@ -283,9 +334,42 @@ class MonthlyReportPage extends StatelessWidget {
                 color: Colors.teal,
               ),
             ),
-          ],
+              ],
+            ),
+          ),
         ),
-      ),
+        if (isBest)
+          Positioned(
+            top: 8,
+            right: 12,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.amber,
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(12.0),
+                  bottomLeft: Radius.circular(12.0),
+                ),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: const [
+                  Icon(Icons.star, color: Colors.white, size: 16),
+                  SizedBox(width: 4),
+                  Text(
+                    'أفضل طالب',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
     );
   }
 

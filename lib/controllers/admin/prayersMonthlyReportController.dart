@@ -61,7 +61,7 @@ class PrayersMonthlyReportController extends GetxController {
   var selectedGroupName = ''.obs;
 
   var prayersReport = PrayersMonthlyReportResponse(
-    totalPossiblePrayersPerStudent: 0,
+    totalPossibleRakatsPerStudent: 0,
     averageCommitmentPercentage: 0,
     students: [],
   ).obs;
@@ -211,7 +211,7 @@ class PrayersMonthlyReportController extends GetxController {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
                 children: [
                   pw.Text(
-                    'إجمالي الصلوات الممكنة للطالب: ${data.totalPossiblePrayersPerStudent}',
+                    'إجمالي  الممكنة للطالب: ${data.totalPossibleRakatsPerStudent}',
                     style: titleStyle,
                   ),
                   pw.Text(
@@ -247,12 +247,17 @@ class PrayersMonthlyReportController extends GetxController {
                   pw.Expanded(
                     flex: 1,
                     child:
-                        pw.Center(child: pw.Text('المصلي', style: headerStyle)),
+                        pw.Center(child: pw.Text('الصلوات المصلاة', style: headerStyle)),
                   ),
                   pw.Expanded(
                     flex: 1,
                     child: pw.Center(
-                        child: pw.Text('نسبة المصلي', style: headerStyle)),
+                        child: pw.Text('نسبة الصلوات', style: headerStyle)),
+                  ),
+                  pw.Expanded(
+                    flex: 1,
+                    child: pw.Center(
+                        child: pw.Text('الركعات المصلاة', style: headerStyle)),
                   ),
                   pw.Expanded(
                     flex: 1,
@@ -268,7 +273,7 @@ class PrayersMonthlyReportController extends GetxController {
                     flex: 1,
                     child: pw.Center(
                         child:
-                            pw.Text('عدد الصلوات الفائتة', style: headerStyle)),
+                            pw.Text('الصلوات الفائتة', style: headerStyle)),
                   ),
                   pw.Expanded(
                     flex: 1,
@@ -317,6 +322,12 @@ class PrayersMonthlyReportController extends GetxController {
                       flex: 1,
                       child: pw.Center(
                           child: pw.Text('${(s.totalPrayedPercentage)}%',
+                              style: cellStyle)),
+                    ),
+                    pw.Expanded(
+                      flex: 1,
+                      child: pw.Center(
+                          child: pw.Text('${s.totalPrayedRakats}',
                               style: cellStyle)),
                     ),
                     pw.Expanded(
@@ -375,12 +386,12 @@ class PrayersMonthlyReportController extends GetxController {
 }
 
 class PrayersMonthlyReportResponse {
-  final int totalPossiblePrayersPerStudent;
+  final int totalPossibleRakatsPerStudent;
   final double averageCommitmentPercentage;
   final List<PrayersReportStudent> students;
 
   PrayersMonthlyReportResponse({
-    required this.totalPossiblePrayersPerStudent,
+    required this.totalPossibleRakatsPerStudent,
     required this.averageCommitmentPercentage,
     required this.students,
   });
@@ -388,8 +399,8 @@ class PrayersMonthlyReportResponse {
   factory PrayersMonthlyReportResponse.fromJson(Map<String, dynamic> json) {
     final studentsList = json['students'] as List<dynamic>? ?? [];
     return PrayersMonthlyReportResponse(
-      totalPossiblePrayersPerStudent:
-          json['totalPossiblePrayersPerStudent'] as int? ?? 0,
+      totalPossibleRakatsPerStudent:
+          json['totalPossibleRakatsPerStudent'] as int? ?? 0,
       averageCommitmentPercentage:
           _toDouble(json['averageCommitmentPercentage']),
       students: studentsList
@@ -403,6 +414,7 @@ class PrayersReportStudent {
   final int studentId;
   final String studentName;
   final String groupName;
+  final int totalPrayedRakats;
   final int totalPrayed;
   final double totalPrayedPercentage;
   final int totalGroupPrayed;
@@ -417,6 +429,7 @@ class PrayersReportStudent {
     required this.studentName,
     required this.groupName,
     required this.totalPrayed,
+    required this.totalPrayedRakats,
     required this.totalPrayedPercentage,
     required this.totalGroupPrayed,
     required this.groupPercentage,
@@ -432,6 +445,7 @@ class PrayersReportStudent {
       studentName: json['studentName'] as String? ?? '',
       groupName: json['groupName'] as String? ?? '',
       totalPrayed: json['totalPrayed'] as int? ?? 0,
+      totalPrayedRakats: json['totalPrayedRakats'] as int? ?? 0,
       totalPrayedPercentage: _toDouble(json['totalPrayedPercentage']),
       totalGroupPrayed: json['totalGroupPrayed'] as int? ?? 0,
       groupPercentage: _toDouble(json['groupPercentage']),

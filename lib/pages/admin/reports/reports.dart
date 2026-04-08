@@ -4,7 +4,6 @@ import 'package:jaberah/pages/admin/reports/monthlyPartialExamReport.dart';
 import 'package:jaberah/pages/admin/reports/monthlyReports.dart';
 import 'package:jaberah/pages/admin/reports/prayersReport.dart';
 import 'package:jaberah/pages/admin/reports/semesterReports.dart';
-import 'package:jaberah/pages/admin/students/bestStudents.dart';
 import 'package:jaberah/pages/admin/teachers/reportTeachersAttendances.dart';
 
 class Reports extends StatelessWidget {
@@ -63,15 +62,6 @@ class Reports extends StatelessWidget {
               color: Colors.amber,
               onTap: () {
                 Get.to(() => MonthlyPartialExamReportPage());
-              },
-            ),
-            _buildCard(
-              context: context,
-              title: 'تقرير الطلاب المتميزين',
-              icon: Icons.star,
-              color: Colors.purple,
-              onTap: () {
-                Get.to(() => BestStudentsReport());
               },
             ),
             _buildCard(
