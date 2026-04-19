@@ -57,7 +57,9 @@ class MonthlyReportPage extends StatelessWidget {
                     children: [
                       const Icon(Icons.numbers, color: Colors.black),
                       Text(
-                        '${controller.take.value}',
+                        controller.isAllStudentsTake
+                            ? 'كل الطلاب'
+                            : '${controller.take.value}',
                         style: const TextStyle(
                           color: Colors.black,
                           fontWeight: FontWeight.bold,
@@ -71,13 +73,14 @@ class MonthlyReportPage extends StatelessWidget {
                     controller.take.value = value;
                   },
                   itemBuilder: (context) {
-                    return const [
-                      PopupMenuItem(value: 5, child: Text('5')),
-                      PopupMenuItem(value: 6, child: Text('6')),
-                      PopupMenuItem(value: 7, child: Text('7')),
-                      PopupMenuItem(value: 8, child: Text('8')),
-                      PopupMenuItem(value: 9, child: Text('9')),
-                      PopupMenuItem(value: 10, child: Text('10')),
+                    return [
+                      const PopupMenuItem(value: 5, child: Text('5')),
+                      const PopupMenuItem(value: 6, child: Text('6')),
+                      const PopupMenuItem(value: 7, child: Text('7')),
+                      const PopupMenuItem(value: 8, child: Text('8')),
+                      const PopupMenuItem(value: 9, child: Text('9')),
+                      const PopupMenuItem(value: 10, child: Text('10')),
+                      const PopupMenuItem(value: MonthlyReportController.kAllStudentsTake, child: Text('كل الطلاب')),
                     ];
                   },
                 )),

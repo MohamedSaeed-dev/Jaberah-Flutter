@@ -19,6 +19,9 @@ class MonthlyReportController extends GetxController {
   /// تُرسل إلى الـ API كـ null ليتم جلب أفضل الطلاب على جميع الحلقات.
   static const int kAllGroupsId = -1;
 
+  /// قيمة اختيار «كل الطلاب» في قائمة عدد الطلاب؛ عند اختيارها لا يُمرَّر معامل `take` للـ API.
+  static const int kAllStudentsTake = -1;
+
   final ApiClient _apiClient = Get.find();
   var isLoading = false.obs;
   var isLoadingUpdate = false.obs; // Add this for exam updates
@@ -29,6 +32,8 @@ class MonthlyReportController extends GetxController {
   var take = 5.obs;
 
   bool get isAllGroupsSelected => selectedGroupId.value == kAllGroupsId;
+
+  bool get isAllStudentsTake => take.value == kAllStudentsTake;
 
   /// بداية ونهاية الشهر الهجري المختار بالميلادي (للـ API).
   var monthReportFromDate = ''.obs;
@@ -72,7 +77,10 @@ class MonthlyReportController extends GetxController {
       final groupIdParam =
           isAllGroupsSelected ? null : '${selectedGroupId.value}';
       var url =
-          "/$monthlyReportURL?fromDate=$fromDate&toDate=$toDate&take=${take.value}";
+          "/$monthlyReportURL?fromDate=$fromDate&toDate=$toDate";
+      if (!isAllStudentsTake) {
+        url = "$url&take=${take.value}";
+      }
       if (groupIdParam != null) {
         url = "$url&groupId=$groupIdParam";
       }
