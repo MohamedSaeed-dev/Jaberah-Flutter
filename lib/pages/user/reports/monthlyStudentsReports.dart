@@ -235,8 +235,7 @@ class MonthlyStudentsReports extends StatelessWidget {
   }
 
   Widget _buildLoadingIndicator() {
-    return SizedBox(
-      height: 450,
+    return Expanded(
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

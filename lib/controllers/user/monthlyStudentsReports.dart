@@ -92,13 +92,14 @@ class MonthlyStudentsReportsController extends GetxController {
       double? oralExam}) async {
     try {
       isLoadingUpdate.value = true;
-      var response = await _apiClient.dio
-          .post("/$monthlyExamsURL", data: {
+      var body = {
         "paperExam": paperExam,
         "oralExam": oralExam,
-        "date": "${selectedDate.value.dateTime!.year}-${selectedDate.value.dateTime!.month.toString().padLeft(2, '0')}-${selectedDate.value.dateTime!.day.toString().padLeft(2, '0')}",
+        "date": monthReportFromDate.value,
         "studentId": studentId
-      }).timeout(const Duration(seconds: 20));
+      };
+      var response = await _apiClient.dio
+          .post("/$monthlyExamsURL", data: body).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         Get.back();
