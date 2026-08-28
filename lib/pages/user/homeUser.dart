@@ -10,6 +10,7 @@ import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/user/myAttendances.dart';
 import 'package:jaberah/pages/user/mySalary.dart';
 import 'package:jaberah/pages/user/dailyPrayers.dart';
+import 'package:jaberah/pages/user/cleaningLog.dart';
 import 'package:jaberah/pages/user/notificationsUser.dart';
 import 'package:jaberah/pages/admin/homeAdmin.dart';
 import 'package:jaberah/pages/user/followStudents/groups_followStudents.dart';
@@ -287,44 +288,55 @@ class HomePageUser extends StatelessWidget {
                 ),
               ),
             ),
-            Center(
-              child: SizedBox(
-                width: 400,
-                height: 420,
-                child: GridView(
-                  padding: const EdgeInsets.all(10),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // Number of columns
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 1,
+            Padding(
+              padding: const EdgeInsets.only(top: 160),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  width: 400,
+                  child: GridView(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(10),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2, // Number of columns
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 1,
+                    ),
+                    children: [
+                      _buildCard(
+                          context: context,
+                          title: 'المتابعة اليومية',
+                          icon: Icons.assignment_add,
+                          color: Colors.red,
+                          route: () => GroupsFollowStudents()),
+                      _buildCard(
+                          context: context,
+                          title: 'تقارير الطلاب',
+                          icon: Icons.event_note,
+                          color: Colors.purple,
+                          route: () => StudentsReport()),
+                      _buildCard(
+                          context: context,
+                          title: 'حضوري',
+                          icon: Icons.fingerprint_sharp,
+                          color: Colors.orange,
+                          route: () => MyAttendances()),
+                      _buildCard(
+                          context: context,
+                          title: 'كشف الصلوات',
+                          icon: Icons.mosque_outlined,
+                          color: Colors.teal,
+                          route: () => DailyPrayers()),
+                      _buildCard(
+                          context: context,
+                          title: 'كشف النظافة',
+                          icon: Icons.cleaning_services,
+                          color: Colors.blue,
+                          route: () => CleaningLog()),
+                    ],
                   ),
-                  children: [
-                    _buildCard(
-                        context: context,
-                        title: 'المتابعة اليومية',
-                        icon: Icons.assignment_add,
-                        color: Colors.red,
-                        route: () => GroupsFollowStudents()),
-                    _buildCard(
-                        context: context,
-                        title: 'تقارير الطلاب',
-                        icon: Icons.event_note,
-                        color: Colors.purple,
-                        route: () => StudentsReport()),
-                    _buildCard(
-                        context: context,
-                        title: 'حضوري',
-                        icon: Icons.fingerprint_sharp,
-                        color: Colors.orange,
-                        route: () => MyAttendances()),
-                    _buildCard(
-                        context: context,
-                        title: 'كشف الصلوات',
-                        icon: Icons.mosque_outlined,
-                        color: Colors.teal,
-                        route: () => DailyPrayers()),
-                  ],
                 ),
               ),
             ),

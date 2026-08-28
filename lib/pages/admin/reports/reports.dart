@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/pages/admin/reports/monthlyPartialExamReport.dart';
 import 'package:jaberah/pages/admin/reports/monthlyReports.dart';
+import 'package:jaberah/pages/admin/reports/cleaningLogReport.dart';
 import 'package:jaberah/pages/admin/reports/prayersReport.dart';
 import 'package:jaberah/pages/admin/reports/semesterReports.dart';
 import 'package:jaberah/pages/admin/teachers/reportTeachersAttendances.dart';
@@ -71,6 +72,15 @@ class Reports extends StatelessWidget {
               color: Colors.teal,
               onTap: () {
                 Get.to(() => TeachersAttendanceReport());
+              },
+            ),
+            _buildCard(
+              context: context,
+              title: 'تقرير كشف النظافة',
+              icon: Icons.cleaning_services,
+              color: Colors.indigo,
+              onTap: () {
+                Get.to(() => CleaningLogReportPage());
               },
             ),
           ],
