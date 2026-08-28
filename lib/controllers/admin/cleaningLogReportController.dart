@@ -132,6 +132,9 @@ class CleaningLogReportController extends GetxController {
     CleaningLogDailyReport data,
     Document pdf,
   ) async {
+    // GE_SS_Two لا يحتوي '%' (U+0025)، فيسقط من الـ PDF مع تحذير
+    // "Helvetica has no Unicode support". نستخدم '٪' (U+066A) وهو مغطّى
+    // في الخط وأصحّ طباعيًا في مستند عربي.
     final fontData = await rootBundle.load('fonts/GE_SS_Two_Bold.ttf');
     final ttf = pw.Font.ttf(fontData);
 
@@ -200,7 +203,7 @@ class CleaningLogReportController extends GetxController {
                   pw.Text('المسندة: ${data.assignedCount}', style: titleStyle),
                   pw.Text('المنجزة: ${data.completedCount}',
                       style: titleStyle),
-                  pw.Text('نسبة الإنجاز: ${data.completionPercentage}%',
+                  pw.Text('نسبة الإنجاز: ${data.completionPercentage}٪',
                       style: titleStyle),
                 ],
               ),
@@ -236,7 +239,9 @@ class CleaningLogReportController extends GetxController {
                   pw.Expanded(
                     flex: 2,
                     child: pw.Center(
-                        child: pw.Text('أُنجزت', style: headerStyle)),
+                        // بلا تشكيل: الحركات تُسقط مُشكّل حزمة bidi
+                        // بـ RangeError عند توليد الـ PDF
+                        child: pw.Text('أنجزت', style: headerStyle)),
                   ),
                   pw.Expanded(
                     flex: 4,

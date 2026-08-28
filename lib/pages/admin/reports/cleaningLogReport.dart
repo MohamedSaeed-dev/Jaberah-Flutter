@@ -124,7 +124,7 @@ class CleaningLogReportPage extends StatelessWidget {
             _buildSummaryItem('المهمات', '${report.totalTasks}'),
             _buildSummaryItem('المسندة', '${report.assignedCount}'),
             _buildSummaryItem('المنجزة', '${report.completedCount}'),
-            _buildSummaryItem('لم تُنجز', '${report.notCompletedCount}'),
+            _buildSummaryItem('لم تنجز', '${report.notCompletedCount}'),
             _buildSummaryItem('الإنجاز', '${report.completionPercentage}%'),
           ],
         ),
@@ -323,7 +323,7 @@ class CleaningLogReportPage extends StatelessWidget {
             const SizedBox(height: 12),
             const Divider(),
             _buildRowItem('نوع النظافة:', row.taskName),
-            _buildRowItem('أُنجزت:', row.isCompleted ? 'نعم' : 'لا'),
+            _buildRowItem('أنجزت:', row.isCompleted ? 'نعم' : 'لا'),
             if (row.notes != null && row.notes!.isNotEmpty)
               _buildRowItem('ملاحظات:', row.notes!),
           ],

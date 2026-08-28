@@ -272,7 +272,7 @@ class CleaningLog extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      log.isCompleted ? 'أُنجزت' : 'لم تُنجز',
+                      log.isCompleted ? 'أنجزت' : 'لم تنجز',
                       style: TextStyle(
                         fontSize: 14,
                         color: log.isCompleted ? _primaryColor : Colors.orange,
@@ -435,7 +435,7 @@ class CleaningLog extends StatelessWidget {
                         contentPadding: EdgeInsets.zero,
                         dense: true,
                         controlAffinity: ListTileControlAffinity.leading,
-                        title: const Text('أُنجزت'),
+                        title: const Text('أنجزت'),
                       )),
                   const SizedBox(height: 8),
                   TextField(
