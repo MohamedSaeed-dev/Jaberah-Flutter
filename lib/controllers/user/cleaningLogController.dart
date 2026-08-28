@@ -88,9 +88,9 @@ class CleaningLogController extends GetxController {
     if (dateStr.isEmpty) return;
     try {
       isLoadingDaily.value = true;
-      final response = await _apiClient.dio
-          .get('/$cleaningLogsDailyURL?date=$dateStr')
-          .timeout(const Duration(seconds: 20));
+      final url = '/$cleaningLogsDailyURL?date=$dateStr';
+      final response =
+          await _apiClient.dio.get(url).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         final list = response.data is List ? response.data as List : [];
         dailyTasks.value = list
@@ -215,9 +215,8 @@ class CleaningLogController extends GetxController {
           ],
         },
       ).timeout(const Duration(seconds: 20));
-      successSnackBar(studentId == null
-          ? 'تم إلغاء إسناد المهمة'
-          : 'تم حفظ كشف النظافة');
+      successSnackBar(
+          studentId == null ? 'تم إلغاء إسناد المهمة' : 'تم حفظ كشف النظافة');
       await loadDailyTasks();
       return true;
     } on DioException catch (e) {
@@ -285,8 +284,9 @@ class DailyCleaningTask {
       displayOrder: _asInt(json['displayOrder']),
       isEditableByMe: json['isEditableByMe'] != false,
       log: log is Map
-          ? CleaningLogInfo.fromJson(
-              log is Map<String, dynamic> ? log : Map<String, dynamic>.from(log))
+          ? CleaningLogInfo.fromJson(log is Map<String, dynamic>
+              ? log
+              : Map<String, dynamic>.from(log))
           : null,
     );
   }
