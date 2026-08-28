@@ -65,7 +65,7 @@ class CleaningLogReportController extends GetxController {
             response.data as Map<String, dynamic>);
         hasLoadedOnce.value = true;
       } else {
-        messageSnackBar(response.data["message"] ?? "حدث خطأ");
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -75,7 +75,8 @@ class CleaningLogReportController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(
+            apiErrorMessage(e.response?.data, fallback: 'حدث خطأ غير متوقع'));
       }
     } catch (e) {
       catchSnackBar();
@@ -94,7 +95,7 @@ class CleaningLogReportController extends GetxController {
         groups.value =
             result.map((item) => GroupsGeneral.fromJson(item)).toList();
       } else {
-        messageSnackBar(response.data["message"] ?? "حدث خطأ");
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -104,7 +105,8 @@ class CleaningLogReportController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(
+            apiErrorMessage(e.response?.data, fallback: 'حدث خطأ غير متوقع'));
       }
     } catch (e) {
       catchSnackBar();

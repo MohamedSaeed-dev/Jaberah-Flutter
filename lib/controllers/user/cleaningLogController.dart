@@ -75,7 +75,7 @@ class CleaningLogController extends GetxController {
       if (e.error is SocketException) {
         socketSnackBar();
       } else {
-        messageSnackBar(e.response?.data['message'] ?? 'حدث خطأ');
+        messageSnackBar(apiErrorMessage(e.response?.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -109,7 +109,7 @@ class CleaningLogController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data['message'] ?? 'حدث خطأ');
+        messageSnackBar(apiErrorMessage(e.response?.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -164,7 +164,7 @@ class CleaningLogController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data['message'] ?? 'حدث خطأ');
+        messageSnackBar(apiErrorMessage(e.response?.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -228,7 +228,8 @@ class CleaningLogController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(_firstErrorMessage(e.response?.data) ?? 'فشل الحفظ');
+        messageSnackBar(
+            apiErrorMessage(e.response?.data, fallback: 'فشل الحفظ'));
       }
       return false;
     } catch (e) {
@@ -237,21 +238,6 @@ class CleaningLogController extends GetxController {
     } finally {
       isUpserting.value = false;
     }
-  }
-
-  /// يقرأ رسالة الخطأ سواء كانت { message } أو { validationContent: [ { message } ] }
-  String? _firstErrorMessage(dynamic data) {
-    if (data is! Map) return null;
-    final message = data['message'];
-    if (message is String && message.isNotEmpty) return message;
-    final validation = data['validationContent'];
-    if (validation is List && validation.isNotEmpty) {
-      final first = validation.first;
-      if (first is Map && first['message'] is String) {
-        return first['message'] as String;
-      }
-    }
-    return null;
   }
 
   @override
