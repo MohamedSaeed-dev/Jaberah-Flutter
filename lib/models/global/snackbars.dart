@@ -120,3 +120,28 @@ SnackbarController timeoutSnackBar() {
     ),
   );
 }
+
+/// يستخرج رسالة الخطأ من جسم رد الـ API بأمان.
+///
+/// جسم الرد قد يكون Map (‏`{message}` أو `{validationContent}`) أو نصًا (صفحة
+/// خطأ 404 مثلًا) أو null. فهرسة النص بمفتاح نصي ترمي
+/// `type 'String' is not a subtype of type 'int' of 'index'`، وإن حدث ذلك داخل
+/// كتلة catch فلن يلتقطه أي catch لاحق ويخرج كاستثناء غير معالج.
+String apiErrorMessage(dynamic data, {String fallback = 'حدث خطأ'}) {
+  if (data is Map) {
+    final message = data['message'];
+    if (message is String && message.trim().isNotEmpty) return message;
+
+    final validation = data['validationContent'];
+    if (validation is List) {
+      final messages = validation
+          .whereType<Map>()
+          .map((item) => item['message'])
+          .whereType<String>()
+          .where((m) => m.trim().isNotEmpty)
+          .toList();
+      if (messages.isNotEmpty) return messages.join('\n');
+    }
+  }
+  return fallback;
+}

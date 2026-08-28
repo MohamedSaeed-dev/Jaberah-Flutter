@@ -54,3 +54,10 @@ const refreshFCMTokenURL = "auth/update-fcm-token";
 
 const prayersURL = "prayers";
 const prayersMonthlyReportURL = "$prayersURL/monthly-report";
+
+const cleaningLogsURL = "cleaning-logs";
+const cleaningTasksURL = "$cleaningLogsURL/tasks";
+const cleaningLogsDailyURL = "$cleaningLogsURL/daily";
+const cleaningLogsAssignableStudentsURL = "$cleaningLogsURL/assignable-students";
+const cleaningLogsUpsertDailyURL = "$cleaningLogsURL/upsert-daily";
+const cleaningLogsDailyReportURL = "$cleaningLogsURL/daily-report";
