@@ -1,167 +1,191 @@
-# تطبيق حلقات مسجد جابرة
+# Jaberah Mosque Circles
 
-تطبيق أندرويد لإدارة حلقات تحفيظ القرآن في مسجد جابرة. يستعمله المعلم لمتابعة
-طلابه يوميًا — الحفظ والمراجعة والحضور والصلوات وكشف النظافة — ويستعمله المدير
-لإدارة الحلقات والطلاب والمعلمين والرواتب، وقراءة التقارير وتصديرها PDF.
+[العربية](README.ar.md)
 
-الواجهة عربية بالكامل واتجاهها RTL، والتواريخ هجرية في كل الشاشات.
+Android app for running the Quran memorisation circles (حلقات) at Jaberah
+Mosque. Teachers use it to follow their students day to day — memorisation,
+revision, attendance, prayers, the cleaning roster — and the administrator uses
+it to manage circles, students, teachers and salaries, and to read and export
+reports as PDF.
 
-الخادم في مستودع [Jaberah-ASP](https://github.com/MohamedSaeed-dev/Jaberah-ASP).
+The interface is entirely in Arabic and right-to-left, and every date in the
+app is Hijri.
 
-## نقطة الدخول ليست main.dart
+The backend lives in
+[Jaberah-ASP](https://github.com/MohamedSaeed-dev/Jaberah-ASP).
 
-لا يوجد `lib/main.dart` في هذا المشروع. الدالة `main()` في **`lib/login.dart`**،
-وهي التي تهيّئ Firebase و`ApiClient` و`AuthController` قبل `runApp`.
+## The entry point is not main.dart
 
-يعني ذلك أن كل أمر بناء أو تشغيل يحتاج `--target`:
+There is no `lib/main.dart` in this project. `main()` is in **`lib/login.dart`**,
+and it is what initialises Firebase, `ApiClient` and `AuthController` before
+`runApp`.
+
+That means every run and build command needs `--target`:
 
 ```bash
 flutter run  --target=lib/login.dart
 flutter build apk --release --target=lib/login.dart --no-tree-shake-icons
 ```
 
-`--no-tree-shake-icons` هو ما يستعمله خط البناء في الـ CI؛ أبقِه في أي بناء إصدار
-لتحصل على نفس المخرَج.
+`--no-tree-shake-icons` is what the CI pipeline uses; keep it on any release
+build so you get the same output.
 
-## التقنيات
+## Stack
 
-Flutter 3.29.2 · GetX للحالة والتنقّل · Dio مع CookieJar للشبكة ·
-`jhijri`/`hijri` للتقويم الهجري · حزمة `pdf` للتقارير · Firebase Messaging
-مع `flutter_local_notifications` · `local_auth` للبصمة · `flutter_secure_storage`
-لتخزين التوكن.
+Flutter 3.29.2 · GetX for state and navigation · Dio with CookieJar for
+networking · `jhijri`/`hijri` for the Hijri calendar · the `pdf` package for
+reports · Firebase Messaging with `flutter_local_notifications` · `local_auth`
+for fingerprint · `flutter_secure_storage` for the token.
 
-## تنظيم المشروع
+## Layout
 
 ```
 lib/
-  login.dart        نقطة الدخول: main() + GetMaterialApp + توجيه حسب الدور
+  login.dart        Entry point: main() + GetMaterialApp + routing by role
   api/
-    URLs.dart       عنوان الخادم وكل مسارات الـ API كثوابت
-    Dio.dart        ApiClient + الاعتراض (توكن، تجديد، خروج)
+    URLs.dart       Server address and every API path as a constant
+    Dio.dart        ApiClient + interceptor (token, refresh, logout)
     tokenStorage.dart
   controllers/
-    admin/          متحكّمات شاشات المدير
-    user/           متحكّمات شاشات المعلم
+    admin/          Controllers for administrator screens
+    user/           Controllers for teacher screens
     authController.dart, versionsController.dart, connectivity.dart
   pages/
-    admin/          شاشات المدير: الحلقات، الطلاب، المعلمون، الرواتب، التقارير
-    user/           شاشات المعلم: المتابعة، الصلوات، كشف النظافة، حضوري، راتبي
-  models/global/    snackbars.dart وأدوات مشتركة
-  widgets/          منتقيات هجرية (سنة فقط، شهر فقط)
-  config/           تهيئة Firebase وخدمة البصمة
-fonts/              GE_SS_Two — الخط الافتراضي للتطبيق وللـ PDF
-assets/             الشعار والخلفيات
+    admin/          Admin screens: circles, students, teachers, salaries, reports
+    user/           Teacher screens: follow-up, prayers, cleaning roster,
+                    my attendance, my salary
+  models/global/    snackbars.dart and shared helpers
+  widgets/          Hijri pickers (year only, month only)
+  config/           Firebase setup and the biometric service
+fonts/              GE_SS_Two — the app's default font, also used in PDFs
+assets/             Logo and backgrounds
 ```
 
-التقسيم بين `admin/` و`user/` هو محور المشروع: الشاشة تحت `pages/user/` تعني معلمًا،
-وتحت `pages/admin/` تعني مديرًا. الباك إند يبني عليه صلاحياته، فنقل شاشة بين
-المجلدين ليس تنظيمًا فقط — قد يعني أنها تنادي نقطة لم تعد مسموحة لدورها.
+The split between `admin/` and `user/` is the axis the whole project turns on:
+a screen under `pages/user/` means a teacher, one under `pages/admin/` means an
+administrator. The backend derives its authorisation from exactly that, so
+moving a screen between the two folders is not just tidying — it may mean the
+screen now calls an endpoint its role is no longer allowed to reach.
 
-أسماء الملفات `camelCase` لا `lower_case_with_underscores`. مخالف لعرف Dart،
-لكنه المتّبع في المشروع كله، و`flutter analyze` يذكّر به في كل ملف. أبقِه متسقًا.
+File names are `camelCase`, not `lower_case_with_underscores`. That goes
+against Dart convention and `flutter analyze` mentions it on every file, but it
+is what the whole project uses. Keep it consistent.
 
-## التشغيل محليًا
+## Running locally
 
 ```bash
 flutter pub get
 flutter run --target=lib/login.dart
 ```
 
-عنوان الخادم في `lib/api/URLs.dart`:
+The server address is in `lib/api/URLs.dart`:
 
 ```dart
-const baseUrl = newServerASP;   // بدّله إلى local_asp أو IP عند التطوير
+const baseUrl = newServerASP;   // switch to local_asp or IP while developing
 ```
 
-- `local_asp` = `http://10.0.2.2:5291/api` — العنوان الذي يرى به محاكي أندرويد
-  الـ localhost على جهازك.
-- `IP` — لجهاز حقيقي على نفس الشبكة؛ ضع فيه عنوان جهازك.
+- `local_asp` = `http://10.0.2.2:5291/api` — how the Android emulator sees
+  localhost on your machine.
+- `IP` — for a real device on the same network; put your machine's address there.
 
-الاتصال بخادم محلي عبر http يحتاج `usesCleartextTraffic` وهو مفعّل أصلًا في
-`AndroidManifest.xml`.
+Talking to a local server over plain http needs `usesCleartextTraffic`, which is
+already enabled in `AndroidManifest.xml`.
 
-## المصادقة
+## Authentication
 
-تسجيل الدخول يرجع access token (7 أيام) ويضع refresh token في كوكي HttpOnly
-(30 يومًا). التوكن يُحفظ في مخزن الجهاز المشفَّر عبر `TokenStorage`، والكوكي
-يديره `CookieJar` داخل `ApiClient`.
+Logging in returns an access token (7 days) and sets a refresh token in an
+HttpOnly cookie (30 days). The token is kept in the device's encrypted store
+through `TokenStorage`; the cookie is handled by `CookieJar` inside `ApiClient`.
 
-الاعتراض في `api/Dio.dart` يضيف الترويسة لكل طلب، وعند أول 401 يستدعي
-`/auth/refresh` مرة واحدة (بقفل يمنع التجديدات المتوازية) ثم يعيد الطلب الأصلي.
-إن فشل التجديد يمسح كل شيء ويعيد المستخدم لشاشة الدخول.
+The interceptor in `api/Dio.dart` attaches the header to every request. On the
+first 401 it calls `/auth/refresh` once — behind a lock so concurrent requests
+do not each trigger their own refresh — and then replays the original request.
+If the refresh fails it clears everything and sends the user back to the login
+screen.
 
-`TokenStorage` يتعامل مع حالتين: جهاز مثبَّت من قبل يحمل توكنًا نصيًا قديمًا
-(يُنقل إلى المخزن المشفَّر بلا إخراج المستخدم)، ومخزن مشفَّر معطوب (يتراجع إلى
-`SharedPreferences` بدل إسقاط الجلسة).
+`TokenStorage` handles two awkward cases: an already-installed device holding an
+old plaintext token (migrated into the encrypted store without logging anyone
+out), and an encrypted store that throws (falls back to `SharedPreferences`
+rather than dropping the session).
 
-## معالجة أخطاء الـ API
+## Handling API errors
 
-لا تفهرس جسم الرد مباشرة:
+Never index the response body directly:
 
 ```dart
-// خطأ — يرمي إن كان الجسم نصًا لا Map (صفحة 404، خطأ بوابة)
+// Wrong — throws when the body is a string rather than a Map
+// (a 404 page, a gateway error)
 messageSnackBar(e.response?.data['message'] ?? 'حدث خطأ');
 
-// صحيح
+// Right
 messageSnackBar(apiErrorMessage(e.response?.data, fallback: 'فشل الحفظ'));
 ```
 
-`apiErrorMessage` في `lib/models/global/snackbars.dart` تقرأ `{message}`، وتتراجع
-إلى تجميع رسائل `{validationContent}` القادمة من فلاتر التحقق في الباك إند، وترجع
-نصًا افتراضيًا لأي شكل آخر. الفهرسة المباشرة كانت تُسقط الشاشة، لأن الاستثناء يُرمى
-من داخل كتلة `catch` فلا يلتقطه `catch` تالٍ.
+`apiErrorMessage` in `lib/models/global/snackbars.dart` reads `{message}`, falls
+back to joining the `{validationContent}` messages the backend's validation
+filters return, and returns a default string for any other shape. Indexing
+directly used to take the screen down, because the exception is thrown from
+inside a `catch` block and no later `catch` picks it up.
 
-## التقارير و PDF
+## Reports and PDF
 
-التقارير تُبنى بحزمة `pdf` وتُحمَّل الخط من `fonts/GE_SS_Two_Bold.ttf`. ملاحظتان
-تعلّمناهما بالطريقة الصعبة:
+Reports are built with the `pdf` package and load the font from
+`fonts/GE_SS_Two_Bold.ttf`. Two things we learned the hard way:
 
-- الخط لا يحوي `%` (U+0025). الحرف لا يظهر في الملف المصدَّر ويسقط صامتًا مع تحذير
-  `Helvetica has no Unicode support` في السجل. استعمل `٪` (U+066A).
-- تركيبة ألف الهمزة مع الضمة (`أُ`) تُسقط مُشكّل حزمة `bidi` بـ `RangeError` وتُفشل
-  التصدير كليًا. تجنّب التشكيل في نصوص الـ PDF.
+- The font has no `%` (U+0025). The character silently disappears from the
+  exported file, with a `Helvetica has no Unicode support` warning in the log.
+  Use `٪` (U+066A).
+- Alef-hamza followed by a damma (`أُ`) makes the `bidi` package's normaliser
+  throw a `RangeError` and fails the export outright. Avoid diacritics in PDF
+  text.
 
-الملفات تُحفظ في مجلد خارجي ثابت معرَّف في `URLs.dart`، ويحتاج إذن
-`MANAGE_EXTERNAL_STORAGE`.
+Files are saved to a fixed external folder defined in `URLs.dart`, which
+requires the `MANAGE_EXTERNAL_STORAGE` permission.
 
-## التحديث الإجباري
+## Forced updates
 
-عند الإقلاع يستدعي `versionsController` النقطة `GET /versions?version=…` مُمرِّرًا
-إصدار التطبيق الحالي. **المقارنة تجري على الخادم لا في التطبيق**: يرجع
-`isUpdateAvailable` و`isUpdateRequired` جاهزين، والتطبيق يعرض حوارًا يمكن تخطيه
-في الأولى وحوارًا إجباريًا في الثانية. دالة `compareVersions` في المتحكّم بقايا
-معلَّقة من نسخة سابقة كانت تقارن محليًا.
+At startup `versionsController` calls `GET /versions?version=…` with the
+installed version. **The comparison happens on the server, not in the app**: it
+returns `isUpdateAvailable` and `isUpdateRequired` ready-made, and the app shows
+a dismissible dialog for the first and a blocking one for the second. The
+`compareVersions` function in the controller is commented-out leftovers from an
+earlier version that compared locally.
 
-## الاختبارات
+## Tests
 
 ```bash
 flutter test
 ```
 
-التغطية مقصورة على المنطق الخالص الذي لا يحتاج شبكة ولا جهازًا: `apiErrorMessage`
-مقابل كل شكل جسم يصدر عن الـ API فعليًا، ومسارات الترقية والتراجع في `TokenStorage`
-بقناة الإضافة مُحاكاة.
+Coverage is limited to pure logic that needs neither the network nor a device:
+`apiErrorMessage` against every body shape the API actually produces, and the
+migration and fallback paths in `TokenStorage` with the plugin channel mocked.
 
-## الإصدار والنشر
+## Releasing
 
-الدفع إلى `main-v2` يشغّل خط GitHub Actions: `pub get` ← `analyze` ← `test` ←
-بناء APK ← رفعه إلى الباك إند عبر `PUT /api/versions`، فيصير الإصدار الرسمي لكل
-المستخدمين. الخط يعمل على طلبات الدمج أيضًا (بناء واختبار فقط، بلا رفع).
+Pushing to `main-v2` runs the GitHub Actions pipeline: `pub get` → `analyze` →
+`test` → build the APK → upload it to the backend via `PUT /api/versions`, which
+makes it the official release for every user. The pipeline also runs on pull
+requests, building and testing only, with no upload.
 
-**ارفع `version` في `pubspec.yaml` قبل الدمج.** رقمه هو اسم ملف الـ APK وقيمة
-`latestVersion` عند الخادم، فدمج بلا رفع يُنتج إصدارًا لا يراه أحد كتحديث.
+**Bump `version` in `pubspec.yaml` before merging.** That number becomes the APK
+filename and the `latestVersion` the server reports, so merging without bumping
+produces a release nobody is offered as an update.
 
-الرفع يشترط ترويسة `X-Deploy-Key`، قيمتها في GitHub Secrets باسم `DEPLOY_KEY`
-ويجب أن تطابق `DeployKey` في إعدادات الخادم.
+The upload requires the `X-Deploy-Key` header, whose value is in GitHub Secrets
+as `DEPLOY_KEY` and must match `DeployKey` in the server configuration.
 
-> خطوة الرفع تستدعي `curl` بلا `--fail`، فتظهر خضراء حتى لو رفض الخادم الرفع.
-> اقرأ سطر `Response from backend:` في سجلها للتأكد.
+> The upload step calls `curl` without `--fail`, so it shows green even when the
+> server rejects the upload. Read the `Response from backend:` line in its log
+> to be sure.
 
-## أمور معروفة لم تُعالج بعد
+## Known rough edges
 
-- `MANAGE_EXTERNAL_STORAGE` مع مسار تخزين خارجي مثبّت — إذن واسع ترفضه Google Play
-  غالبًا. البديل مجلد خاص بالتطبيق، لكنه ينقل مكان كل تقرير مُصدَّر سابقًا.
-- `lib/controllers/user/DataFollowStudentController.dart` لا تستدعيه أي شاشة.
-- خطوط `fonts/Amiri/` موجودة وغير مستعملة ولا معرَّفة في `pubspec.yaml`.
-- `flutter analyze` عند 185 ملاحظة كلها من نوع info، أغلبها `withOpacity` المهجورة
-  وأسماء الملفات. لا تحذيرات ولا أخطاء.
+- `MANAGE_EXTERNAL_STORAGE` together with a hardcoded external path — a broad
+  permission Google Play will usually reject. The alternative is an
+  app-specific directory, but that moves every previously exported report.
+- `lib/controllers/user/DataFollowStudentController.dart` is not used by any
+  screen.
+- The fonts under `fonts/Amiri/` are unused and not declared in `pubspec.yaml`.
+- `flutter analyze` sits at 185 issues, all of them info — mostly the deprecated
+  `withOpacity` and the file naming. No warnings, no errors.
