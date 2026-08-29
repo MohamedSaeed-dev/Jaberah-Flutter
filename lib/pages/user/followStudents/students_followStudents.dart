@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jaberah/controllers/admin/groupStudentsController.dart';
 import 'package:jaberah/controllers/user/studentGroupsFollowStudentsController.dart';
 import 'package:jaberah/pages/user/followStudents/editData_followStudent.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
@@ -8,8 +7,6 @@ import 'package:jhijri_picker/_src/_jWidgets.dart';
 class StudentGroupsFollowStudents extends StatelessWidget {
   final StudentGroupsFollowStudentsController controller =
       Get.put(StudentGroupsFollowStudentsController());
-  final StudentsOfGroupController studentController =
-      Get.put(StudentsOfGroupController());
 
   @override
   Widget build(BuildContext context) {
