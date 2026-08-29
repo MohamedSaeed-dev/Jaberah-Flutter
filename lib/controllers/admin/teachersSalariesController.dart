@@ -63,7 +63,7 @@ class TeachersSalariesController extends GetxController {
         teachersSalaries.value =
             result.map((item) => TeacherSalaries.fromJson(item)).toList();
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -73,7 +73,7 @@ class TeachersSalariesController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -99,7 +99,7 @@ class TeachersSalariesController extends GetxController {
         successSnackBar("تم تحديث رواتب المعلمين لشهر $monthName");
         await getTeachersSalaries();
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -109,7 +109,7 @@ class TeachersSalariesController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();

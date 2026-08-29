@@ -85,7 +85,7 @@ class PrayersMonthlyReportController extends GetxController {
         final result = response.data as Map<String, dynamic>;
         prayersReport.value = PrayersMonthlyReportResponse.fromJson(result);
       } else {
-        messageSnackBar(response.data["message"] ?? "حدث خطأ");
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -95,7 +95,7 @@ class PrayersMonthlyReportController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -125,7 +125,7 @@ class PrayersMonthlyReportController extends GetxController {
           selectedGroupName.value = groups[0].name;
         }
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -135,7 +135,7 @@ class PrayersMonthlyReportController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -215,7 +215,7 @@ class PrayersMonthlyReportController extends GetxController {
                     style: titleStyle,
                   ),
                   pw.Text(
-                    'متوسط نسبة الالتزام في جماعة: ${(data.averageCommitmentPercentage)}%',
+                    'متوسط نسبة الالتزام في جماعة: ${(data.averageCommitmentPercentage)}٪',
                     style: titleStyle,
                   ),
                 ],
@@ -321,7 +321,7 @@ class PrayersMonthlyReportController extends GetxController {
                     pw.Expanded(
                       flex: 1,
                       child: pw.Center(
-                          child: pw.Text('${(s.totalPrayedPercentage)}%',
+                          child: pw.Text('${(s.totalPrayedPercentage)}٪',
                               style: cellStyle)),
                     ),
                     pw.Expanded(
@@ -339,7 +339,7 @@ class PrayersMonthlyReportController extends GetxController {
                     pw.Expanded(
                       flex: 1,
                       child: pw.Center(
-                          child: pw.Text('${s.groupPercentage}%',
+                          child: pw.Text('${s.groupPercentage}٪',
                               style: cellStyle)),
                     ),
                     pw.Expanded(
@@ -351,7 +351,7 @@ class PrayersMonthlyReportController extends GetxController {
                     pw.Expanded(
                       flex: 1,
                       child: pw.Center(
-                          child: pw.Text('${(s.missedPercentage)}%',
+                          child: pw.Text('${(s.missedPercentage)}٪',
                               style: cellStyle)),
                     ),
                   ],

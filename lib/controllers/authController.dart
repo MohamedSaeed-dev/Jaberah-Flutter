@@ -79,7 +79,7 @@ class AuthController extends GetxController {
           messageSnackBar("حدثت اخطاء غير متوقعه");
         }
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
       usernameController().clear();
       passwordController().clear();

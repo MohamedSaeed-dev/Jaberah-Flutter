@@ -51,7 +51,7 @@ class DataFollowStudentController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();

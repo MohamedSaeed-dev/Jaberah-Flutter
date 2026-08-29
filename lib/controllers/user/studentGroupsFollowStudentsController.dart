@@ -44,7 +44,7 @@ class StudentGroupsFollowStudentsController extends GetxController {
             result.map((item) => FollowStudent.fromJson(item)).toList();
         filteredStudents.value = students;
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -54,7 +54,7 @@ class StudentGroupsFollowStudentsController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();

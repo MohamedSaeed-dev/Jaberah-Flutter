@@ -62,7 +62,7 @@ class StudentsController extends GetxController {
             ((pageNumber.value - 1) * pageSize) + data.value.data.length;
         students.value = data.value.data;
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -72,7 +72,7 @@ class StudentsController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -102,7 +102,7 @@ class StudentsController extends GetxController {
         successSnackBar('تم اضافة الطالب بنجاح');
         await getStudents();
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -112,7 +112,7 @@ class StudentsController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -137,7 +137,7 @@ class StudentsController extends GetxController {
             result.map((item) => GroupsForGeneralUse.fromJson(item)).toList();
         groups.insert(0, GroupsForGeneralUse(id: null, groupName: "بدون حلقة"));
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -147,7 +147,7 @@ class StudentsController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -238,7 +238,7 @@ class StudentsController extends GetxController {
         successSnackBar('تم حذف الطالب بنجاح');
         await getStudents();
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on SocketException catch (_) {
       socketSnackBar();
@@ -268,7 +268,7 @@ class StudentsController extends GetxController {
         successSnackBar('تم تحديث بيانات الطالب بنجاح');
         await getStudents();
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on SocketException catch (_) {
       socketSnackBar();

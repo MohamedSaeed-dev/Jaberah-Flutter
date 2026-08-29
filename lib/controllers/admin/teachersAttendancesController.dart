@@ -68,7 +68,7 @@ class TeacherAttendancesController extends GetxController {
             .map((item) => TeacherAttendanceForDayReport.fromJson(item))
             .toList();
       } else {
-        messageSnackBar(response.data['message']);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -78,7 +78,7 @@ class TeacherAttendancesController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -102,7 +102,7 @@ class TeacherAttendancesController extends GetxController {
         successSnackBar("تم تحديث حضور المعلم");
         await getTeachersAttendances();
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on SocketException catch (_) {
       socketSnackBar();
