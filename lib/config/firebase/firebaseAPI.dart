@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/api/URLs.dart';
+import 'package:jaberah/api/tokenStorage.dart';
 import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/user/notificationsUserController.dart';
 import 'package:jaberah/login.dart';
@@ -80,7 +81,7 @@ class FirebaseAPI {
       }
       final prefs = await SharedPreferences.getInstance();
       final id = prefs.getString("id");
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await TokenStorage.read();
       if (id != null && accessToken != null) await updateToken(id, token);
     });
 

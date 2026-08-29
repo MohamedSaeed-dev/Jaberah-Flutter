@@ -67,7 +67,7 @@ class MonthlyStudentsReportsController extends GetxController {
 
         monthlyReport.value = MonthlyReportResponse.fromJson(result);
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -77,7 +77,7 @@ class MonthlyStudentsReportsController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -106,7 +106,7 @@ class MonthlyStudentsReportsController extends GetxController {
         successSnackBar("تم تعديل النتائج بنجاح");
         await getMonthlyReport();
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -116,7 +116,7 @@ class MonthlyStudentsReportsController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();
@@ -148,7 +148,7 @@ class MonthlyStudentsReportsController extends GetxController {
         await getMonthlyReport();
         successSnackBar("تمت إضافة الكتاب بنجاح");
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -182,7 +182,7 @@ class MonthlyStudentsReportsController extends GetxController {
         successSnackBar("تم تعديل الكتاب بنجاح");
         Get.back();
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -201,7 +201,7 @@ class MonthlyStudentsReportsController extends GetxController {
         await getMonthlyReport();
         successSnackBar("تم حذف الكتاب");
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -233,7 +233,7 @@ class MonthlyStudentsReportsController extends GetxController {
           selectedGroupName.value = groups[0].name;
         }
       } else {
-        messageSnackBar(response.data["message"]);
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
@@ -243,7 +243,7 @@ class MonthlyStudentsReportsController extends GetxController {
           e.type == DioExceptionType.receiveTimeout) {
         timeoutSnackBar();
       } else {
-        messageSnackBar(e.response?.data["message"] ?? "حدث خطأ غير متوقع");
+        messageSnackBar(apiErrorMessage(e.response?.data, fallback: "حدث خطأ غير متوقع"));
       }
     } catch (e) {
       catchSnackBar();

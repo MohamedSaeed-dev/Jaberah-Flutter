@@ -69,7 +69,7 @@ class DailyPrayersController extends GetxController {
       if (e.error is SocketException) {
         socketSnackBar();
       } else {
-        messageSnackBar(e.response?.data['message'] ?? 'حدث خطأ');
+        messageSnackBar(apiErrorMessage(e.response?.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -101,7 +101,7 @@ class DailyPrayersController extends GetxController {
       if (e.error is SocketException) {
         socketSnackBar();
       } else {
-        messageSnackBar(e.response?.data['message'] ?? 'حدث خطأ');
+        messageSnackBar(apiErrorMessage(e.response?.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -175,13 +175,13 @@ class DailyPrayersController extends GetxController {
         hasNext.value = false;
         hasPrevious.value = false;
       } else {
-        messageSnackBar(response.data['message'] ?? 'حدث خطأ');
+        messageSnackBar(apiErrorMessage(response.data));
       }
     } on DioException catch (e) {
       if (e.error is SocketException) {
         socketSnackBar();
       } else {
-        messageSnackBar(e.response?.data['message'] ?? 'حدث خطأ');
+        messageSnackBar(apiErrorMessage(e.response?.data));
       }
     } catch (e) {
       catchSnackBar();
@@ -207,7 +207,7 @@ class DailyPrayersController extends GetxController {
       successSnackBar('تم حفظ كشف الصلوات');
       await loadDailyPrayers();
     } on DioException catch (e) {
-      messageSnackBar(e.response?.data['message'] ?? 'فشل الحفظ');
+      messageSnackBar(apiErrorMessage(e.response?.data, fallback: 'فشل الحفظ'));
     } catch (e) {
       catchSnackBar();
     } finally {

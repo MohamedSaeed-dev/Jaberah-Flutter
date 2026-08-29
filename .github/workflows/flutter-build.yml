@@ -5,6 +5,13 @@ on:
     branches:
       - master
       - main-v2
+  # كان البناء لا يعمل إلا بعد الدمج، فأي كسر في بناء الأندرويد (حزمة أصلية جديدة،
+  # إعداد Gradle) لا يظهر إلا وقد صار في الفرع الرئيس. خطوات النشر أدناه محصورة
+  # بـ github.ref فلا تعمل على طلبات الدمج.
+  pull_request:
+    branches:
+      - master
+      - main-v2
 
 jobs:
   build:
@@ -22,6 +29,12 @@ jobs:
 
       - name: Install Dependencies
         run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test
 
       - name: Extract App Version
         id: extract_version
@@ -41,6 +54,7 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           response=$(curl -X PUT "${{ secrets.BACKEND_API }}?version=${{ env.VERSION }}" \
+            -H "X-Deploy-Key: ${{ secrets.DEPLOY_KEY }}" \
             -H "Content-Type: multipart/form-data" \
             -F "apkFile=@build/app/outputs/flutter-apk/jaberah-${VERSION}.apk")
           echo "Response from backend: $response"
@@ -50,6 +64,7 @@ jobs:
         if: github.ref == 'refs/heads/main-v2'
         run: |
           response=$(curl -X PUT "${{ secrets.BACKEND_API_V2 }}?version=${{ env.VERSION }}" \
+            -H "X-Deploy-Key: ${{ secrets.DEPLOY_KEY }}" \
             -H "Content-Type: multipart/form-data" \
             -F "apkFile=@build/app/outputs/flutter-apk/jaberah-${VERSION}.apk")
           echo "Response from backend: $response"
