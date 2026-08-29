@@ -41,6 +41,7 @@ dependencies:
   http:
   get:
   shared_preferences: ^2.0.0
+  flutter_secure_storage: ^9.2.4
   multi_select_flutter:
   connectivity_plus:
   jhijri_picker:

@@ -166,7 +166,7 @@ class SemesterReportPage extends StatelessWidget {
         picked.jhijri != controller.selectedFromDate.value.jhijri) {
       controller.selectedFromDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
 
-      final fromDateHijri = picked.jhijri!;
+      final fromDateHijri = picked.jhijri;
       var newToYear = fromDateHijri.year;
       var newToMonth = fromDateHijri.month + 3;
 

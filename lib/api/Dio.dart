@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:jaberah/api/URLs.dart';
+import 'package:jaberah/api/tokenStorage.dart';
 import 'package:jaberah/login.dart';
 
 class ApiClient {
@@ -38,8 +39,7 @@ class ApiInterceptors extends Interceptor {
   Future<void> onRequest(
       RequestOptions options, RequestInterceptorHandler handler) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final accessToken = prefs.getString('accessToken');
+      final accessToken = await TokenStorage.read();
       if (accessToken != null && accessToken.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer $accessToken';
       }
@@ -80,8 +80,7 @@ class ApiInterceptors extends Interceptor {
         final newAccessToken = await _refreshToken();
         
         if (newAccessToken != null && newAccessToken.isNotEmpty) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('accessToken', newAccessToken);
+          await TokenStorage.write(newAccessToken);
           
           _refreshCompleter!.complete(newAccessToken);
           _isRefreshing = false;
@@ -174,6 +173,8 @@ class ApiInterceptors extends Interceptor {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+      // prefs.clear() لا يمسّ المخزن المشفَّر.
+      await TokenStorage.clear();
       await cookieJar.deleteAll();
       Get.offAll(() => Login());
     } catch (e) {

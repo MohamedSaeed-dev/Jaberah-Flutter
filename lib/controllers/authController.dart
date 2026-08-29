@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/api/Dio.dart';
+import 'package:jaberah/api/tokenStorage.dart';
 import 'package:jaberah/api/URLs.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
 import 'package:jaberah/login.dart';
@@ -37,7 +38,7 @@ class AuthController extends GetxController {
       if (response.statusCode == 200) {
         final LoginModel data = LoginModel.fromJson(response.data);
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('accessToken', data.accessToken);
+        await TokenStorage.write(data.accessToken);
         final UserNameController usernameC = Get.put(UserNameController());
         usernameC.saveValue(data.user.teacherName);
         await prefs.setString("id", data.user.id.toString());
@@ -129,6 +130,8 @@ class AuthController extends GetxController {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.clear();
+      // prefs.clear() لا يمسّ المخزن المشفَّر.
+      await TokenStorage.clear();
 
       usernameController.value.clear();
       passwordController.value.clear();
@@ -167,7 +170,7 @@ class AuthController extends GetxController {
 
   Future<AuthController> checkLoginStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var accessToken = prefs.getString('accessToken');
+    var accessToken = await TokenStorage.read();
     var role = prefs.getString("role");
     if (accessToken != null && role != null) {
       isAdmin.value = role == "1";
