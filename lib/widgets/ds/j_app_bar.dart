@@ -130,7 +130,8 @@ class JAppBar extends StatelessWidget implements PreferredSizeWidget {
     if (ModalRoute.of(context)?.impliesAppBarDismissal ?? false) {
       return Center(
         child: JAppBarButton(
-          // النظام يرسم السهم «<» كما هو في لوحة الشاشات.
+          // chevron_left يحمل matchTextDirection فينعكس في الواجهة العربية
+          // ويشير يمينًا — وهو اتجاه الرجوع الصحيح في RTL.
           icon: Icons.chevron_left_rounded,
           tooltip: MaterialLocalizations.of(context).backButtonTooltip,
           onPressed: () => Navigator.maybePop(context),

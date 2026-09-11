@@ -102,7 +102,7 @@ class StudentGroupsFollowStudents extends StatelessWidget {
             ),
           ),
           JIconAction(
-            icon: Icons.calendar_month_rounded,
+            icon: Icons.chevron_left_rounded,
             tooltip: 'اختيار اليوم',
             onPressed: () => _selectHijriDate(context),
           ),

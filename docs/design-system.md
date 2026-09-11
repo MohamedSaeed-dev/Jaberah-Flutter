@@ -12,10 +12,14 @@
 
 | | |
 |---|---|
-| ![الشاشة الرئيسية](design/screen-home.png) | ![قائمة الحلقات](design/screen-halaqat.png) |
-| الرئيسية · HOME | الحلقات · HALAQAT LIST |
-
-![مكوّنات النظام](design/component-kit.png)
+| ![الدخول](design/01-login.png) | ![الرئيسية](design/02-home.png) |
+| الدخول · LOGIN | الرئيسية · HOME |
+| ![الحلقات](design/03-halaqat.png) | ![تفاصيل الحلقة](design/04-halaqa-detail.png) |
+| الحلقات · HALAQAT LIST | تفاصيل الحلقة · HALAQA DETAIL |
+| ![المعلمون](design/05-teachers.png) | ![الحضور](design/06-attendance.png) |
+| المعلمون · TEACHERS | الحضور · ATTENDANCE |
+| ![الإشعارات](design/07-notifications.png) | ![المكوّنات](design/08-kit.png) |
+| الإشعارات · NOTIFICATIONS | المكوّنات · COMPONENTS |
 
 ---
 
