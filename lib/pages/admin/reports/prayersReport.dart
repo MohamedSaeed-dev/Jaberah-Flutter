@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/prayersMonthlyReportController.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class PrayersReportPage extends StatelessWidget {
   final PrayersMonthlyReportController controller =
@@ -26,16 +27,16 @@ class PrayersReportPage extends StatelessWidget {
                   label: const Text(
                     "عـرض الـتـقـريـر",
                     style: TextStyle(
-                      color: Colors.black,
+                      color: AppColors.onPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   icon: const Icon(
                     Icons.document_scanner_outlined,
-                    color: Colors.black,
+                    color: AppColors.onPrimary,
                   ),
-                  backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+                  backgroundColor: AppColors.primary,
                 ),
               ),
             ),
@@ -54,12 +55,12 @@ class PrayersReportPage extends StatelessWidget {
                         "تقرير كشف الصلوات - ${controller.selectedGroupName.value} - ${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
                       );
                     },
-              icon: const Icon(Icons.save, color: Colors.black),
+              icon: const Icon(Icons.save, color: AppColors.onPrimary),
             ),
           ),
         ],
         title: const Text('تقرير كشف الصلوات'),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -188,7 +189,7 @@ class PrayersReportPage extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
@@ -199,8 +200,8 @@ class PrayersReportPage extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2),
-      backgroundColor: Colors.white,
+      primaryColor: AppColors.primary,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -296,7 +297,7 @@ class PrayersReportPage extends StatelessWidget {
               student.groupName,
               style: const TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.inkFaint,
               ),
             ),
             const SizedBox(height: 16),
@@ -359,7 +360,7 @@ class PrayersReportPage extends StatelessWidget {
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: Colors.grey,
+        color: AppColors.inkFaint,
       ),
     );
   }

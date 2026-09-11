@@ -2,659 +2,476 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/groupStudentsController.dart';
 import 'package:jaberah/controllers/admin/groupsController.dart';
+import 'package:jaberah/helpers/timeHelpers.dart';
 import 'package:jaberah/pages/user/followStudents/students_followStudents.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
 
 class GroupStudents extends StatelessWidget {
+  GroupStudents({super.key});
+
   final GroupStudentsController controller = Get.put(GroupStudentsController());
   final StudentsOfGroupController studentController =
       Get.put(StudentsOfGroupController());
 
+  /// المراحل الدراسية المسموح بها في القائمة المنسدلة.
+  static const List<String> _schoolClasses = [
+    'المرحلة الابتدائية',
+    'المرحلة الاعدادية',
+    'المرحلة الثانوية',
+  ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: BottomAppBar(
-        color: Color(0xfef7ff),
-        shape: const CircularNotchedRectangle(),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildBottomButton(
-                icon: Icons.delete_outline,
-                label: 'حذف الحلقة',
-                color: Colors.red,
-                onPressed: () => _showDeleteConfirmation(context),
+    return JScaffold(
+      appBar: JAppBar(
+        title: 'تفاصيل الحلقة',
+        subtitle: 'طلاب الحلقة وبياناتها',
+        actions: [
+          JAppBarButton(
+            icon: Icons.visibility_outlined,
+            tooltip: 'عرض كمعلم',
+            onPressed: () {
+              Get.to(
+                () => StudentGroupsFollowStudents(),
+                arguments: {
+                  "id": controller.id,
+                  "Name": controller.groupName.value,
+                },
+              );
+            },
+          ),
+        ],
+      ),
+      bottomNavigationBar: _ActionBar(
+        onDelete: () => _showDeleteConfirmation(context),
+        onEdit: () async {
+          await controller.getTeachers();
+          _showEditGroupDialog(context);
+        },
+      ),
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.md,
+                0,
               ),
-              _buildBottomButton(
-                icon: Icons.edit_outlined,
-                label: 'تعديل الحلقة',
-                color: Colors.blue,
-                onPressed: () async {
-                  await controller.getTeachers();
-                  _showEditGroupDialog(context);
+              child: Obx(() => _GroupSummary(controller: controller)),
+            ),
+            Obx(
+              () => JSearchField(
+                controller: controller.searchText.value,
+                hintText: 'ابحث عن طالب...',
+                enabled: !controller.isLoadingData.value,
+                onSubmitted: (_) {
+                  controller.pageNumber.value = 1;
+                  controller.getStudents();
                 },
               ),
-            ],
-          ),
-        ),
-      ),
-      appBar: AppBar(
-        title: Obx(() => Text(
-              'طلاب ${controller.groupName.value}',
-              style: TextStyle(
-                fontFamily: 'GE_SS_Two',
-                fontWeight: FontWeight.bold,
-              ),
-            )),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-        actions: [
-          Tooltip(
-            message: 'عرض كمعلم',
-            child: IconButton(
-              icon: Icon(Icons.visibility_outlined, color: Colors.black),
-              onPressed: () {
-                Get.to(
-                  () => StudentGroupsFollowStudents(),
-                  arguments: {
-                    "id": controller.id,
-                    "Name": controller.groupName.value,
-                  },
-                );
-              },
             ),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Obx(() => TextField(
-                  controller: controller.searchText.value,
-                  style: TextStyle(color: Colors.black),
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    hintText: 'ابحث عن طالب...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  onSubmitted: controller.isLoadingData.value
-                      ? null
-                      : (value) {
-                          controller.pageNumber.value = 1;
-                          controller.getStudents();
-                        },
-                )),
-          ),
-          Obx(() {
-            if (controller.isLoadingData.value) {
-              return Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      CircularProgressIndicator(),
-                      Text(
-                        "جاري تحميل الطلاب...",
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            } else if (controller.students.isEmpty &&
-                !controller.isLoadingData.value) {
-              return Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.hourglass_empty),
-                      SizedBox(
-                        height: 10,
-                      ),
-                      Text("لاتوجد بيانات", style: TextStyle(fontSize: 20))
-                    ],
-                  ),
-                ),
-              );
-            } else {
-              return Expanded(
-                child: ListView.builder(
-                  itemCount: controller.students.length,
-                  itemBuilder: (context, index) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12.0, vertical: 5),
-                      child: _buildStudentCard(
-                          context, controller.students[index]),
-                    );
-                  },
-                ),
-              );
-            }
-          }),
-          Obx(() => _buildPaginationControls()),
-        ],
-      ),
-    );
-  }
-
-  // Paginated list
-
-  // Pagination controls
-  Widget _buildPaginationControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed:
-              controller.hasPrevious.value && !controller.isLoadingData.value
-                  ? () {
-                      controller.pageNumber.value--;
-                      controller.getStudents();
-                    }
-                  : null,
-        ),
-        Text(
-            '${controller.fetchedCount.value} من ${controller.totalCount.value}'),
-        IconButton(
-          icon: Icon(Icons.arrow_forward),
-          onPressed: controller.hasNext.value && !controller.isLoadingData.value
-              ? () {
-                  controller.pageNumber.value++;
-                  controller.getStudents();
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoadingData.value) {
+                  return const JLoadingState(message: 'جاري تحميل الطلاب...');
                 }
-              : null,
-        ),
-      ],
-    );
-  }
-
-  // Method to build each student card
-  Widget _buildStudentCard(BuildContext context, StudentGroup student) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
-      elevation: 8,
-      shadowColor: Colors.indigo[300],
-      color: Colors.indigo[50],
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildDetailRow('اسم الطالب:', student.studentName),
-            _buildDetailRow('رقم ولي الامر:', student.phoneNumber),
-            _buildDetailRow('مقدار الحفظ:', student.memoRate.toString()),
-            _buildDetailRow('المستوى:', student.schoolLevel),
-            _buildDetailRow('الصف الدراسي:', student.studyLevel),
-            _buildDetailRow('المرحلة الدراسية:', student.schoolClass),
-            _buildDetailRow('ملاحظات:', student.notes),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                IconButton(
-                  icon: Icon(Icons.edit, color: Colors.blue),
-                  onPressed: () => _showEditStudentDialog(context, student),
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete, color: Colors.red),
-                  onPressed: () =>
-                      _showDeleteStudentConfirmation(context, student.id),
-                ),
-              ],
-            )
+                if (controller.students.isEmpty) {
+                  return const JEmptyState(
+                    title: 'لا يوجد طلاب في هذه الحلقة',
+                    message: 'أضف الطلاب إلى الحلقة من شاشة الطلاب.',
+                    icon: Icons.school_outlined,
+                  );
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.xs,
+                    AppSpacing.md,
+                    AppSpacing.md,
+                  ),
+                  itemCount: controller.students.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.xs),
+                  itemBuilder: (context, index) => _buildStudentCard(
+                    context,
+                    controller.students[index] as StudentGroup,
+                  ),
+                );
+              }),
+            ),
+            Obx(
+              () => JPaginationBar(
+                fetchedCount: controller.fetchedCount.value,
+                totalCount: controller.totalCount.value,
+                onPrevious: controller.hasPrevious.value &&
+                        !controller.isLoadingData.value
+                    ? () {
+                        controller.pageNumber.value--;
+                        controller.getStudents();
+                      }
+                    : null,
+                onNext:
+                    controller.hasNext.value && !controller.isLoadingData.value
+                        ? () {
+                            controller.pageNumber.value++;
+                            controller.getStudents();
+                          }
+                        : null,
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, String? value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
+  Widget _buildStudentCard(BuildContext context, StudentGroup student) {
+    return JListCard(
+      leading: JAvatar(name: student.studentName),
+      title: student.studentName,
+      subtitle: _studentSummary(student),
+      trailing: JChip(
+        label: 'حفظ ${student.memoRate}',
+        tone: JTone.gold,
+        compact: true,
+      ),
+      footer: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+          JDetailRow(
+            label: 'ولي الأمر:',
+            value: student.phoneNumber,
+            icon: Icons.phone_outlined,
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              value ?? "",
-              style: const TextStyle(fontSize: 16),
-              overflow: TextOverflow.ellipsis,
+          if ((student.notes ?? '').trim().isNotEmpty)
+            JDetailRow(
+              label: 'ملاحظات:',
+              value: student.notes!,
+              icon: Icons.sticky_note_2_outlined,
             ),
+          const SizedBox(height: AppSpacing.xxs),
+          JCardActions(
+            onEdit: () => _showEditStudentDialog(context, student),
+            onDelete: () => _showDeleteStudentConfirmation(context, student.id),
           ),
         ],
       ),
     );
   }
 
-  // Dialog to edit student details
+  static String _studentSummary(StudentGroup student) {
+    final parts = [
+      student.schoolClass,
+      student.studyLevel,
+      student.schoolLevel,
+    ].whereType<String>().map((e) => e.trim()).where((e) => e.isNotEmpty);
+    return parts.isEmpty ? 'لا توجد بيانات دراسية' : parts.join(' · ');
+  }
+
+  // ----------------------------------------------------- حوارات الطلاب
   void _showEditStudentDialog(BuildContext context, StudentGroup student) {
     studentController.nameController.value.text = student.studentName;
     studentController.phoneController.value.text = student.phoneNumber;
-    
-    // Validate and map schoolClass value to match dropdown items
-    final validSchoolClasses = [
-      'المرحلة الابتدائية',
-      'المرحلة الاعدادية',
-      'المرحلة الثانوية'
-    ];
-    String schoolClassValue = student.schoolClass ?? "";
-    if (!validSchoolClasses.contains(schoolClassValue)) {
-      schoolClassValue = "";
-    }
-    studentController.selectedSchoolClass.value = schoolClassValue;
-    
+
+    // قيمة المرحلة القادمة من الخادم قد لا تطابق خيارات القائمة، فتُفرَّغ حينها.
+    final schoolClassValue = student.schoolClass ?? '';
+    studentController.selectedSchoolClass.value =
+        _schoolClasses.contains(schoolClassValue) ? schoolClassValue : '';
+
     studentController.rateController.value.text = student.memoRate.toString();
-    studentController.levelController.value.text = student.schoolLevel ?? "";
-    studentController.notesController.value.text = student.notes ?? "";
-    studentController.studyLevelController.value.text =
-        student.studyLevel ?? "";
-    var key = GlobalKey<FormState>();
-    showDialog(
+    studentController.levelController.value.text = student.schoolLevel ?? '';
+    studentController.notesController.value.text = student.notes ?? '';
+    studentController.studyLevelController.value.text = student.studyLevel ?? '';
+
+    final key = GlobalKey<FormState>();
+    showJDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Text('تعديل معلومات الطالب'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: key,
-              child: Column(
-                children: [
-                  _buildDialogTextField(
-                      'اسم الطالب', studentController.nameController.value,
-                      (value) {
-                    final arabicRegex =
-                        RegExp(r'^[\u0621-\u064A\u0660-\u0669\s]+$');
-                    if (value!.isNotEmpty && !arabicRegex.hasMatch(value))
-                      return 'اسم الطالب يجب ان يكون عربياً';
-                    else if (value.length < 7 || value.length > 20)
-                      return 'اسم الطالب يجب ان يكون بين 7 و 20 حرفاً';
-                    return null;
-                  }),
-                  _buildDialogTextField(
-                      'رقم ولي الأمر', studentController.phoneController.value,
-                      (value) {
-                    RegExp regExp = RegExp(r'^7[0-9]{8}$');
-                    if (value!.isNotEmpty && !regExp.hasMatch(value)) {
-                      return 'يرجى إدخال رقم هاتف صحيح';
-                    }
-                    return null;
-                  }),
-                  _buildDialogTextField(
-                      'مقدار الحفظ', studentController.rateController.value,
-                      (value) {
-                    return null;
-                  }),
-                  _buildDialogTextField('الصف الدراسي',
-                      studentController.studyLevelController.value, (value) {
-                    return null;
-                  }),
-                  _buildDialogTextField(
-                      'المستوى', studentController.levelController.value,
-                      (value) {
-                    return null;
-                  }),
-                  _buildDialogTextField(
-                      'ملاحظات', studentController.notesController.value,
-                      (value) {
-                    return null;
-                  }),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: InputDecorator(
-                      decoration: InputDecoration(
-                        labelText:
-                            'المرحلة الدراسية', // Add label text similar to TextFormField
-                        border: OutlineInputBorder(), // Outline border
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12), // Adjust padding
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: Obx(() => DropdownButton<String>(
-                              isExpanded: true,
-                              value: studentController.selectedSchoolClass.value.isEmpty
-                                  ? null
-                                  : studentController.selectedSchoolClass.value,
-                              hint: Text('اختر المرحلة الدراسية'),
-                              onChanged: (value) {
-                                studentController.selectedSchoolClass.value =
-                                    value ?? "";
-                              },
-                              items: [
-                                DropdownMenuItem(
-                                  value: 'المرحلة الابتدائية',
-                                  child: Text('المرحلة الابتدائية'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'المرحلة الاعدادية',
-                                  child: Text('المرحلة الاعدادية'),
-                                ),
-                                DropdownMenuItem(
-                                  value: 'المرحلة الثانوية',
-                                  child: Text('المرحلة الثانوية'),
-                                ),
-                              ],
-                            )),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+      dialog: Obx(
+        () => JDialog(
+          title: 'تعديل معلومات الطالب',
+          icon: Icons.edit_outlined,
+          confirmLabel: 'حفظ',
+          loading: studentController.isLoadingOperation.value,
+          loadingLabel: 'جاري الحفظ...',
+          onConfirm: () async {
+            if (key.currentState!.validate()) {
+              await studentController.updateStudent(id: student.id);
+            }
+          },
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5,
             ),
-          ),
-          actions: [
-            TextButton(
-              child: const Text('إلغاء'),
-              onPressed: () {
-                Get.back();
-              },
-            ),
-            TextButton(
-              onPressed: studentController.isLoadingOperation.value
-                  ? null
-                  : () async {
-                      if (key.currentState!.validate()) {
-                        await studentController.updateStudent(id: student.id);
-                      }
-                    },
-              child: Obx(() => Text(studentController.isLoadingOperation.value
-                  ? 'جاري الحفظ...'
-                  : 'حفظ')),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildDialogTextField(String label, TextEditingController controller,
-      String? Function(String?)? validatorFunction) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextFormField(
-        controller: controller,
-        validator: validatorFunction,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
-        ),
-      ),
-    );
-  }
-
-  // Show delete confirmation dialog
-  void _showDeleteStudentConfirmation(BuildContext context, int id) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Text('تأكيد الحذف'),
-          content: const Text('هل أنت متأكد أنك تريد حذف هذا الطالب؟'),
-          actions: [
-            TextButton(
-              child: const Text('إلغاء'),
-              onPressed: () {
-                Get.back();
-              },
-            ),
-            TextButton(
-              onPressed: studentController.isLoadingOperation.value
-                  ? null
-                  : () async {
-                      await studentController.deleteStudent(id: id);
-                    },
-              child: Obx(() => Text(
-                    studentController.isLoadingOperation.value
-                        ? 'جاري الحذف...'
-                        : 'حذف',
-                    style: TextStyle(color: Colors.red),
-                  )),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Placeholder for delete confirmation for the group
-  void _showDeleteConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
-          title: const Text('تأكيد الحذف'),
-          content: const Text(
-              'هل أنت متأكد أنك تريد حذف هذه الحلقة؟\n ملاحظة: لن يؤدي إلى حذف الطلاب. '),
-          actions: [
-            TextButton(
-              child: const Text('إلغاء'),
-              onPressed: () {
-                Get.back();
-              },
-            ),
-            TextButton(
-              onPressed: controller.isLoadingOperation.value
-                  ? null
-                  : () async {
-                      await controller.deleteGroup();
-                    },
-              child: Obx(() => Text(
-                    controller.isLoadingOperation.value
-                        ? 'جاري الحذف...'
-                        : 'حذف',
-                    style: TextStyle(color: Colors.red),
-                  )),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Placeholder for edit dialog for the group
-  final formKeyGroupName = GlobalKey<FormState>();
-
-  void _showEditGroupDialog(BuildContext context) {
-    controller.groupNameText.value.text = controller.groupName.value;
-
-    controller.selectedTeacherId.value = controller.teacherIdText;
-
-    controller.period.value = controller.period.value;
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('تعديل الحلقة '),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: Form(
-              key: formKeyGroupName,
-              child: SingleChildScrollView(
+            child: SingleChildScrollView(
+              child: Form(
+                key: key,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                TextFormField(
-                  controller: controller.groupNameText.value,
-                  decoration: const InputDecoration(
-                      labelText: 'اسم الحلقة', border: OutlineInputBorder()),
-                  validator: (value) {
-                    final arabicRegex =
-                        RegExp(r'^[\u0621-\u064A\u0660-\u0669\s]+$');
-                    if (value!.isEmpty)
-                      return 'يرجى إدخال اسم الحلقة';
-                    else if (!arabicRegex.hasMatch(value))
-                      return 'اسم الحلقة يجب ان يكون عربياً';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                Obx(() => DropdownButtonFormField<String>(
-                      value: controller.period.value,
-                      hint: Text(
-                        'اختر الفترة',
-                        style: TextStyle(color: Colors.grey[700], fontSize: 16),
+                    _field(
+                      'اسم الطالب',
+                      studentController.nameController.value,
+                      _nameValidator,
+                    ),
+                    _field(
+                      'رقم ولي الأمر',
+                      studentController.phoneController.value,
+                      _phoneValidator,
+                      keyboardType: TextInputType.phone,
+                    ),
+                    _field(
+                      'مقدار الحفظ',
+                      studentController.rateController.value,
+                      null,
+                    ),
+                    _field(
+                      'الصف الدراسي',
+                      studentController.studyLevelController.value,
+                      null,
+                    ),
+                    _field(
+                      'المستوى',
+                      studentController.levelController.value,
+                      null,
+                    ),
+                    _field(
+                      'ملاحظات',
+                      studentController.notesController.value,
+                      null,
+                    ),
+                    DropdownButtonFormField<String>(
+                      value: studentController.selectedSchoolClass.value.isEmpty
+                          ? null
+                          : studentController.selectedSchoolClass.value,
+                      isExpanded: true,
+                      hint: const Text('اختر المرحلة الدراسية'),
+                      onChanged: (value) {
+                        studentController.selectedSchoolClass.value =
+                            value ?? '';
+                      },
+                      decoration: const InputDecoration(
+                        labelText: 'المرحلة الدراسية',
                       ),
                       items: [
-                        DropdownMenuItem(
-                          value: 'صباحية',
-                          child: Text('صباحية', style: TextStyle(fontSize: 16)),
-                        ),
-                        DropdownMenuItem(
-                          value: 'مسائية',
-                          child: Text('مسائية', style: TextStyle(fontSize: 16)),
-                        ),
+                        for (final item in _schoolClasses)
+                          DropdownMenuItem(value: item, child: Text(item)),
                       ],
-                      onChanged: (value) {
-                        controller.period.value = value!;
-                      },
-                      decoration: InputDecoration(
-                          labelText: 'الفترة', border: OutlineInputBorder()),
-                    )),
-                const SizedBox(height: 20),
-                _buildTeachersDropdown(),
-                const SizedBox(height: 16),
-                Obx(() => _buildTimeEditRow(
-                      context,
-                      label: 'وقت بداية فترة الحلقة خلال اليوم',
-                      value: controller.windowStartEdit.value,
-                      onTap: () => _pickTimeForGroup(
-                              context, controller.windowStartEdit.value)
-                          .then((v) {
-                        if (v != null) controller.windowStartEdit.value = v;
-                      }),
-                    )),
-                const SizedBox(height: 12),
-                Obx(() => _buildTimeEditRow(
-                      context,
-                      label: 'وقت نهاية فترة الحلقة خلال اليوم',
-                      value: controller.windowEndEdit.value,
-                      onTap: () => _pickTimeForGroup(
-                              context, controller.windowEndEdit.value)
-                          .then((v) {
-                        if (v != null) controller.windowEndEdit.value = v;
-                      }),
-                    )),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: controller.flexibleMinutesEditController.value,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'الدقائق المرنة قبل احتساب التأخر',
-                    hintText: 'مثال: 15',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+                    ),
                   ],
                 ),
               ),
             ),
           ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Get.back();
-              },
-              child: const Text('إلغاء'),
+        ),
+      ),
+    );
+  }
+
+  void _showDeleteStudentConfirmation(BuildContext context, int id) {
+    showJDialog(
+      context: context,
+      dialog: Obx(
+        () => JDialog(
+          title: 'تأكيد الحذف',
+          message: 'هل أنت متأكد أنك تريد حذف هذا الطالب؟',
+          icon: Icons.delete_outline_rounded,
+          tone: JTone.danger,
+          confirmLabel: 'حذف',
+          loading: studentController.isLoadingOperation.value,
+          loadingLabel: 'جاري الحذف...',
+          onConfirm: () async => studentController.deleteStudent(id: id),
+        ),
+      ),
+    );
+  }
+
+  // ----------------------------------------------------- حوارات الحلقة
+  void _showDeleteConfirmation(BuildContext context) {
+    showJDialog(
+      context: context,
+      dialog: Obx(
+        () => JDialog(
+          title: 'تأكيد حذف الحلقة',
+          message: 'هل أنت متأكد أنك تريد حذف هذه الحلقة؟\n'
+              'ملاحظة: لن يؤدي ذلك إلى حذف الطلاب.',
+          icon: Icons.delete_outline_rounded,
+          tone: JTone.danger,
+          confirmLabel: 'حذف الحلقة',
+          loading: controller.isLoadingOperation.value,
+          loadingLabel: 'جاري الحذف...',
+          onConfirm: () async => controller.deleteGroup(),
+        ),
+      ),
+    );
+  }
+
+  final formKeyGroupName = GlobalKey<FormState>();
+
+  void _showEditGroupDialog(BuildContext context) {
+    controller.groupNameText.value.text = controller.groupName.value;
+    controller.selectedTeacherId.value = controller.teacherIdText;
+
+    showJDialog(
+      context: context,
+      dialog: Obx(
+        () => JDialog(
+          title: 'تعديل الحلقة',
+          icon: Icons.edit_outlined,
+          confirmLabel: 'تعديل الحلقة',
+          loading: controller.isLoadingOperation.value,
+          loadingLabel: 'جاري التعديل...',
+          onConfirm: () async {
+            if (formKeyGroupName.currentState!.validate()) {
+              await controller.updateGroup();
+            }
+          },
+          content: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.5,
             ),
-            TextButton(
-              onPressed: controller.isLoadingOperation.value
-                  ? null
-                  : () async {
-                      if (formKeyGroupName.currentState!.validate()) {
-                        await controller.updateGroup();
-                      }
-                    },
-              child: Obx(() => Text(controller.isLoadingOperation.value
-                  ? 'جاري التعديل...'
-                  : ' تعديل الحلقة')),
+            child: SingleChildScrollView(
+              child: Form(
+                key: formKeyGroupName,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextFormField(
+                      controller: controller.groupNameText.value,
+                      decoration:
+                          const InputDecoration(labelText: 'اسم الحلقة'),
+                      validator: (value) {
+                        final arabicRegex = RegExp(
+                            r'^[\u0621-\u064A\u0660-\u0669\s]+$');
+                        if (value!.isEmpty) {
+                          return 'يرجى إدخال اسم الحلقة';
+                        } else if (!arabicRegex.hasMatch(value)) {
+                          return 'اسم الحلقة يجب ان يكون عربياً';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    DropdownButtonFormField<String>(
+                      value: controller.period.value,
+                      hint: const Text('اختر الفترة'),
+                      items: const [
+                        DropdownMenuItem(
+                            value: 'صباحية', child: Text('صباحية')),
+                        DropdownMenuItem(
+                            value: 'مسائية', child: Text('مسائية')),
+                      ],
+                      onChanged: (value) => controller.period.value = value!,
+                      decoration: const InputDecoration(labelText: 'الفترة'),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    _buildTeachersDropdown(),
+                    const SizedBox(height: AppSpacing.md),
+                    _buildTimeEditRow(
+                      label: 'وقت بداية فترة الحلقة خلال اليوم',
+                      value: controller.windowStartEdit.value,
+                      onTap: () async {
+                        final picked = await _pickTimeForGroup(
+                          context,
+                          controller.windowStartEdit.value,
+                        );
+                        if (picked != null) {
+                          controller.windowStartEdit.value = picked;
+                        }
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildTimeEditRow(
+                      label: 'وقت نهاية فترة الحلقة خلال اليوم',
+                      value: controller.windowEndEdit.value,
+                      onTap: () async {
+                        final picked = await _pickTimeForGroup(
+                          context,
+                          controller.windowEndEdit.value,
+                        );
+                        if (picked != null) {
+                          controller.windowEndEdit.value = picked;
+                        }
+                      },
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    TextFormField(
+                      controller:
+                          controller.flexibleMinutesEditController.value,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'الدقائق المرنة قبل احتساب التأخر',
+                        hintText: 'مثال: 15',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ],
-        );
-      },
+          ),
+        ),
+      ),
     );
   }
 
   Widget _buildTeachersDropdown() {
-    controller.teachersForGeneralUse
-        .insert(0, TeachersForGeneralUse(id: null, teacherName: "بدون معلم"));
-    return Obx(() => InputDecorator(
-          decoration: InputDecoration(
-            labelText: 'المعلم',
-            border: OutlineInputBorder(),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton(
-              isExpanded: true,
-              value: controller.selectedTeacherId.value,
-              onChanged: (value) {
-                controller.selectedTeacherId.value = value;
-              },
-              items: controller.teachersForGeneralUse.map((teacher) {
-                return DropdownMenuItem(
-                  value: teacher.id,
-                  child: Text(teacher.teacherName),
-                );
-              }).toList(),
+    // خيار «بدون معلم» يُضاف مرة واحدة فقط حتى لا يتكرر مع كل إعادة بناء.
+    if (controller.teachersForGeneralUse.isEmpty ||
+        controller.teachersForGeneralUse.first.id != null) {
+      controller.teachersForGeneralUse
+          .insert(0, TeachersForGeneralUse(id: null, teacherName: 'بدون معلم'));
+    }
+    return DropdownButtonFormField<int?>(
+      isExpanded: true,
+      value: controller.selectedTeacherId.value,
+      onChanged: (value) => controller.selectedTeacherId.value = value,
+      decoration: const InputDecoration(labelText: 'المعلم'),
+      items: controller.teachersForGeneralUse
+          .map(
+            (teacher) => DropdownMenuItem<int?>(
+              value: teacher.id,
+              child: Text(
+                teacher.teacherName,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
-        ));
+          )
+          .toList(),
+    );
   }
 
-  Widget _buildTimeEditRow(
-    BuildContext context, {
+  Widget _buildTimeEditRow({
     required String label,
     required String value,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: AppRadii.mdAll,
       child: InputDecorator(
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
-          suffixIcon: const Icon(Icons.access_time),
+          suffixIcon: const Icon(Icons.access_time_rounded, size: 20),
         ),
         child: Text(
-          value.isEmpty ? '—' : value,
-          style: TextStyle(
-            fontSize: 16,
-            color: value.isEmpty ? Colors.grey : null,
-          ),
+          value.isEmpty ? '—' : (formatTime12(value) ?? value),
+          style: value.isEmpty
+              ? AppText.bodyMedium.copyWith(color: AppColors.inkFaint)
+              : AppText.bodyMedium,
         ),
       ),
     );
   }
 
-  Future<String?> _pickTimeForGroup(BuildContext context,
-      [String? initialStr]) async {
-    TimeOfDay initial = TimeOfDay.now();
+  Future<String?> _pickTimeForGroup(
+    BuildContext context, [
+    String? initialStr,
+  ]) async {
+    var initial = TimeOfDay.now();
     if (initialStr != null && initialStr.contains(':')) {
       final parts = initialStr.split(':');
       if (parts.length >= 2) {
@@ -665,39 +482,170 @@ class GroupStudents extends StatelessWidget {
         }
       }
     }
-    final picked = await showTimePicker(
-      context: context,
-      initialTime: initial,
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(primary: Color(0xFF3FB56C)),
-          ),
-          child: child!,
-        );
-      },
-    );
+    final picked = await showTimePicker(context: context, initialTime: initial);
     if (picked == null) return null;
-    return '${picked.hour.toString().padLeft(2, '0')}:${picked.minute.toString().padLeft(2, '0')}';
+    return '${picked.hour.toString().padLeft(2, '0')}:'
+        '${picked.minute.toString().padLeft(2, '0')}';
   }
 
-  Widget _buildBottomButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onPressed,
+  Widget _field(
+    String label,
+    TextEditingController fieldController,
+    String? Function(String?)? validator, {
+    TextInputType? keyboardType,
   }) {
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: color),
-      label: Text(
-        label,
-        style: TextStyle(color: color, fontWeight: FontWeight.w600),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+      child: TextFormField(
+        controller: fieldController,
+        validator: validator,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(labelText: label),
       ),
-      style: OutlinedButton.styleFrom(
-        side: BorderSide(color: color), // Consistent color border
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10), // Modern rounded corners
+    );
+  }
+
+  static String? _nameValidator(String? value) {
+    final arabicRegex = RegExp(r'^[\u0621-\u064A\u0660-\u0669\s]+$');
+    final text = value ?? '';
+    if (text.isNotEmpty && !arabicRegex.hasMatch(text)) {
+      return 'اسم الطالب يجب ان يكون عربياً';
+    }
+    if (text.length < 7 || text.length > 20) {
+      return 'اسم الطالب يجب ان يكون بين 7 و 20 حرفاً';
+    }
+    return null;
+  }
+
+  static String? _phoneValidator(String? value) {
+    final regExp = RegExp(r'^7[0-9]{8}$');
+    final text = value ?? '';
+    if (text.isNotEmpty && !regExp.hasMatch(text)) {
+      return 'يرجى إدخال رقم هاتف صحيح';
+    }
+    return null;
+  }
+}
+
+/// رأس شاشة تفاصيل الحلقة: الاسم، الفترة والنافذة الزمنية، وعدد الطلاب.
+class _GroupSummary extends StatelessWidget {
+  const _GroupSummary({required this.controller});
+
+  final GroupStudentsController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = formatTime12(controller.windowStartEdit.value);
+    final end = formatTime12(controller.windowEndEdit.value);
+    final window = (start != null && end != null) ? '$start - $end' : null;
+
+    return JCard(
+      color: AppColors.primaryTint,
+      borderColor: AppColors.primarySoft,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      showMotif: true,
+      motifColor: AppColors.primary,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              const JIconBadge(icon: Icons.auto_stories_outlined),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      controller.groupName.value,
+                      style: AppText.displaySmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      window == null
+                          ? controller.period.value
+                          : '${controller.period.value} · $window',
+                      style: AppText.caption,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const Divider(color: AppColors.primarySoft),
+          const SizedBox(height: AppSpacing.sm),
+          JStatStrip(
+            background: Colors.transparent,
+            borderColor: AppColors.primarySoft,
+            padding: EdgeInsets.zero,
+            stats: [
+              JStat(value: '${controller.totalCount.value}', label: 'طالب'),
+              JStat(
+                value: controller.period.value,
+                label: 'الفترة',
+                tone: JTone.gold,
+              ),
+              JStat(
+                value: controller.flexibleMinutesEditController.value.text.isEmpty
+                    ? '—'
+                    : controller.flexibleMinutesEditController.value.text,
+                label: 'دقائق مرنة',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// شريط سفلي بإجراءي الحلقة: حذف وتعديل.
+class _ActionBar extends StatelessWidget {
+  const _ActionBar({required this.onDelete, required this.onEdit});
+
+  final VoidCallback onDelete;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.bgElev,
+        border: Border(top: BorderSide(color: AppColors.line)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: JButton.ghost(
+                  label: 'حذف الحلقة',
+                  icon: Icons.delete_outline_rounded,
+                  tone: JTone.danger,
+                  onPressed: onDelete,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: JButton(
+                  label: 'تعديل الحلقة',
+                  icon: Icons.edit_outlined,
+                  onPressed: onEdit,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

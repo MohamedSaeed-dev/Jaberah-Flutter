@@ -2,141 +2,70 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/groupsFollowStudentsController.dart';
 import 'package:jaberah/pages/user/followStudents/students_followStudents.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
 
 class GroupsFollowStudents extends StatelessWidget {
+  GroupsFollowStudents({super.key});
+
   final GroupsFollowStudentsController groupsController =
       Get.put(GroupsFollowStudentsController());
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-            onPressed: () {
-              Get.delete<GroupsFollowStudentsController>();
-              Get.back();
-            },
-            icon: Icon(Icons.arrow_back)),
-        title: const Text(
-          'الحلقات',
-          style: TextStyle(
-            fontFamily: 'GE_SS_Two',
-            fontWeight: FontWeight.bold,
-          ),
+    return JScaffold(
+      appBar: JAppBar(
+        title: 'الحلقات',
+        subtitle: 'المتابعة اليومية',
+        leading: JAppBarButton(
+          icon: Icons.chevron_left_rounded,
+          tooltip: 'رجوع',
+          onPressed: () {
+            Get.delete<GroupsFollowStudentsController>();
+            Get.back();
+          },
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
+      body: SafeArea(
+        top: false,
         child: Obx(() {
           if (groupsController.isLoading.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  Text(
-                    "جاري تحميل الحلقات...",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ],
-              ),
-            );
-          } else if (groupsController.groups.isEmpty &&
-              !groupsController.isLoading.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.hourglass_empty),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text("لاتوجد بيانات", style: TextStyle(fontSize: 20))
-                ],
-              ),
-            );
-          } else {
-            return GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Number of columns
-                crossAxisSpacing: 10, // Horizontal spacing between cards
-                mainAxisSpacing: 10, // Vertical spacing between cards
-              ),
-              itemCount: groupsController.groups.length,
-              itemBuilder: (context, index) {
-                var data = groupsController.groups[index];
-                return _buildGroupCard(
-                  context: context,
-                  title: data.groupName,
-                  period: data.period,
-                  studentsCount: data.studentsNo,
-                  color: const Color.fromARGB(255, 63, 181, 108),
-                  onTap: () {
-                    Get.to(() => StudentGroupsFollowStudents(), arguments: {
-                      "id": data.id,
-                      "Name": data.groupName
-                    });
-                  },
-                );
-              },
+            return const JLoadingState(message: 'جاري تحميل الحلقات...');
+          }
+          if (groupsController.groups.isEmpty) {
+            return const JEmptyState(
+              title: 'لا توجد حلقات',
+              message: 'لم تُسند إليك أي حلقة بعد.',
+              icon: Icons.hub_outlined,
             );
           }
+          return GridView.builder(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: AppSpacing.sm,
+              mainAxisSpacing: AppSpacing.sm,
+              childAspectRatio: 0.98,
+            ),
+            itemCount: groupsController.groups.length,
+            itemBuilder: (context, index) {
+              final data = groupsController.groups[index];
+              return JStatTile(
+                title: data.groupName,
+                icon: Icons.auto_stories_outlined,
+                tone: index.isEven ? JTone.primary : JTone.gold,
+                value: '${data.studentsNo}',
+                unit: 'طالب · ${data.period}',
+                onTap: () {
+                  Get.to(
+                    () => StudentGroupsFollowStudents(),
+                    arguments: {"id": data.id, "Name": data.groupName},
+                  );
+                },
+              );
+            },
+          );
         }),
-      ),
-    );
-  }
-
-  // Build Group Card
-  Widget _buildGroupCard({
-    required BuildContext context,
-    required String title,
-    required String period,
-    required int studentsCount,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 8,
-        shadowColor: color.withOpacity(0.5),
-        child: Padding(
-          padding: const EdgeInsets.all(10.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "الفترة : $period",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                "عدد الطلاب : $studentsCount",
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

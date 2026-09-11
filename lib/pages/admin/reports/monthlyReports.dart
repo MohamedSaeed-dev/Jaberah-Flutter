@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/monthlyReportController.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class MonthlyReportPage extends StatelessWidget {
   final MonthlyReportController controller = Get.put(MonthlyReportController());
@@ -22,16 +23,16 @@ class MonthlyReportPage extends StatelessWidget {
                     label: const Text(
                       "عـرض الـتـقـريـر",
                       style: TextStyle(
-                        color: Colors.black,
+                        color: AppColors.onPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     icon: const Icon(
                       Icons.document_scanner_outlined,
-                      color: Colors.black,
+                      color: AppColors.onPrimary,
                     ),
-                    backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+                    backgroundColor: AppColors.primary,
                   )),
             ),
           ]),
@@ -48,20 +49,20 @@ class MonthlyReportPage extends StatelessWidget {
                       },
                 icon: Icon(
                   Icons.save,
-                  color: Colors.black,
+                  color: AppColors.onPrimary,
                 ))),
             Obx(() => PopupMenuButton<int>(
-                  iconColor: Colors.black,
+                  iconColor: AppColors.onPrimary,
                   icon: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.numbers, color: Colors.black),
+                      const Icon(Icons.numbers, color: AppColors.onPrimary),
                       Text(
                         controller.isAllStudentsTake
                             ? 'كل الطلاب'
                             : '${controller.take.value}',
                         style: const TextStyle(
-                          color: Colors.black,
+                          color: AppColors.onPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                         ),
@@ -86,7 +87,7 @@ class MonthlyReportPage extends StatelessWidget {
                 )),
           ],
           title: const Text('التقارير الشهرية'),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+          backgroundColor: AppColors.primary,
         ),
         body: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -176,7 +177,7 @@ class MonthlyReportPage extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24, // Smaller for cleaner appearance
               fontWeight: FontWeight.w600, // Slightly bold for emphasis
               letterSpacing: 1.2, // Adds a modern touch with spaced letters
@@ -187,8 +188,8 @@ class MonthlyReportPage extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: AppColors.primary, // Blue accent for primary color
+      backgroundColor: AppColors.bgElev, // Light background for contrast
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -334,7 +335,7 @@ class MonthlyReportPage extends StatelessWidget {
               valueStyle: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: AppColors.primary,
               ),
             ),
               ],
@@ -347,7 +348,7 @@ class MonthlyReportPage extends StatelessWidget {
             right: 12,
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.amber,
+                color: AppColors.gold,
                 borderRadius: const BorderRadius.only(
                   topRight: Radius.circular(12.0),
                   bottomLeft: Radius.circular(12.0),
@@ -358,12 +359,12 @@ class MonthlyReportPage extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: const [
-                  Icon(Icons.star, color: Colors.white, size: 16),
+                  Icon(Icons.star, color: AppColors.onPrimary, size: 16),
                   SizedBox(width: 4),
                   Text(
                     'أفضل طالب',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: AppColors.onPrimary,
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
                     ),
@@ -433,7 +434,7 @@ class MonthlyReportPage extends StatelessWidget {
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: Colors.grey,
+        color: AppColors.inkFaint,
       ),
     );
   }

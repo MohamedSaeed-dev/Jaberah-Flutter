@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/monthlyPartialExamReportController.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class MonthlyPartialExamReportPage extends StatelessWidget {
   final MonthlyPartialExamReportController controller =
@@ -24,16 +25,16 @@ class MonthlyPartialExamReportPage extends StatelessWidget {
                   label: const Text(
                     "عـرض الـتـقـريـر",
                     style: TextStyle(
-                      color: Colors.black,
+                      color: AppColors.onPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   icon: const Icon(
                     Icons.document_scanner_outlined,
-                    color: Colors.black,
+                    color: AppColors.onPrimary,
                   ),
-                  backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+                  backgroundColor: AppColors.primary,
                 ),
               ),
             ),
@@ -41,7 +42,7 @@ class MonthlyPartialExamReportPage extends StatelessWidget {
         ),
         appBar: AppBar(
           title: const Text('تقرير الاختبارات الجزئية الشهري'),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+          backgroundColor: AppColors.primary,
           actions: [
             Obx(() => IconButton(
                   onPressed: (controller.isLoading.value ||
@@ -52,7 +53,7 @@ class MonthlyPartialExamReportPage extends StatelessWidget {
                             "تقرير الاختبارات الجزئية الشهري - ${controller.selectedGroupName.value} - ${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
                           );
                         },
-                  icon: const Icon(Icons.save, color: Colors.black),
+                  icon: const Icon(Icons.save, color: AppColors.onPrimary),
                   tooltip: 'تصدير PDF',
                 )),
           ],
@@ -140,7 +141,7 @@ class MonthlyPartialExamReportPage extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
@@ -151,8 +152,8 @@ class MonthlyPartialExamReportPage extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2),
-      backgroundColor: Colors.white,
+      primaryColor: AppColors.primary,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -271,7 +272,7 @@ class MonthlyPartialExamReportPage extends StatelessWidget {
               valueStyle: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: AppColors.primary,
               ),
             ),
           ],
@@ -311,7 +312,7 @@ class MonthlyPartialExamReportPage extends StatelessWidget {
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: Colors.grey,
+        color: AppColors.inkFaint,
       ),
     );
   }

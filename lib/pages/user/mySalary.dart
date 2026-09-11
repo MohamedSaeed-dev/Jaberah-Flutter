@@ -4,6 +4,7 @@ import 'package:jaberah/controllers/user/mySalaryController.dart';
 import 'package:jaberah/helpers/timeHelpers.dart';
 import 'package:jhijri/jHijri.dart';
 import 'package:jaberah/widgets/hijri_year_only_picker/hijri_year_only_picker_dialog.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class MySalary extends StatelessWidget {
   final MySalaryController controller = Get.put(MySalaryController());
@@ -14,9 +15,8 @@ class MySalary extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'راتبي',
-          style: TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -27,7 +27,7 @@ class MySalary extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              color: Colors.white,
+              color: AppColors.onPrimary,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
@@ -48,7 +48,7 @@ class MySalary extends StatelessWidget {
                     IconButton(
                       onPressed: () => _openHijriCalendarForYear(context),
                       icon: const Icon(Icons.calendar_month, size: 28),
-                      color: const Color(0xFF3FB56C),
+                      color: AppColors.primary,
                       tooltip: 'تقويم هجري',
                     ),
                   ],
@@ -75,7 +75,7 @@ class MySalary extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.payments_outlined, size: 64, color: Colors.grey),
+                        Icon(Icons.payments_outlined, size: 64, color: AppColors.inkFaint),
                         SizedBox(height: 12),
                         Text("لا توجد رواتب مسجّلة لهذه السنة", style: TextStyle(fontSize: 16)),
                       ],
@@ -105,7 +105,7 @@ class MySalary extends StatelessWidget {
                               style: const TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF3FB56C),
+                                color: AppColors.primary,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -149,11 +149,11 @@ class MySalary extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: isPaid
-                      ? const Color(0xFF3FB56C).withOpacity(0.15)
-                      : Colors.orange.withOpacity(0.15),
+                      ? AppColors.primary.withOpacity(0.15)
+                      : AppColors.gold.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isPaid ? const Color(0xFF3FB56C) : Colors.orange,
+                    color: isPaid ? AppColors.primary : AppColors.gold,
                     width: 1.2,
                   ),
                 ),
@@ -162,7 +162,7 @@ class MySalary extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: isPaid ? const Color(0xFF3FB56C) : Colors.orange[800],
+                    color: isPaid ? AppColors.primary : AppColors.goldDark,
                   ),
                 ),
               ),
@@ -177,7 +177,7 @@ class MySalary extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               'تاريخ الاستلام: $paidAtStr',
-              style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+              style: TextStyle(fontSize: 13, color: AppColors.inkMuted),
             ),
           ],
           if (!isPaid) ...[
@@ -197,8 +197,8 @@ class MySalary extends StatelessWidget {
                     : const Icon(Icons.fingerprint, size: 22),
                 label: Text(isMarking ? 'جاري التسجيل...' : 'تأكيد الاستلام'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3FB56C),
-                  foregroundColor: Colors.white,
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.onPrimary,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/trashController.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class TrashPage extends StatelessWidget {
   final TrashController controller = Get.put(TrashController());
@@ -19,7 +20,7 @@ class TrashPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('سلة المحذوفات'),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+          backgroundColor: AppColors.primary,
           bottom: TabBar(
             // onTap callback triggers loading data for the selected tab if not loaded already.
             onTap: (index) async {
@@ -106,14 +107,14 @@ class TrashPage extends StatelessWidget {
                 child: Row(
                   children: [
                     CircleAvatar(
-                      backgroundColor: Colors.indigo[100],
+                      backgroundColor: AppColors.primarySoft,
                       child: Icon(
                         type == 'students'
                             ? Icons.school
                             : type == 'groups'
                                 ? Icons.group
                                 : Icons.person,
-                        color: Colors.indigo,
+                        color: AppColors.primary,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -133,7 +134,7 @@ class TrashPage extends StatelessWidget {
                             subtitle,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[700],
+                              color: AppColors.inkMuted,
                             ),
                           ),
                         ],
@@ -145,7 +146,7 @@ class TrashPage extends StatelessWidget {
                           onPressed: () {
                             _showRestoreConfirmation(context, record.id, type);
                           },
-                          icon: const Icon(Icons.restore, color: Colors.green),
+                          icon: const Icon(Icons.restore, color: AppColors.primary),
                         ),
                         IconButton(
                           onPressed: () {
@@ -153,7 +154,7 @@ class TrashPage extends StatelessWidget {
                                 context, record.id, type);
                           },
                           icon: const Icon(Icons.delete_forever,
-                              color: Colors.red),
+                              color: AppColors.danger),
                         ),
                       ],
                     )
@@ -189,7 +190,7 @@ class TrashPage extends StatelessWidget {
                     controller.isLoading.value
                         ? 'جاري الاستعادة...'
                         : 'استعادة',
-                    style: TextStyle(color: Colors.green)),
+                    style: TextStyle(color: AppColors.primary)),
               ),
               onPressed: () async {
                 await controller.restoreRecord(id: id, type: type);
@@ -221,7 +222,7 @@ class TrashPage extends StatelessWidget {
             TextButton(
               child: Obx(
                 () => Text(controller.isLoading.value ? 'جاري الحذف...' : 'حذف',
-                    style: TextStyle(color: Colors.red)),
+                    style: TextStyle(color: AppColors.danger)),
               ),
               onPressed: () async {
                 await controller.deleteRecordPermanently(id: id, type: type);

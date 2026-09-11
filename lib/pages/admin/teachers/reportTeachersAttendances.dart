@@ -4,6 +4,7 @@ import 'package:jaberah/controllers/admin/reportTeachersAttendancesController.da
 import 'package:jaberah/helpers/timeHelpers.dart';
 import 'package:jhijri/_src/_jHijri.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class TeachersAttendanceReport extends StatelessWidget {
   final TeachersAttendancesReportController controller =
@@ -36,23 +37,23 @@ class TeachersAttendanceReport extends StatelessWidget {
                     label: Text(
                       "عـرض الـتـقـريـر",
                       style: TextStyle(
-                        color: Colors.black,
+                        color: AppColors.onPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     icon: Icon(
                       Icons.document_scanner_outlined,
-                      color: Colors.black,
+                      color: AppColors.onPrimary,
                     ),
-                    backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+                    backgroundColor: AppColors.primary,
                   ));
             },
           ),
         ),
         appBar: AppBar(
           title: const Text('تقرير الحضور المعلمين'),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+          backgroundColor: AppColors.primary,
           bottom: const TabBar(
             tabs: [
               Tab(text: 'بحث باليوم'),
@@ -82,7 +83,7 @@ class TeachersAttendanceReport extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            color: Colors.white,
+            color: AppColors.onPrimary,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: _buildHijriDatePicker(context, "اليوم:"),
@@ -124,9 +125,9 @@ class TeachersAttendanceReport extends StatelessWidget {
       BuildContext context, TeacherAttendanceForMonthReport teacher) {
     return Card(
       elevation: 4,
-      shadowColor: Colors.black26,
+      shadowColor: AppColors.shadow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.white,
+      color: AppColors.onPrimary,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         child: Column(
@@ -155,7 +156,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
                   "الحلقة: ${teacher.groupName}",
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                  style: TextStyle(fontSize: 14, color: AppColors.inkMuted),
                 ),
               ),
             // Attendance Summary (new shape: excuseNo, presentNo, lateNo, absentNo)
@@ -167,12 +168,12 @@ class TeachersAttendanceReport extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.orange[300],
+                        color: AppColors.goldSoft,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.warning_amber_outlined,
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                         size: 20,
                       ),
                     ),
@@ -181,7 +182,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       "بعذر",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.inkMuted,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -190,7 +191,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.orange,
+                        color: AppColors.gold,
                       ),
                     ),
                   ],
@@ -200,12 +201,12 @@ class TeachersAttendanceReport extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: const BoxDecoration(
-                        color: Colors.green,
+                        color: AppColors.primary,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.check_circle_outline,
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                         size: 20,
                       ),
                     ),
@@ -214,7 +215,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       "حاضر",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.inkMuted,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -223,7 +224,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.green,
+                        color: AppColors.primary,
                       ),
                     ),
                   ],
@@ -233,12 +234,12 @@ class TeachersAttendanceReport extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.amber[700],
+                        color: AppColors.goldDark,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.schedule,
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                         size: 20,
                       ),
                     ),
@@ -247,7 +248,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       "متأخر",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.inkMuted,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -256,7 +257,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.amber[800],
+                        color: AppColors.goldDark,
                       ),
                     ),
                   ],
@@ -266,12 +267,12 @@ class TeachersAttendanceReport extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.red[300],
+                        color: AppColors.danger,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.cancel_outlined,
-                        color: Colors.white,
+                        color: AppColors.onPrimary,
                         size: 20,
                       ),
                     ),
@@ -280,7 +281,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       "غائب",
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.inkMuted,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -289,7 +290,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.red[700],
+                        color: AppColors.danger,
                       ),
                     ),
                   ],
@@ -318,9 +319,9 @@ class TeachersAttendanceReport extends StatelessWidget {
 
     return Card(
       elevation: 3,
-      shadowColor: Colors.black12,
+      shadowColor: AppColors.shadow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      color: Colors.white,
+      color: AppColors.onPrimary,
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -357,7 +358,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF3FB56C).withOpacity(0.12),
+                      color: AppColors.primary.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -365,7 +366,7 @@ class TeachersAttendanceReport extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF3FB56C),
+                        color: AppColors.primary,
                       ),
                     ),
                   ),
@@ -377,7 +378,7 @@ class TeachersAttendanceReport extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: AppColors.ink,
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -385,25 +386,25 @@ class TeachersAttendanceReport extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 "الحلقة: ${teacher.groupName}",
-                style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                style: TextStyle(fontSize: 14, color: AppColors.inkMuted),
               ),
             ],
             if (teacher.checkInTime != null || teacher.checkOutTime != null) ...[
               const SizedBox(height: 10),
               Row(
                 children: [
-                  Icon(Icons.login, size: 18, color: Colors.grey[600]),
+                  Icon(Icons.login, size: 18, color: AppColors.inkMuted),
                   const SizedBox(width: 6),
                   Text(
                     "دخول: ${formatTime12(teacher.checkInTime) ?? '—'}",
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 14, color: AppColors.inkMuted),
                   ),
                   const SizedBox(width: 16),
-                  Icon(Icons.logout, size: 18, color: Colors.grey[600]),
+                  Icon(Icons.logout, size: 18, color: AppColors.inkMuted),
                   const SizedBox(width: 6),
                   Text(
                     "خروج: ${formatTime12(teacher.checkOutTime) ?? '—'}",
-                    style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                    style: TextStyle(fontSize: 14, color: AppColors.inkMuted),
                   ),
                 ],
               ),
@@ -433,20 +434,20 @@ class TeachersAttendanceReport extends StatelessWidget {
     switch (status) {
       case 'حاضر':
       case 'Present':
-        return Colors.green;
+        return AppColors.primary;
       case 'مستأذن':
       case 'غائب بعذر':
       case 'بعذر':
       case 'Excused':
-        return Colors.orange;
+        return AppColors.gold;
       case 'متأخر':
       case 'Late':
-        return Colors.amber;
+        return AppColors.gold;
       case 'غائب':
       case 'Absent':
-        return Colors.red;
+        return AppColors.danger;
       default:
-        return Colors.grey;
+        return AppColors.inkFaint;
     }
   }
 
@@ -559,7 +560,7 @@ class TeachersAttendanceReport extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            color: Colors.white,
+            color: AppColors.onPrimary,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: _buildHijriMonthDatePicker(context, "الشهر:"),
@@ -630,7 +631,7 @@ class TeachersAttendanceReport extends StatelessWidget {
         IconButton(
           onPressed: () => _selectHijriDayDate(context),
           icon: const Icon(Icons.calendar_month, size: 28),
-          color: const Color(0xFF3FB56C),
+          color: AppColors.primary,
         ),
       ],
     );
@@ -668,7 +669,7 @@ class TeachersAttendanceReport extends StatelessWidget {
         IconButton(
           onPressed: () => _selectHijriMonthDate(context),
           icon: const Icon(Icons.calendar_month, size: 28),
-          color: const Color(0xFF3FB56C),
+          color: AppColors.primary,
         ),
       ],
     );
@@ -679,8 +680,8 @@ class TeachersAttendanceReport extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF3FB56C),
-      backgroundColor: Colors.white,
+      primaryColor: AppColors.primary,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -698,8 +699,8 @@ class TeachersAttendanceReport extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF3FB56C),
-      backgroundColor: Colors.white,
+      primaryColor: AppColors.primary,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,

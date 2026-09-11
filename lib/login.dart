@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:jaberah/api/Dio.dart';
 import 'package:jaberah/controllers/authController.dart';
@@ -8,11 +9,15 @@ import 'package:jaberah/controllers/connectivity.dart';
 import 'package:jaberah/config/firebase/firebaseAPI.dart';
 import 'package:jaberah/pages/admin/homeAdmin.dart';
 import 'package:jaberah/pages/user/homeUser.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
+import 'package:jaberah/widgets/global/exit_confirmation.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setSystemUIOverlayStyle(AppTheme.systemOverlay);
   Get.put(ApiClient());
   await Firebase.initializeApp();
   await FirebaseAPI().initNotifications();
@@ -25,15 +30,16 @@ void main() async {
 }
 
 class App extends StatelessWidget {
+  App({super.key});
+
   final authController = Get.find<AuthController>();
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'GE_SS_Two',
-      ),
+      title: 'حلقات مسجد جابرة',
+      theme: AppTheme.light,
       locale: const Locale('ar', 'SA'),
       supportedLocales: const [
         Locale('ar', 'SA'),
@@ -62,6 +68,8 @@ class App extends StatelessWidget {
 }
 
 class Login extends StatelessWidget {
+  Login({super.key});
+
   final key1 = GlobalKey<FormState>();
 
   final authController = Get.find<AuthController>();
@@ -72,153 +80,180 @@ class Login extends StatelessWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-
-        bool exitApp = await Get.dialog(
-              AlertDialog(
-                title: Text('الخروج من التطبيق'),
-                content: Text('هل أنت متأكد انك تريد الخروج من التطبيق؟'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Get.back(result: false),
-                    child: Text('إلغاء'),
-                  ),
-                  TextButton(
-                    onPressed: () => Get.back(result: true),
-                    child: Text(
-                      'الخروج',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              ),
-            ) ??
-            false;
-        if (exitApp) {
+        if (await confirmExitApp()) {
           exit(0);
         }
       },
       child: Scaffold(
-        body: Stack(
-          children: [
-            Align(
-              child: Opacity(
-                opacity: 0.2,
-                child: Image.asset(
-                  'assets/background12.png',
-                  height: double.infinity,
-                  width: 500,
-                  fit: BoxFit.cover,
+        backgroundColor: AppColors.bg,
+        body: JMotifBackground(
+          opacity: 0.05,
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.xxl,
                 ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Center(
-                child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 460),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Image.asset("assets/أهل_القرآن-removebg-preview.png"),
-                      Text(
-                        textAlign: TextAlign.center,
-                        "اهلا بك في تطبيق حلقات\n مسجد جابرة",
-                        style: TextStyle(
-                            fontSize: 25, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Form(
-                        key: key1,
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller:
-                                  authController.usernameController.value,
-                              validator: (value) {
-                                final arabicRegex = RegExp(
-                                    r'^[\u0621-\u064A\u0660-\u0669\s]+$');
+                      const _LoginBrand(),
+                      const SizedBox(height: AppSpacing.xxl),
+                      JCard(
+                        padding: const EdgeInsets.all(AppSpacing.lg),
+                        child: Form(
+                          key: key1,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'تسجيل الدخول',
+                                style: AppText.displaySmall,
+                              ),
+                              const SizedBox(height: AppSpacing.xxs),
+                              Text(
+                                'أدخل اسمك وكلمة المرور للمتابعة',
+                                style: AppText.caption,
+                              ),
+                              const SizedBox(height: AppSpacing.lg),
+                              TextFormField(
+                                controller:
+                                    authController.usernameController.value,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  final arabicRegex =
+                                      RegExp(r'^[\u0621-\u064A\u0660-\u0669\s]+$');
 
-                                if (value!.length < 5 || value.length > 20) {
-                                  return 'يجب أن يكون اسم المستخدم بين 5 أحرف الى 20 حرفاً';
-                                }
-                                if (!arabicRegex.hasMatch(value)) {
-                                  return 'اسم المستخدم يجب ان يكون باللغة العربية فقط';
-                                }
-                                return null;
-                              },
-                              decoration: InputDecoration(
-                                prefixIcon: Icon(Icons.person),
-                                labelText: 'الاسم',
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20),
+                                  if (value!.length < 5 || value.length > 20) {
+                                    return 'يجب أن يكون اسم المستخدم بين 5 أحرف الى 20 حرفاً';
+                                  }
+                                  if (!arabicRegex.hasMatch(value)) {
+                                    return 'اسم المستخدم يجب ان يكون باللغة العربية فقط';
+                                  }
+                                  return null;
+                                },
+                                decoration: const InputDecoration(
+                                  prefixIcon: Icon(Icons.person_outline),
+                                  labelText: 'الاسم',
                                 ),
                               ),
-                            ),
-                            SizedBox(height: 20),
-                            Obx(
-                              () => TextFormField(
-                                controller:
-                                    authController.passwordController.value,
-                                obscureText: authController.isShowEye.value,
-                                validator: (value) {
-                                  if (value!.length < 8) {
-                                    return 'يجب أن تكون كلمة المرور 8 أحرف أو أكثر';
-                                  } else {
-                                    return null;
-                                  }
-                                },
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(Icons.lock),
-                                  suffixIcon: IconButton(
+                              const SizedBox(height: AppSpacing.md),
+                              Obx(
+                                () => TextFormField(
+                                  controller:
+                                      authController.passwordController.value,
+                                  obscureText: authController.isShowEye.value,
+                                  textInputAction: TextInputAction.done,
+                                  validator: (value) {
+                                    if (value!.length < 8) {
+                                      return 'يجب أن تكون كلمة المرور 8 أحرف أو أكثر';
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                  decoration: InputDecoration(
+                                    prefixIcon: const Icon(Icons.lock_outline),
+                                    suffixIcon: IconButton(
                                       onPressed: () {
                                         authController.isShowEye.value =
                                             !authController.isShowEye.value;
                                       },
-                                      icon: authController.isShowEye.value
-                                          ? Icon(Icons.visibility)
-                                          : Icon(Icons.visibility_off)),
-                                  labelText: 'كلمة المرور',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20),
+                                      tooltip: authController.isShowEye.value
+                                          ? 'إظهار كلمة المرور'
+                                          : 'إخفاء كلمة المرور',
+                                      icon: Icon(
+                                        authController.isShowEye.value
+                                            ? Icons.visibility_outlined
+                                            : Icons.visibility_off_outlined,
+                                      ),
+                                    ),
+                                    labelText: 'كلمة المرور',
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Obx(() => MaterialButton(
-                            color: const Color.fromARGB(255, 63, 181, 108),
-                            minWidth: double.infinity,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                  20), // Adjust radius as needed
-                            ),
-                            height: 60,
-                            onPressed: authController.isLoading.value
-                                ? () {}
-                                : () async {
+                              const SizedBox(height: AppSpacing.lg),
+                              Obx(
+                                () => JButton(
+                                  label: 'تسجيل الدخول',
+                                  icon: Icons.login_rounded,
+                                  loading: authController.isLoading.value,
+                                  loadingLabel: 'جاري التسجيل...',
+                                  onPressed: () async {
                                     if (key1.currentState!.validate()) {
                                       await authController.login();
                                     }
                                   },
-                            child: Text(
-                              '${authController.isLoading.value ? 'جاري التسجيل....' : 'تسجيل'}',
-                              style: const TextStyle(
-                                  color: Colors.black, fontSize: 20),
-                            ),
-                          ))
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      const JOrnamentDivider(),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'مسجد الجابرة · الرياض',
+                        textAlign: TextAlign.center,
+                        style: AppText.caption,
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// ترويسة شاشة الدخول: شعار المسجد داخل مربّع زمردي، ثم الاسم والترحيب.
+class _LoginBrand extends StatelessWidget {
+  const _LoginBrand();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 84,
+          height: 84,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.primary, AppColors.primaryDark],
+            ),
+            borderRadius: BorderRadius.circular(AppRadii.xl),
+            boxShadow: AppShadows.float,
+          ),
+          child: const Icon(
+            Icons.mosque_rounded,
+            size: 44,
+            color: AppColors.onPrimary,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          'حلقات مسجد جابرة',
+          textAlign: TextAlign.center,
+          style: AppText.displayLarge,
+        ),
+        const SizedBox(height: AppSpacing.xxs),
+        Text(
+          'بسم الله الرحمن الرحيم',
+          textAlign: TextAlign.center,
+          style: AppText.displaySmall.copyWith(color: AppColors.gold),
+        ),
+      ],
     );
   }
 }

@@ -13,6 +13,7 @@ import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/admin/homeAdmin.dart';
 import 'package:jaberah/pages/user/homeUser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class AuthController extends GetxController {
   final ApiClient apiClient = Get.find();
@@ -54,8 +55,8 @@ class AuthController extends GetxController {
           '',
           '',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green.withValues(alpha: 0.7),
-          colorText: Colors.white,
+          backgroundColor: AppColors.primary.withValues(alpha: 0.7),
+          colorText: AppColors.onPrimary,
           margin: const EdgeInsets.all(10),
           duration: const Duration(seconds: 3),
           isDismissible: true,
@@ -154,8 +155,8 @@ class AuthController extends GetxController {
       '',
       '',
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green.withValues(alpha: 0.7),
-      colorText: Colors.white,
+      backgroundColor: AppColors.primary.withValues(alpha: 0.7),
+      colorText: AppColors.onPrimary,
       margin: const EdgeInsets.all(10),
       duration: const Duration(seconds: 3),
       isDismissible: true,

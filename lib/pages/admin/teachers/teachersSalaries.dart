@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/teachersSalariesController.dart';
 import 'package:jaberah/helpers/timeHelpers.dart';
 import 'package:jhijri/jHijri.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class TeachersSalaries extends StatelessWidget {
   final TeachersSalariesController controller =
@@ -14,10 +15,8 @@ class TeachersSalaries extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'رواتب المعلمين',
-          style:
-              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -28,7 +27,7 @@ class TeachersSalaries extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              color: Colors.white,
+              color: AppColors.onPrimary,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: _buildHijriMonthDatePicker(context, "الشهر:"),
@@ -84,7 +83,7 @@ class TeachersSalaries extends StatelessWidget {
         IconButton(
           onPressed: () => _showMonthDialog(context),
           icon: const Icon(Icons.calendar_month, size: 28),
-          color: const Color(0xFF3FB56C),
+          color: AppColors.primary,
         ),
       ],
     );
@@ -177,7 +176,7 @@ class TeachersSalaries extends StatelessWidget {
 
     return Card(
       elevation: 3,
-      shadowColor: Colors.black12,
+      shadowColor: AppColors.shadow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: Padding(
@@ -193,7 +192,7 @@ class TeachersSalaries extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: AppColors.ink,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -202,13 +201,13 @@ class TeachersSalaries extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: isPaid
-                        ? const Color(0xFF3FB56C).withOpacity(0.15)
-                        : Colors.orange.withOpacity(0.15),
+                        ? AppColors.primary.withOpacity(0.15)
+                        : AppColors.gold.withOpacity(0.15),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(
                       color: isPaid
-                          ? const Color(0xFF3FB56C)
-                          : Colors.orange,
+                          ? AppColors.primary
+                          : AppColors.gold,
                       width: 1.2,
                     ),
                   ),
@@ -218,8 +217,8 @@ class TeachersSalaries extends StatelessWidget {
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: isPaid
-                          ? const Color(0xFF3FB56C)
-                          : Colors.orange[800],
+                          ? AppColors.primary
+                          : AppColors.goldDark,
                     ),
                   ),
                 ),
@@ -243,8 +242,8 @@ class TeachersSalaries extends StatelessWidget {
                 icon: const Icon(Icons.edit_outlined, size: 20),
                 label: const Text('تعديل'),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF3FB56C),
-                  side: const BorderSide(color: Color(0xFF3FB56C)),
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
                   padding: const EdgeInsets.symmetric(vertical: 10),
                 ),
               ),
@@ -306,7 +305,7 @@ class TeachersSalaries extends StatelessWidget {
                       'الحلقة: ${salaryData.groupName}',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[700],
+                        color: AppColors.inkMuted,
                       ),
                     ),
                   ),

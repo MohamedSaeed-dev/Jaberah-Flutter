@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/studentsPartialExamsController.dart';
 import 'package:jaberah/pages/admin/partialExams/addPartialExam.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class StudentsPartialExams extends StatelessWidget {
   final StudentsPartialExamsController controller =
@@ -14,12 +15,8 @@ class StudentsPartialExams extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'اختبارات الجزئي',
-          style: TextStyle(
-            fontFamily: 'GE_SS_Two',
-            fontWeight: FontWeight.bold,
-          ),
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
         actions: [
           Obx(() => IconButton(
               onPressed: (controller.isLoading.value ||
@@ -32,7 +29,7 @@ class StudentsPartialExams extends StatelessWidget {
                     },
               icon: Icon(
                 Icons.save,
-                color: Colors.black,
+                color: AppColors.onPrimary,
               ))),
         ],
       ),
@@ -74,8 +71,8 @@ class StudentsPartialExams extends StatelessWidget {
               const SizedBox(height: 10),
               Obx(() => TextField(
                     controller: controller.searchText.value,
-                    style: const TextStyle(color: Colors.black),
-                    cursorColor: Colors.black,
+                    style: const TextStyle(color: AppColors.ink),
+                    cursorColor: AppColors.ink,
                     onChanged: (_) => controller.searchStudents(),
                     decoration: InputDecoration(
                       hintText: 'ابحث عن طالب...',
@@ -205,7 +202,7 @@ class StudentsPartialExams extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
@@ -216,8 +213,8 @@ class StudentsPartialExams extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2),
-      backgroundColor: Colors.white,
+      primaryColor: AppColors.primary,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -305,8 +302,8 @@ class StudentsPartialExams extends StatelessWidget {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: student.hasExam
-                          ? Colors.blue[600]
-                          : const Color.fromARGB(255, 63, 181, 108),
+                          ? AppColors.primary
+                          : AppColors.primary,
                       padding:
                           EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       shape: RoundedRectangleBorder(
@@ -318,14 +315,14 @@ class StudentsPartialExams extends StatelessWidget {
                       children: [
                         Icon(
                           student.hasExam ? Icons.edit : Icons.add,
-                          color: Colors.white,
+                          color: AppColors.onPrimary,
                           size: 16,
                         ),
                         SizedBox(width: 4),
                         Text(
                           student.hasExam ? 'تعديل' : 'إضافة',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: AppColors.onPrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.bold,
                           ),
@@ -342,7 +339,7 @@ class StudentsPartialExams extends StatelessWidget {
               Container(
                 padding: EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: AppColors.bgSunken,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -418,7 +415,7 @@ class StudentsPartialExams extends StatelessWidget {
                         'المختبر',
                         student.tester ?? '-',
                         Icons.book_outlined,
-                        Colors.blue,
+                        AppColors.primary,
                       ),
                     ),
                     SizedBox(width: 8),
@@ -427,7 +424,7 @@ class StudentsPartialExams extends StatelessWidget {
                         'الجزء',
                         student.part ?? '-',
                         Icons.class_outlined,
-                        Colors.purple,
+                        AppColors.goldDark,
                       ),
                     ),
                   ],
@@ -438,7 +435,7 @@ class StudentsPartialExams extends StatelessWidget {
                     'اضغط لعرض التفاصيل الكاملة',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[600],
+                      color: AppColors.inkMuted,
                       fontStyle: FontStyle.italic,
                     ),
                   ),
@@ -455,9 +452,9 @@ class StudentsPartialExams extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.onPrimary,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.line),
       ),
       child: FittedBox(
         fit: BoxFit.scaleDown,
@@ -469,7 +466,7 @@ class StudentsPartialExams extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 10,
-                color: Colors.grey[600],
+                color: AppColors.inkMuted,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -478,7 +475,7 @@ class StudentsPartialExams extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,
-                color: Colors.black,
+                color: AppColors.ink,
               ),
             ),
           ],
@@ -492,10 +489,10 @@ class StudentsPartialExams extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isTotal ? Colors.blue[50] : Colors.grey[100],
+        color: isTotal ? AppColors.primaryTint : AppColors.bgSunken,
         borderRadius: BorderRadius.circular(8),
         border:
-            Border.all(color: isTotal ? Colors.blue[200]! : Colors.grey[300]!),
+            Border.all(color: isTotal ? AppColors.primarySoft : AppColors.line),
       ),
       child: Column(
         children: [
@@ -503,7 +500,7 @@ class StudentsPartialExams extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 13,
-              color: Colors.grey[600],
+              color: AppColors.inkMuted,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -517,14 +514,14 @@ class StudentsPartialExams extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
-                  color: isTotal ? Colors.blue[700] : Colors.black,
+                  color: isTotal ? AppColors.primaryDark : AppColors.ink,
                 ),
               ),
               Text(
                 ' $suffix',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.grey[600],
+                  color: AppColors.inkMuted,
                 ),
               ),
             ],
@@ -551,7 +548,7 @@ class StudentsPartialExams extends StatelessWidget {
             label,
             style: TextStyle(
               fontSize: 10,
-              color: Colors.grey[600],
+              color: AppColors.inkMuted,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -575,17 +572,17 @@ class StudentsPartialExams extends StatelessWidget {
   Color _getRateColor(String rate) {
     switch (rate) {
       case 'ممتاز':
-        return Colors.green[700]!;
+        return AppColors.primaryDark;
       case 'جيد جداً':
-        return Colors.green[500]!;
+        return AppColors.primary;
       case 'جيد':
-        return Colors.blue[600]!;
+        return AppColors.primary;
       case 'مقبول':
-        return Colors.orange[600]!;
+        return AppColors.gold;
       case 'ضعيف':
-        return Colors.red[600]!;
+        return AppColors.danger;
       default:
-        return Colors.grey[700]!;
+        return AppColors.inkMuted;
     }
   }
 
@@ -609,13 +606,13 @@ class StudentsPartialExams extends StatelessWidget {
                 Container(
                   padding: EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.grey[100],
+                    color: AppColors.bgSunken,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(12),
                       topRight: Radius.circular(12),
                     ),
                     border: Border(
-                      bottom: BorderSide(color: Colors.grey[300]!, width: 1),
+                      bottom: BorderSide(color: AppColors.line, width: 1),
                     ),
                   ),
                   child: Row(
@@ -626,12 +623,12 @@ class StudentsPartialExams extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.ink,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.close, color: Colors.grey[700]),
+                        icon: Icon(Icons.close, color: AppColors.inkMuted),
                         onPressed: () => Get.back(),
                         padding: EdgeInsets.zero,
                         constraints: BoxConstraints(),
@@ -651,7 +648,7 @@ class StudentsPartialExams extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.ink,
                           ),
                         ),
                         Divider(height: 30, thickness: 1),
@@ -662,16 +659,16 @@ class StudentsPartialExams extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.ink,
                           ),
                         ),
                         SizedBox(height: 12),
                         Container(
                           padding: EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
+                            color: AppColors.bgSunken,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey[300]!),
+                            border: Border.all(color: AppColors.line),
                           ),
                           child: Column(
                             children: [
@@ -755,7 +752,7 @@ class StudentsPartialExams extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
+                            color: AppColors.ink,
                           ),
                         ),
                         SizedBox(height: 8),
@@ -767,9 +764,9 @@ class StudentsPartialExams extends StatelessWidget {
                           ),
                           padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.grey[50],
+                            color: AppColors.bgSunken,
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: Colors.grey[300]!),
+                            border: Border.all(color: AppColors.line),
                           ),
                           child: SingleChildScrollView(
                             child: Text(
@@ -777,8 +774,8 @@ class StudentsPartialExams extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14,
                                 color: student.notes != null
-                                    ? Colors.black87
-                                    : Colors.grey[500],
+                                    ? AppColors.ink
+                                    : AppColors.inkFaint,
                               ),
                             ),
                           ),
@@ -799,9 +796,9 @@ class StudentsPartialExams extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.onPrimary,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey[400]!),
+        border: Border.all(color: AppColors.inkFaint),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -811,7 +808,7 @@ class StudentsPartialExams extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: Colors.grey[600],
+              color: AppColors.inkMuted,
             ),
           ),
           SizedBox(height: 6),
@@ -820,14 +817,14 @@ class StudentsPartialExams extends StatelessWidget {
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Colors.black87,
+              color: AppColors.ink,
             ),
           ),
           Text(
             '/ 1.5',
             style: TextStyle(
               fontSize: 9,
-              color: Colors.grey[500],
+              color: AppColors.inkFaint,
             ),
           ),
         ],
@@ -844,7 +841,7 @@ class StudentsPartialExams extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w500,
-            color: Colors.grey[700],
+            color: AppColors.inkMuted,
           ),
         ),
         Text(
@@ -852,7 +849,7 @@ class StudentsPartialExams extends StatelessWidget {
           style: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.ink,
           ),
         ),
       ],

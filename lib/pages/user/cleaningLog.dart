@@ -3,8 +3,9 @@ import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/cleaningLogController.dart';
 import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
-const _primaryColor = Color.fromARGB(255, 63, 181, 108);
+const _primaryColor = AppColors.primary;
 
 class CleaningLog extends StatelessWidget {
   final CleaningLogController controller = Get.put(CleaningLogController());
@@ -17,8 +18,6 @@ class CleaningLog extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'كشف النظافة',
-          style:
-              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
         backgroundColor: _primaryColor,
       ),
@@ -53,7 +52,7 @@ class CleaningLog extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.cleaning_services_outlined,
-                            size: 64, color: Colors.grey),
+                            size: 64, color: AppColors.inkFaint),
                         SizedBox(height: 12),
                         Text(
                           'لا توجد مهمات نظافة',
@@ -112,7 +111,7 @@ class CleaningLog extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
@@ -124,7 +123,7 @@ class CleaningLog extends StatelessWidget {
       context: context,
       pickerType: PickerType.JHijri,
       primaryColor: _primaryColor,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -153,8 +152,8 @@ class CleaningLog extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 color: controller.isLoadingGroups.value
-                    ? Colors.grey
-                    : Colors.black87,
+                    ? AppColors.inkFaint
+                    : AppColors.ink,
               ),
             ),
           );
@@ -214,10 +213,10 @@ class CleaningLog extends StatelessWidget {
                   ),
                   if (isLocked)
                     const Icon(Icons.lock_outline,
-                        size: 18, color: Colors.grey)
+                        size: 18, color: AppColors.inkFaint)
                   else
                     const Icon(Icons.edit_outlined,
-                        size: 18, color: Colors.grey),
+                        size: 18, color: AppColors.inkFaint),
                 ],
               ),
               const SizedBox(height: 10),
@@ -225,11 +224,11 @@ class CleaningLog extends StatelessWidget {
                 const Row(
                   children: [
                     Icon(Icons.person_off_outlined,
-                        size: 18, color: Colors.grey),
+                        size: 18, color: AppColors.inkFaint),
                     SizedBox(width: 6),
                     Text(
                       'غير مسندة',
-                      style: TextStyle(fontSize: 15, color: Colors.grey),
+                      style: TextStyle(fontSize: 15, color: AppColors.inkFaint),
                     ),
                   ],
                 )
@@ -268,14 +267,14 @@ class CleaningLog extends StatelessWidget {
                           ? Icons.check_circle
                           : Icons.radio_button_unchecked,
                       size: 18,
-                      color: log.isCompleted ? _primaryColor : Colors.orange,
+                      color: log.isCompleted ? _primaryColor : AppColors.gold,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       log.isCompleted ? 'أنجزت' : 'لم تنجز',
                       style: TextStyle(
                         fontSize: 14,
-                        color: log.isCompleted ? _primaryColor : Colors.orange,
+                        color: log.isCompleted ? _primaryColor : AppColors.gold,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -285,7 +284,7 @@ class CleaningLog extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     'ملاحظات: ${log.notes}',
-                    style: const TextStyle(fontSize: 13, color: Colors.grey),
+                    style: const TextStyle(fontSize: 13, color: AppColors.inkFaint),
                   ),
                 ],
               ],
@@ -293,7 +292,7 @@ class CleaningLog extends StatelessWidget {
                 const SizedBox(height: 8),
                 const Text(
                   'هذه المهمة مسندة لحلقة أخرى',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: TextStyle(fontSize: 12, color: AppColors.inkFaint),
                 ),
               ],
             ],
@@ -335,8 +334,8 @@ class CleaningLog extends StatelessWidget {
                 children: [
                   TextField(
                     controller: controller.searchText.value,
-                    style: const TextStyle(color: Colors.black),
-                    cursorColor: Colors.black,
+                    style: const TextStyle(color: AppColors.ink),
+                    cursorColor: AppColors.ink,
                     decoration: InputDecoration(
                       hintText: 'ابحث عن طالب...',
                       prefixIcon: const Icon(Icons.search),
@@ -470,7 +469,7 @@ class CleaningLog extends StatelessWidget {
                           },
                     child: const Text(
                       'إزالة الإسناد',
-                      style: TextStyle(color: Colors.red),
+                      style: TextStyle(color: AppColors.danger),
                     ),
                   )),
             TextButton(

@@ -3,125 +3,111 @@ import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/studentGroupsFollowStudentsController.dart';
 import 'package:jaberah/pages/user/followStudents/editData_followStudent.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
 
 class StudentGroupsFollowStudents extends StatelessWidget {
+  StudentGroupsFollowStudents({super.key});
+
   final StudentGroupsFollowStudentsController controller =
       Get.put(StudentGroupsFollowStudentsController());
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'طلاب ${controller.name}',
-          style: TextStyle(
-            fontFamily: 'GE_SS_Two',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
+    return JScaffold(
+      title: 'طلاب ${controller.name}',
+      subtitle: 'المتابعة اليومية',
+      body: SafeArea(
+        top: false,
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.md,
+                AppSpacing.md,
+                0,
+              ),
+              child: Obx(() => _buildDateCard(context)),
+            ),
             Obx(
-              () => _buildHijriDatePicker(context, 'التاريخ الهجري:'),
+              () => JSearchField(
+                controller: controller.searchText.value,
+                hintText: 'ابحث عن طالب...',
+                enabled: !controller.isLoading.value,
+                onSubmitted: (_) => controller.getStudents(),
+              ),
             ),
-            Obx(() => TextField(
-                  controller: controller.searchText.value,
-                  style: TextStyle(color: Colors.black),
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    hintText: 'ابحث عن طالب...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const JLoadingState(message: 'جاري تحميل الطلاب...');
+                }
+                if (controller.students.isEmpty) {
+                  return const JEmptyState(
+                    title: 'لا يوجد طلاب',
+                    message: 'لا توجد متابعة مسجّلة لهذا اليوم.',
+                    icon: Icons.school_outlined,
+                  );
+                }
+                return ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    0,
+                    AppSpacing.md,
+                    AppSpacing.md,
                   ),
-                  onSubmitted: controller.isLoading.value
-                      ? null
-                      : (value) {
-                          // controller.pageNumber.value = 1;
-                          controller.getStudents();
-                        },
-                )),
-            const Divider(
-              height: 30,
+                  itemCount: controller.filteredStudents.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.xs),
+                  itemBuilder: (context, index) => _buildStudentsCard(
+                    controller.filteredStudents[index],
+                    context,
+                  ),
+                );
+              }),
             ),
-            Obx(() {
-              if (controller.isLoading.value) {
-                return Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(),
-                        Text(
-                          "جاري تحميل الطلاب...",
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              } else if (controller.students.isEmpty &&
-                  !controller.isLoading.value) {
-                return Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.hourglass_empty),
-                        SizedBox(
-                          height: 10,
-                        ),
-                        Text("لاتوجد بيانات", style: TextStyle(fontSize: 20))
-                      ],
-                    ),
-                  ),
-                );
-              } else {
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: controller.filteredStudents.length,
-                    itemBuilder: (context, index) {
-                      return _buildStudentsCard(
-                          controller.filteredStudents[index], context);
-                    },
-                  ),
-                );
-              }
-            }),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHijriDatePicker(BuildContext context, String label) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 15),
+  /// بطاقة اليوم الهجري المختار.
+  Widget _buildDateCard(BuildContext context) {
+    return JCard(
+      padding: const EdgeInsets.all(AppSpacing.sm + 2),
+      color: AppColors.primaryTint,
+      borderColor: AppColors.primarySoft,
+      onTap: () => _selectHijriDate(context),
+      child: Row(
+        children: [
+          const JIconBadge(icon: Icons.event_outlined, size: 46, iconSize: 24),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('التاريخ الهجري', style: AppText.caption),
+                Text(
+                  '${controller.selectedDate.value.jhijri!.day}'
+                  ' ${controller.selectedDate.value.jhijri!.monthName}'
+                  ' ${controller.selectedDate.value.jhijri!.year}',
+                  style: AppText.displayXSmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            SizedBox(
-              width: 20,
-            ),
-            Text(
-              "${controller.selectedDate.value.jhijri!.day} - ${controller.selectedDate.value.jhijri!.monthName} - ${controller.selectedDate.value.jhijri!.year}",
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
-        IconButton(
+          ),
+          JIconAction(
+            icon: Icons.calendar_month_rounded,
+            tooltip: 'اختيار اليوم',
             onPressed: () => _selectHijriDate(context),
-            icon: Icon(Icons.calendar_month))
-      ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -133,23 +119,18 @@ class StudentGroupsFollowStudents extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
-            "التقويم الهجري",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24, // Smaller for cleaner appearance
-              fontWeight: FontWeight.w600, // Slightly bold for emphasis
-              letterSpacing: 1.2, // Adds a modern touch with spaced letters
-            ),
+            'التقويم الهجري',
+            style: AppText.displaySmall.copyWith(color: AppColors.onPrimary),
           ),
         ),
       ),
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: AppColors.primary,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -157,161 +138,163 @@ class StudentGroupsFollowStudents extends StatelessWidget {
 
     if (picked != null &&
         picked.jhijri != controller.selectedDate.value.jhijri) {
-      controller.selectedDate.value = JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
+      controller.selectedDate.value =
+          JDateModel(jhijri: picked.jhijri, dateTime: picked.date);
       await controller.getStudents();
     }
   }
 
   Widget _buildStudentsCard(FollowStudent student, BuildContext context) {
-    return Card(
-      elevation: 4,
-      margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Student Name
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
+    return JCard(
+      radius: AppRadii.lg,
+      padding: const EdgeInsets.all(AppSpacing.sm + 2),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              JAvatar(name: student.studentName, size: 42),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(
                   student.studentName,
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
+                  style: AppText.displayXSmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              JIconAction(
+                icon: Icons.edit_outlined,
+                tooltip: 'تعديل المتابعة',
+                onPressed: () {
+                  Get.to(() => EditFollowStudent(), arguments: {
+                    "student": student,
+                    "date": controller.selectedDate.value,
+                  });
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: _RecitationBlock(
+                    title: 'الحفظ',
+                    tone: JTone.primary,
+                    surahFrom: student.surahFromTeacher,
+                    verseFrom: student.verseFromTeacher,
+                    surahTo: student.surahToTeacher,
+                    verseTo: student.verseToTeacher,
+                    rate: student.rateTeacher,
+                    pages: student.pagesTeacher,
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    Get.to(() => EditFollowStudent(), arguments: {
-                      "student": student,
-                      "date": controller.selectedDate.value
-                    });
-                  },
-                  icon: Icon(Icons.edit),
-                  color: Colors.blue,
-                )
+                const VerticalDivider(width: AppSpacing.md, thickness: 1),
+                Expanded(
+                  child: _RecitationBlock(
+                    title: 'المراجعة',
+                    tone: JTone.gold,
+                    surahFrom: student.surahFromFriend,
+                    verseFrom: student.verseFromFriend,
+                    surahTo: student.surahToFriend,
+                    verseTo: student.verseToFriend,
+                    rate: student.rateFriend,
+                    pages: student.pagesFriend,
+                  ),
+                ),
               ],
             ),
-            const Divider(),
-            const SizedBox(height: 10),
-
-            // حفظ ومراجعة Section
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "الحفظ",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Divider(),
-                        _buildInfoRow("من سورة:", student.surahFromTeacher),
-                        _buildInfoRow(
-                            "آيه:", student.verseFromTeacher.toString()),
-                        _buildInfoRow("إلى سورة:", student.surahToTeacher),
-                        _buildInfoRow(
-                            "آيه:", student.verseToTeacher.toString()),
-                        _buildInfoRow("التقدير:", student.rateTeacher),
-                        _buildInfoRow(
-                            "عدد الصفحات:", student.pagesTeacher.toString()),
-                      ],
-                    ),
-                  ),
-                  const VerticalDivider(
-                    thickness: 1,
-                    color: Colors.grey,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "المراجعة",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Divider(),
-                        _buildInfoRow("من سورة:", student.surahFromFriend),
-                        _buildInfoRow(
-                            "آيه:", student.verseFromFriend.toString()),
-                        _buildInfoRow("إلى سورة:", student.surahToFriend),
-                        _buildInfoRow("آيه:", student.verseToFriend.toString()),
-                        _buildInfoRow("التقدير:", student.rateFriend),
-                        _buildInfoRow(
-                            "عدد الصفحات:", student.pagesFriend.toString()),
-                      ],
-                    ),
-                  ),
-                ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const Divider(),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              JChip(
+                label: 'الحضور: ${student.attendance}',
+                tone: JTone.primary,
+                icon: Icons.how_to_reg_outlined,
+                compact: true,
               ),
+              JChip(
+                label: 'السلوك: ${student.behavior}',
+                tone: JTone.gold,
+                icon: Icons.emoji_events_outlined,
+                compact: true,
+              ),
+            ],
+          ),
+          if (student.notes.trim().isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.xs),
+            JDetailRow(
+              label: 'ملاحظات:',
+              value: student.notes,
+              icon: Icons.sticky_note_2_outlined,
             ),
+          ],
+        ],
+      ),
+    );
+  }
+}
 
-            const Divider(height: 24, thickness: 1),
-            const SizedBox(height: 10),
+/// عمود الحفظ أو المراجعة داخل بطاقة المتابعة.
+class _RecitationBlock extends StatelessWidget {
+  const _RecitationBlock({
+    required this.title,
+    required this.tone,
+    required this.surahFrom,
+    required this.verseFrom,
+    required this.surahTo,
+    required this.verseTo,
+    required this.rate,
+    required this.pages,
+  });
 
-            // الحضور والسلوك Section
-            _buildStudentRow('الحضور:', student.attendance.toString()),
-            _buildStudentRow('السلوك:', student.behavior.toString()),
-            _buildInfoRow('ملاحظات:', student.notes),
+  final String title;
+  final JTone tone;
+  final String surahFrom;
+  final int verseFrom;
+  final String surahTo;
+  final int verseTo;
+  final String rate;
+  final double pages;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        JChip(label: title, tone: tone, compact: true),
+        const SizedBox(height: AppSpacing.xs),
+        _line('من:', '$surahFrom · آية $verseFrom'),
+        _line('إلى:', '$surahTo · آية $verseTo'),
+        _line('التقدير:', rate),
+        _line('الصفحات:', '$pages'),
+      ],
+    );
+  }
+
+  Widget _line(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: RichText(
+        text: TextSpan(
+          style: AppText.caption,
+          children: [
+            TextSpan(text: '$label ', style: AppText.captionStrong),
+            TextSpan(
+              text: value.trim().isEmpty ? '—' : value,
+              style: AppText.caption.copyWith(color: AppColors.ink),
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Wrap(
-        spacing: 8.0,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
-// Helper to build student rows
-  Widget _buildStudentRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        vertical: 4.0,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            child: Text(
-              value,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
       ),
     );
   }

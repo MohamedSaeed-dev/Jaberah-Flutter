@@ -5,6 +5,7 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 import 'package:jaberah/controllers/exportedReportsPageController.dart';
 import 'package:jhijri_picker/jhijri_picker.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class ExportedReportsPage extends StatelessWidget {
   final ExportedReportsController controller =
@@ -25,7 +26,7 @@ Future<void> _pickHijriStartDate(BuildContext context) async {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24, // Smaller for cleaner appearance
               fontWeight: FontWeight.w600, // Slightly bold for emphasis
               letterSpacing: 1.2, // Adds a modern touch with spaced letters
@@ -36,8 +37,8 @@ Future<void> _pickHijriStartDate(BuildContext context) async {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: AppColors.primary, // Blue accent for primary color
+      backgroundColor: AppColors.bgElev, // Light background for contrast
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.filterStartDate.value,
@@ -64,7 +65,7 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24, // Smaller for cleaner appearance
               fontWeight: FontWeight.w600, // Slightly bold for emphasis
               letterSpacing: 1.2, // Adds a modern touch with spaced letters
@@ -75,8 +76,8 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: AppColors.primary, // Blue accent for primary color
+      backgroundColor: AppColors.bgElev, // Light background for contrast
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.filterEndDate.value,
@@ -109,7 +110,7 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
                     )
                   : TextButton(
                       child: const Text("حذف",
-                          style: TextStyle(color: Colors.red)),
+                          style: TextStyle(color: AppColors.danger)),
                       onPressed: () async {
                         await controller.deleteFile(file);
                         Get.back();
@@ -125,7 +126,7 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
     return Scaffold(
       appBar: AppBar(
         title: const Text('التقارير المصدرة'),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
         elevation: 2,
       ),
       body: Column(
@@ -171,7 +172,7 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
                     ),
                     onPressed: () => _pickHijriStartDate(context),
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.green.shade500,
+                      backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -187,7 +188,7 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
                     ),
                     onPressed: () => _pickHijriEndDate(context),
                     style: FilledButton.styleFrom(
-                      backgroundColor: Colors.green.shade500,
+                      backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -203,9 +204,9 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
               tooltip: 'مسح الفلاتر',
               onPressed: anyFilterActive ? controller.clearFilters : null,
               icon: Icon(Icons.clear),
-              color: anyFilterActive ? Colors.red : Colors.grey,
+              color: anyFilterActive ? AppColors.danger : AppColors.inkFaint,
               style: IconButton.styleFrom(
-                backgroundColor: anyFilterActive ? Colors.red.shade100 : Colors.transparent,
+                backgroundColor: anyFilterActive ? AppColors.dangerSoft : Colors.transparent,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -247,7 +248,7 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
                 return const Center(
                   child: Text(
                     "لاتوجد تقارير مصدرة حالياً",
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(fontSize: 16, color: AppColors.inkFaint),
                   ),
                 );
               }
@@ -292,7 +293,7 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                           leading: const Icon(Icons.picture_as_pdf,
-                              color: Colors.red, size: 30),
+                              color: AppColors.danger, size: 30),
                           title: Text(
                             fileName,
                             style: const TextStyle(
@@ -303,14 +304,14 @@ Future<void> _pickHijriEndDate(BuildContext context) async {
                           subtitle: Text(
                             'تاريخ الإنشاء: $createdAtStr',
                             style: const TextStyle(
-                                fontSize: 12, color: Colors.grey),
+                                fontSize: 12, color: AppColors.inkFaint),
                           ),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
                                 icon:
-                                    const Icon(Icons.delete, color: Colors.red),
+                                    const Icon(Icons.delete, color: AppColors.danger),
                                 tooltip: "حذف التقرير",
                                 onPressed: () =>
                                     _showDeleteConfirmation(context, file),

@@ -1,123 +1,112 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
 
-SnackbarController successSnackBar(String message) {
+/// شريط تنبيه بلغة نظام التصميم: سطح داكن، حافة مستديرة، أيقونة بنغمة الحالة.
+///
+/// كانت كل دالة هنا تبني ألوانها بنفسها (أخضر/أحمر مادي بشفافية)؛ صارت كلها
+/// تمر من [_snack] فتبقى منسجمة مع بقية الواجهة.
+SnackbarController _snack({
+  required String title,
+  String? message,
+  required IconData icon,
+  required JTone tone,
+}) {
   return Get.snackbar(
     '',
     '',
     snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.green.withOpacity(0.7),
-    colorText: Colors.white,
-    margin: const EdgeInsets.all(10),
+    backgroundColor: AppColors.primaryDark,
+    colorText: AppColors.onPrimary,
+    margin: const EdgeInsets.all(AppSpacing.md),
+    padding: const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.sm,
+    ),
+    borderRadius: AppRadii.md,
     duration: const Duration(seconds: 3),
     isDismissible: true,
-    titleText: Center(
-      child: Text(
-        message,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-      ),
+    titleText: Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: tone.solid,
+            borderRadius: AppRadii.smAll,
+          ),
+          child: Icon(icon, size: 18, color: tone.onSolid),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text(
+            title,
+            style: AppText.bodyLarge.copyWith(
+              color: AppColors.onPrimary,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     ),
+    messageText: message == null
+        ? const SizedBox.shrink()
+        : Padding(
+            padding: const EdgeInsets.only(top: AppSpacing.xxs),
+            child: Text(
+              message,
+              style: AppText.bodyMedium.copyWith(
+                color: AppColors.onPrimary.withValues(alpha: 0.85),
+              ),
+            ),
+          ),
+  );
+}
+
+SnackbarController successSnackBar(String message) {
+  return _snack(
+    title: message,
+    icon: Icons.check_rounded,
+    tone: JTone.primary,
   );
 }
 
 SnackbarController catchSnackBar() {
-  return Get.snackbar(
-    '',
-    '',
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.red.withOpacity(0.7),
-    colorText: Colors.white,
-    margin: const EdgeInsets.all(10),
-    duration: const Duration(seconds: 3),
-    isDismissible: true,
-    titleText: const Center(
-      child: Text(
-        'حدث خطأ ما',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-      ),
-    ),
-    messageText: const Center(
-      child: Text(
-        'الرجاء المحاولة مرة أخرى',
-        style: TextStyle(fontSize: 16),
-      ),
-    ),
+  return _snack(
+    title: 'حدث خطأ ما',
+    message: 'الرجاء المحاولة مرة أخرى',
+    icon: Icons.error_outline_rounded,
+    tone: JTone.danger,
   );
 }
 
 SnackbarController messageSnackBar(String message,
     {String title = 'حدث خطأ ما'}) {
-  return Get.snackbar(
-    '',
-    '',
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.red.withValues(alpha: 0.7),
-    colorText: Colors.white,
-    margin: const EdgeInsets.all(10),
-    duration: const Duration(seconds: 3),
-    isDismissible: true,
-    titleText: Center(
-      child: Text(
-        title,
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-      ),
-    ),
-    messageText: Center(
-      child: Text(
-        message,
-        style: TextStyle(fontSize: 16),
-      ),
-    ),
+  return _snack(
+    title: title,
+    message: message,
+    icon: Icons.error_outline_rounded,
+    tone: JTone.danger,
   );
 }
 
 SnackbarController socketSnackBar() {
-  return Get.snackbar(
-    '',
-    '',
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.red.withOpacity(0.7),
-    colorText: Colors.white,
-    margin: const EdgeInsets.all(10),
-    duration: const Duration(seconds: 3),
-    isDismissible: true,
-    titleText: const Center(
-      child: Text(
-        'حدث خطأ في الاتصال بالانترنت',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-      ),
-    ),
-    messageText: const Center(
-      child: Text(
-        'الرجاء التأكد من الاتصال بالانترنت',
-        style: TextStyle(fontSize: 16),
-      ),
-    ),
+  return _snack(
+    title: 'حدث خطأ في الاتصال بالانترنت',
+    message: 'الرجاء التأكد من الاتصال بالانترنت',
+    icon: Icons.wifi_off_rounded,
+    tone: JTone.danger,
   );
 }
 
 SnackbarController timeoutSnackBar() {
-  return Get.snackbar(
-    '',
-    '',
-    snackPosition: SnackPosition.BOTTOM,
-    backgroundColor: Colors.red.withOpacity(0.7),
-    colorText: Colors.white,
-    margin: const EdgeInsets.all(10),
-    duration: const Duration(seconds: 3),
-    isDismissible: true,
-    titleText: const Center(
-      child: Text(
-        'حدث خطأ في الخادم',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-      ),
-    ),
-    messageText: const Center(
-      child: Text(
-        'الرجاء المحاولة مرة أخرى',
-        style: TextStyle(fontSize: 16),
-      ),
-    ),
+  return _snack(
+    title: 'حدث خطأ في الخادم',
+    message: 'الرجاء المحاولة مرة أخرى',
+    icon: Icons.hourglass_disabled_rounded,
+    tone: JTone.gold,
   );
 }
 

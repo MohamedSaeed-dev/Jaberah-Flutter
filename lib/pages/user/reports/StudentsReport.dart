@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaberah/pages/user/reports/monthlyStudentsReports.dart';
 import 'package:jaberah/pages/user/reports/prayersStudentsReport.dart';
 import 'package:jaberah/pages/user/reports/semesterStudentsReports.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class StudentsReport extends StatelessWidget {
   const StudentsReport({super.key});
@@ -13,10 +14,8 @@ class StudentsReport extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'تقارير الطلاب',
-          style:
-              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -30,7 +29,7 @@ class StudentsReport extends StatelessWidget {
               context: context,
               title: 'التقرير الفصلي',
               icon: Icons.calendar_month,
-              color: Colors.blue,
+              color: AppColors.primary,
               onTap: () {
                 Get.to(() => SemesterStudentsReports());
               },
@@ -39,7 +38,7 @@ class StudentsReport extends StatelessWidget {
               context: context,
               title: 'التقرير الشهري',
               icon: Icons.calendar_view_month,
-              color: Colors.green,
+              color: AppColors.primary,
               onTap: () {
                 Get.to(() => MonthlyStudentsReports());
               },
@@ -48,7 +47,7 @@ class StudentsReport extends StatelessWidget {
               context: context,
               title: 'تقرير كشف الصلوات',
               icon: Icons.mosque,
-              color: Colors.orange,
+              color: AppColors.gold,
               onTap: () {
                 Get.to(() => PrayersStudentsReportPage());
               },
@@ -86,7 +85,6 @@ class StudentsReport extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'GE_SS_Two',
                 ),
               ),
             ],

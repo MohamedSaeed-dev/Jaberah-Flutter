@@ -1,77 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/pages/admin/students/students.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
 
 class Panel_Students extends StatelessWidget {
   const Panel_Students({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'الطلاب',
-          style: TextStyle(
-            fontFamily: 'GE_SS_Two',
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
+    return JScaffold(
+      title: 'الطلاب',
+      subtitle: 'بيانات الطلاب المسجّلين',
+      body: SafeArea(
+        top: false,
         child: GridView.count(
-          crossAxisCount: 2, // Number of columns (2 cards in this case)
-          crossAxisSpacing: 10, // Space between columns
-          mainAxisSpacing: 10, // Space between rows
+          padding: const EdgeInsets.all(AppSpacing.md),
+          crossAxisCount: 2,
+          crossAxisSpacing: AppSpacing.sm,
+          mainAxisSpacing: AppSpacing.sm,
+          childAspectRatio: 0.98,
           children: [
-            _buildCard(
-              context: context,
+            JStatTile(
               title: 'بيانات الطلاب',
-              icon: Icons.person,
-              color: Colors.orange,
-              onTap: () {
-                Get.to(() => Students());
-              },
+              icon: Icons.school_outlined,
+              unit: 'إضافة وتعديل وحذف',
+              onTap: () => Get.to(() => Students()),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Function to build each card
-  Widget _buildCard({
-    required BuildContext context,
-    required String title,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 8,
-        shadowColor: color.withOpacity(0.5),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 50, color: color),
-              const SizedBox(height: 20),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

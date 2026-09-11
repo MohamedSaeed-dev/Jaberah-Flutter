@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jhijri_picker/_src/_src.dart';
 
 import 'hijri_year_only_picker_controller.dart';
+import 'package:jaberah/theme/theme.dart';
 
 /// حوار شبكة السنوات الهجرية فقط (مكوّن [JYearPicker]) مع GetX.
 class HijriYearOnlyPickerDialog extends StatelessWidget {
@@ -46,7 +47,7 @@ class HijriYearOnlyPickerDialog extends StatelessWidget {
         child: Theme(
           data: Theme.of(context).copyWith(
             colorScheme: Theme.of(context).colorScheme.copyWith(
-                  primary: const Color(0xFF3FB56C),
+                  primary: AppColors.primary,
                 ),
           ),
           child: Obx(() => JYearPicker(
@@ -71,7 +72,7 @@ class HijriYearOnlyPickerDialog extends StatelessWidget {
           child: const Text(
             'تأكيد',
             style: TextStyle(
-              color: Color(0xFF3FB56C),
+              color: AppColors.primary,
               fontWeight: FontWeight.w600,
             ),
           ),

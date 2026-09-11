@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/teacherInfoController.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class TeacherInfo extends StatelessWidget {
   final TeacherInfoController teacherInfocontroller =
@@ -17,12 +18,8 @@ class TeacherInfo extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'تغيير معلومات المعلم',
-          style: TextStyle(
-            fontFamily: 'GE_SS_Two',
-            fontWeight: FontWeight.bold,
-          ),
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -101,12 +98,12 @@ class TeacherInfo extends StatelessWidget {
                         BorderRadius.circular(20), // Adjust radius as needed
                   ),
                   height: 60,
-                  color: const Color.fromARGB(255, 63, 181, 108),
+                  color: AppColors.primary,
                   child: Obx(() => Text(
                         teacherInfocontroller.isLoading.value
                             ? 'جاري التحديث...'
                             : 'تحديث المعلومات',
-                        style: const TextStyle(color: Colors.black),
+                        style: const TextStyle(color: AppColors.ink),
                       )),
                 ),
               ],

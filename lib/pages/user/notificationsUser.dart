@@ -1,163 +1,81 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// import 'package:intl/intl.dart';
 import 'package:jaberah/controllers/user/notificationsUserController.dart';
-import 'dart:ui';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
+import 'package:jaberah/widgets/global/notification_card.dart';
 
-// ignore: must_be_immutable
 class NotificationsUser extends StatelessWidget {
-  final controller = Get.put(NotificationsCRUDUserController());
-  var notificationCount = Get.find<NotificationsCountController>();
-
   NotificationsUser({super.key});
+
+  final controller = Get.put(NotificationsCRUDUserController());
+  final notificationCount = Get.find<NotificationsCountController>();
 
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       notificationCount.resetNewNotification();
     });
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('الإشعارات'),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-      ),
-      body: Container(
-        alignment: Alignment.topLeft,
-        child: Obx(() {
-          if (controller.isLoading.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 10),
-                  Text(
-                    "جاري تحميل الاشعارات...",
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
-            );
-          } else if (controller.notifications.isEmpty &&
-              !controller.isLoading.value) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.hourglass_empty),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Text("لاتوجد بيانات", style: TextStyle(fontSize: 20))
-                ],
-              ),
-            );
-          } else {
-            return Column(
-              children: [
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0, vertical: 8.0),
-                    child: ListView.builder(
-                      itemCount: controller.notifications.length,
-                      itemBuilder: (context, index) {
-                        final notification = controller.notifications[index];
-                        return Card(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          elevation: 5,
-                          margin: EdgeInsets.symmetric(vertical: 8),
-                          child: ListTile(
-                            contentPadding: EdgeInsets.all(16),
-                            leading: CircleAvatar(
-                              backgroundColor: Colors.indigo[100],
-                              child: Icon(
-                                Icons.notifications,
-                              ),
-                            ),
-                            title: Text(
-                              notification.title,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(
-                              notification.body,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: Colors.grey[700],
-                              ),
-                            ),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text(
-                                    notification.getHijriDate(),
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: Colors.black87,
-                                    )),
-                                Text(
-                                  notification.getHijriTime(),
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black54,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  textDirection: TextDirection.rtl,
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                Obx(() => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12.0),
-                      child: _buildPaginationControls(),
-                    ))
-              ],
-            );
-          }
-        }),
-      ),
-    );
-  }
-
-  Widget _buildPaginationControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: controller.hasPrevious.value && !controller.isLoading.value
-              ? () {
-                  controller.pageNumber.value--;
-                  controller.getNotifications();
+    return JScaffold(
+      title: 'الإشعارات',
+      subtitle: 'إشعارات إدارة المسجد',
+      body: SafeArea(
+        top: false,
+        child: Column(
+          children: [
+            Expanded(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const JLoadingState(
+                    message: 'جاري تحميل الاشعارات...',
+                  );
                 }
-              : null,
-        ),
-        Text(
-            '${controller.fetchedCount.value} من ${controller.totalCount.value}'),
-        IconButton(
-          icon: Icon(Icons.arrow_forward),
-          onPressed: controller.hasNext.value && !controller.isLoading.value
-              ? () {
-                  controller.pageNumber.value++;
-                  controller.getNotifications();
+                if (controller.notifications.isEmpty) {
+                  return const JEmptyState(
+                    title: 'لا توجد إشعارات',
+                    message: 'ستظهر هنا الإشعارات الواردة من إدارة المسجد.',
+                    icon: Icons.notifications_none_rounded,
+                  );
                 }
-              : null,
+                return ListView.separated(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  itemCount: controller.notifications.length,
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.xs),
+                  itemBuilder: (context, index) {
+                    final notification = controller.notifications[index];
+                    return JNotificationCard(
+                      title: notification.title,
+                      body: notification.body,
+                      hijriDate: notification.getHijriDate(),
+                      hijriTime: notification.getHijriTime(),
+                    );
+                  },
+                );
+              }),
+            ),
+            Obx(
+              () => JPaginationBar(
+                fetchedCount: controller.fetchedCount.value,
+                totalCount: controller.totalCount.value,
+                onPrevious:
+                    controller.hasPrevious.value && !controller.isLoading.value
+                        ? () {
+                            controller.pageNumber.value--;
+                            controller.getNotifications();
+                          }
+                        : null,
+                onNext: controller.hasNext.value && !controller.isLoading.value
+                    ? () {
+                        controller.pageNumber.value++;
+                        controller.getNotifications();
+                      }
+                    : null,
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

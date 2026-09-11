@@ -3,120 +3,48 @@ import 'package:get/get.dart';
 import 'package:jaberah/pages/admin/teachers/teachers.dart';
 import 'package:jaberah/pages/admin/teachers/teachersAttendances.dart';
 import 'package:jaberah/pages/admin/teachers/teachersSalaries.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
 
 class TeachersPanelPage extends StatelessWidget {
   const TeachersPanelPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'المعلمين',
-          style:
-              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
+    return JScaffold(
+      title: 'المعلمين',
+      subtitle: 'بيانات المعلمين والحضور والرواتب',
+      body: SafeArea(
+        top: false,
         child: GridView.count(
-          crossAxisCount: 2, // Number of columns
-          crossAxisSpacing: 10, // Space between columns
-          mainAxisSpacing: 10, // Space between rows
+          padding: const EdgeInsets.all(AppSpacing.md),
+          crossAxisCount: 2,
+          crossAxisSpacing: AppSpacing.sm,
+          mainAxisSpacing: AppSpacing.sm,
+          childAspectRatio: 0.98,
           children: [
-            _buildCard(
-              context: context,
+            JStatTile(
               title: 'بيانات المعلمين',
-              icon: Icons.person,
-              color: Colors.orange,
-              onTap: () {
-                Get.to(() => Teachers());
-              },
+              icon: Icons.badge_outlined,
+              unit: 'إضافة وتعديل وحذف',
+              onTap: () => Get.to(() => Teachers()),
             ),
-            _buildCard(
-              context: context,
-              title: 'تسجيل الحضور اليومي',
-              icon: Icons.schedule,
-              color: Colors.blue,
-              onTap: () {
-                Get.to(() => TeachersAttendancePage());
-              },
+            JStatTile(
+              title: 'الحضور اليومي',
+              icon: Icons.schedule_rounded,
+              tone: JTone.gold,
+              unit: 'تسجيل حضور المعلمين',
+              onTap: () => Get.to(() => TeachersAttendancePage()),
             ),
-            _buildCard(
-              context: context,
+            JStatTile(
               title: 'رواتب المعلمين',
-              icon: Icons.attach_money,
-              color: Colors.green,
-              onTap: () {
-                Get.to(() => TeachersSalaries());
-              },
+              icon: Icons.payments_outlined,
+              unit: 'الرواتب والمستحقات',
+              onTap: () => Get.to(() => TeachersSalaries()),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  // Function to build each card
-  Widget _buildCard({
-    required BuildContext context,
-    required String title,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 8,
-        shadowColor: color.withOpacity(0.5),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 50, color: color),
-              const SizedBox(height: 20),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// Placeholder pages for the navigation
-class TeachersAttendance extends StatelessWidget {
-  const TeachersAttendance({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('حضور المعلمين')),
-      body: const Center(child: Text('صفحة حضور المعلمين')),
-    );
-  }
-}
-
-class TeachersInfoPage extends StatelessWidget {
-  const TeachersInfoPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('معلومات المعلمين')),
-      body: const Center(child: Text('صفحة معلومات المعلمين')),
     );
   }
 }

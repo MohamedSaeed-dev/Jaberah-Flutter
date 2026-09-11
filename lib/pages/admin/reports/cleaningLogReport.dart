@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/cleaningLogReportController.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
-const _primaryColor = Color.fromARGB(255, 63, 181, 108);
+const _primaryColor = AppColors.primary;
 
 class CleaningLogReportPage extends StatelessWidget {
   final CleaningLogReportController controller =
@@ -29,14 +30,14 @@ class CleaningLogReportPage extends StatelessWidget {
                   label: const Text(
                     "عـرض الـتـقـريـر",
                     style: TextStyle(
-                      color: Colors.black,
+                      color: AppColors.onPrimary,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   icon: const Icon(
                     Icons.document_scanner_outlined,
-                    color: Colors.black,
+                    color: AppColors.onPrimary,
                   ),
                   backgroundColor: _primaryColor,
                 ),
@@ -57,14 +58,12 @@ class CleaningLogReportPage extends StatelessWidget {
                         "تقرير كشف النظافة - ${controller.selectedGroupName.value} - ${controller.hijriDateLabel}",
                       );
                     },
-              icon: const Icon(Icons.save, color: Colors.black),
+              icon: const Icon(Icons.save, color: AppColors.onPrimary),
             ),
           ),
         ],
         title: const Text(
           'تقرير كشف النظافة',
-          style:
-              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
         backgroundColor: _primaryColor,
       ),
@@ -139,7 +138,7 @@ class CleaningLogReportPage extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
+            style: const TextStyle(fontSize: 12, color: AppColors.inkFaint),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
@@ -206,7 +205,7 @@ class CleaningLogReportPage extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
@@ -218,7 +217,7 @@ class CleaningLogReportPage extends StatelessWidget {
       context: context,
       pickerType: PickerType.JHijri,
       primaryColor: _primaryColor,
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -310,7 +309,7 @@ class CleaningLogReportPage extends StatelessWidget {
                 ),
                 Icon(
                   row.isCompleted ? Icons.check_circle : Icons.cancel,
-                  color: row.isCompleted ? _primaryColor : Colors.red,
+                  color: row.isCompleted ? _primaryColor : AppColors.danger,
                   size: 22,
                 ),
               ],
@@ -318,7 +317,7 @@ class CleaningLogReportPage extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               row.groupName ?? '-',
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: const TextStyle(fontSize: 14, color: AppColors.inkFaint),
             ),
             const SizedBox(height: 12),
             const Divider(),
@@ -371,7 +370,7 @@ class CleaningLogReportPage extends StatelessWidget {
             const Row(
               children: [
                 Icon(Icons.warning_amber_outlined,
-                    size: 20, color: Colors.orange),
+                    size: 20, color: AppColors.gold),
                 SizedBox(width: 6),
                 Text(
                   'مهام غير مسندة اليوم',

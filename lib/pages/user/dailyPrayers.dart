@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/dailyPrayersController.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class DailyPrayers extends StatelessWidget {
   final DailyPrayersController controller = Get.put(DailyPrayersController());
@@ -12,10 +13,8 @@ class DailyPrayers extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'كشف الصلوات',
-          style:
-              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -26,8 +25,8 @@ class DailyPrayers extends StatelessWidget {
             _buildGroupDropdown(),
             Obx(() => TextField(
                   controller: controller.searchText.value,
-                  style: const TextStyle(color: Colors.black),
-                  cursorColor: Colors.black,
+                  style: const TextStyle(color: AppColors.ink),
+                  cursorColor: AppColors.ink,
                   readOnly: controller.teacherGroups.isEmpty,
                   enabled: controller.teacherGroups.isNotEmpty,
                   decoration: InputDecoration(
@@ -67,7 +66,7 @@ class DailyPrayers extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.mosque_outlined,
-                            size: 64, color: Colors.grey),
+                            size: 64, color: AppColors.inkFaint),
                         SizedBox(height: 12),
                         Text(
                           'لا يوجد طلاب لهذا اليوم أو لا توجد بيانات',
@@ -127,7 +126,7 @@ class DailyPrayers extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24,
               fontWeight: FontWeight.w600,
               letterSpacing: 1.2,
@@ -138,8 +137,8 @@ class DailyPrayers extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color.fromARGB(255, 63, 181, 108),
-      backgroundColor: Colors.white,
+      primaryColor: AppColors.primary,
+      backgroundColor: AppColors.bgElev,
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -168,8 +167,8 @@ class DailyPrayers extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 color: controller.isLoadingGroups.value
-                    ? Colors.grey
-                    : Colors.black87,
+                    ? AppColors.inkFaint
+                    : AppColors.ink,
               ),
             ),
           );
@@ -239,7 +238,7 @@ class DailyPrayers extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 63, 181, 108)
+                        color: AppColors.primary
                             .withOpacity(0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
@@ -370,7 +369,7 @@ class DailyPrayers extends StatelessWidget {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     side:
-                                        const BorderSide(color: Colors.black12),
+                                        const BorderSide(color: AppColors.line),
                                   ),
                                   child: Padding(
                                     padding: const EdgeInsets.all(12),
@@ -395,7 +394,7 @@ class DailyPrayers extends StatelessWidget {
                                             Text(
                                               'عدد الركعات: ${prayer.defaultRakats}',
                                               style: const TextStyle(
-                                                color: Colors.grey,
+                                                color: AppColors.inkFaint,
                                                 fontSize: 12,
                                               ),
                                             ),

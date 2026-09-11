@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/admin/addPartialExamController.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class AddPartialExam extends StatelessWidget {
   final AddPartialExamController controller =
@@ -13,12 +14,8 @@ class AddPartialExam extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           controller.isEditMode ? 'تعديل تسميع جزئي' : 'إضافة تسميع جزئي',
-          style: TextStyle(
-            fontFamily: 'GE_SS_Two',
-            fontWeight: FontWeight.bold,
-          ),
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -160,19 +157,19 @@ class AddPartialExam extends StatelessWidget {
                             controller.submitPartialExam();
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+                      backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     child: controller.isLoading.value
-                        ? CircularProgressIndicator(color: Colors.white)
+                        ? CircularProgressIndicator(color: AppColors.onPrimary)
                         : Text(
                             controller.isEditMode
                                 ? 'تحديث التسميع الجزئي'
                                 : 'حفظ التسميع الجزئي',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: AppColors.onPrimary,
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
@@ -270,7 +267,7 @@ class AddPartialExam extends StatelessWidget {
         SizedBox(height: 5),
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
+            border: Border.all(color: AppColors.inkFaint),
             borderRadius: BorderRadius.circular(8),
           ),
           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -281,7 +278,7 @@ class AddPartialExam extends StatelessWidget {
                 hint,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: AppColors.inkMuted,
                 ),
               ),
               TextField(
@@ -331,15 +328,15 @@ class AddPartialExam extends StatelessWidget {
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [
-                Colors.blue[50]!,
-                Colors.blue[100]!,
+                AppColors.primaryTint,
+                AppColors.primarySoft,
               ],
             ),
-            border: Border.all(color: Colors.blue[400]!, width: 1.5),
+            border: Border.all(color: AppColors.primary, width: 1.5),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
-                color: Colors.blue.withOpacity(0.1),
+                color: AppColors.primary.withOpacity(0.1),
                 spreadRadius: 0.5,
                 blurRadius: 3,
               ),
@@ -351,7 +348,7 @@ class AddPartialExam extends StatelessWidget {
             children: [
               Icon(
                 Icons.grade,
-                color: Colors.blue[700],
+                color: AppColors.primaryDark,
                 size: 22,
               ),
               SizedBox(width: 10),
@@ -362,7 +359,7 @@ class AddPartialExam extends StatelessWidget {
                     'الدرجة الكلية',
                     style: TextStyle(
                       fontSize: 12,
-                      color: Colors.grey[700],
+                      color: AppColors.inkMuted,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -375,7 +372,7 @@ class AddPartialExam extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue[800],
+                              color: AppColors.primaryDark,
                             ),
                           ),
                           Padding(
@@ -384,7 +381,7 @@ class AddPartialExam extends StatelessWidget {
                               ' / 20',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[600],
+                                color: AppColors.inkMuted,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
@@ -420,7 +417,7 @@ class AddPartialExam extends StatelessWidget {
         SizedBox(height: 5),
         Container(
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
+            border: Border.all(color: AppColors.inkFaint),
             borderRadius: BorderRadius.circular(8),
           ),
           padding: EdgeInsets.symmetric(horizontal: 10),
@@ -431,7 +428,7 @@ class AddPartialExam extends StatelessWidget {
                 hint,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey[600],
+                  color: AppColors.inkMuted,
                 ),
               ),
               TextField(
@@ -466,7 +463,7 @@ class AddPartialExam extends StatelessWidget {
         SizedBox(height: 5),
         Obx(() => Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
+                border: Border.all(color: AppColors.inkFaint),
                 borderRadius: BorderRadius.circular(8),
               ),
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),

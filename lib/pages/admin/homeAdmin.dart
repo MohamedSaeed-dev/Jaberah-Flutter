@@ -6,448 +6,196 @@ import 'package:jaberah/controllers/admin/notificationsAdminController.dart';
 import 'package:jaberah/controllers/authController.dart';
 import 'package:jaberah/controllers/admin/userNameController.dart';
 import 'package:jaberah/controllers/versionsController.dart';
-import 'package:jaberah/models/global/snackbars.dart';
 import 'package:jaberah/pages/admin/groups/groups.dart';
 import 'package:jaberah/pages/admin/notificationsAdmin.dart';
 import 'package:jaberah/pages/admin/reports/reports.dart';
 import 'package:jaberah/pages/admin/students/Panel_Students.dart';
 import 'package:jaberah/pages/admin/teachers/Panel_teachers.dart';
-import 'package:jaberah/pages/admin/teachers/profile.dart';
 import 'package:jaberah/pages/admin/trash.dart';
 import 'package:jaberah/pages/exportedReportsPage.dart';
 import 'package:jaberah/pages/user/homeUser.dart';
 import 'package:jaberah/pages/admin/partialExams/students_partialExams.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
+import 'package:jaberah/widgets/global/app_drawer.dart';
+import 'package:jaberah/widgets/global/exit_confirmation.dart';
+import 'package:jaberah/widgets/global/hijri_badge.dart';
+import 'package:jaberah/widgets/global/home_header.dart';
 
 class HomePageAdmin extends StatelessWidget {
+  HomePageAdmin({super.key});
+
   final AuthController authController = Get.put(AuthController());
   final UserNameController userNameController = Get.put(UserNameController());
   final NotificationsAdminController notificationController =
       Get.put(NotificationsAdminController());
   final VersionsController versionController = Get.find<VersionsController>();
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-
-        bool exitApp = await Get.dialog(
-              AlertDialog(
-                title: Text('الخروج من التطبيق'),
-                content: Text('هل أنت متأكد انك تريد الخروج من التطبيق؟'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Get.back(result: false),
-                    child: Text('إلغاء'),
-                  ),
-                  TextButton(
-                    onPressed: () => Get.back(result: true),
-                    child: Text(
-                      'الخروج',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ),
-                ],
-              ),
-            ) ??
-            false;
-        if (exitApp) {
+        if (await confirmExitApp()) {
           exit(0);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'حلقات مسجد جابرة',
-            style: TextStyle(
-              fontFamily: 'GE_SS_Two',
-              fontWeight: FontWeight.bold,
+      child: JScaffold(
+        title: 'حلقات مسجد جابرة',
+        subtitle: 'قسم الإدارة · مسجد جابرة',
+        drawer: JAppDrawer(
+          items: [
+            JDrawerItem(
+              icon: Icons.menu_book_rounded,
+              label: 'قسم الحلقات',
+              onTap: () => Get.off(() => HomePageUser()),
             ),
-          ),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+            JDrawerItem(
+              icon: Icons.quiz_outlined,
+              label: 'اختبارات الجزئي',
+              tone: JTone.gold,
+              onTap: () => Get.to(() => StudentsPartialExams()),
+            ),
+            JDrawerItem(
+              icon: Icons.insert_chart_outlined_rounded,
+              label: 'التقارير المصدرة',
+              onTap: () => Get.to(() => ExportedReportsPage()),
+            ),
+            JDrawerItem(
+              icon: Icons.notifications_none_rounded,
+              label: 'الإشعارات',
+              tone: JTone.gold,
+              onTap: () => Get.to(() => NotificationsAdmin()),
+            ),
+            JDrawerItem(
+              icon: Icons.auto_delete_outlined,
+              label: 'سلة المحذوفات',
+              tone: JTone.danger,
+              onTap: () => Get.to(() => TrashPage()),
+            ),
+          ],
         ),
-        drawer: Drawer(
-          child: Container(
-            padding: const EdgeInsets.only(bottom: 30),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    DrawerHeader(
-                      decoration: const BoxDecoration(
-                        color: Color.fromARGB(255, 63, 181, 108),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CircleAvatar(
-                            backgroundImage: AssetImage('assets/profile.png'),
-                            radius: 40,
-                          ),
-                          Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Obx(() => Text(
-                                      userNameController.name.value,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                      ),
-                                    )),
-                                IconButton(
-                                  onPressed: () async {
-                                    var result =
-                                        await Get.to(() => TeacherInfo());
-                                    if (result != null) {
-                                      userNameController.name.value = result;
-                                      SharedPreferences prefs =
-                                          await SharedPreferences.getInstance();
-                                      await prefs.setString('name', result);
-                                    }
-                                  },
-                                  icon: Icon(Icons.edit),
-                                  color: Colors.white,
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.book_sharp),
-                      title: const Text('قسم الحلقات'),
-                      onTap: () {
-                        Get.off(() => HomePageUser());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.quiz),
-                      title: const Text('اختبارات الجزئي'),
-                      onTap: () {
-                        Get.to(() => StudentsPartialExams());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.data_thresholding),
-                      title: const Text('التقارير المصدرة'),
-                      onTap: () {
-                        Get.to(() => ExportedReportsPage());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.notification_important),
-                      title: const Text('الإشعارات'),
-                      onTap: () {
-                        Get.to(() => NotificationsAdmin());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.auto_delete),
-                      title: const Text('سلة المحذوفات'),
-                      onTap: () {
-                        Get.to(() => TrashPage());
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.logout),
-                      title: const Text('تسجيل الخروج'),
-                      onTap: () {
-                        Get.dialog(
-                          AlertDialog(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            title: const Text(
-                              'تأكيد تسجيل الخروج؟',
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            content: const Text(
-                                'هل أنت متأكد أنك تريد تسجيل الخروج؟'),
-                            actions: [
-                              TextButton(
-                                child: const Text(
-                                  'إلغاء',
-                                  style: TextStyle(color: Colors.black),
-                                ),
-                                onPressed: () {
-                                  Get.back();
-                                },
-                              ),
-                              TextButton(
-                                child: Obx(() => Text(
-                                      authController.isLoadingLogout.value
-                                          ? 'جاري تسجيل الخروج...'
-                                          : 'تسجيل الخروج',
-                                      style: const TextStyle(color: Colors.red),
-                                    )),
-                                onPressed: () async {
-                                  await authController.logout();
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+        body: SafeArea(
+          top: false,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.md,
+              AppSpacing.lg,
+              AppSpacing.md,
+              // مساحة أسفل القائمة حتى لا يغطّي الزر العائم آخر بطاقة.
+              AppSpacing.xxxl + AppSpacing.xxl,
+            ),
+            children: [
+              const JHomeHeader(title: 'القوائم'),
+              const SizedBox(height: AppSpacing.md),
+              Obx(
+                () => JTodayCard(
+                  greeting: _greeting(userNameController.name.value),
+                  caption: 'مسجد الجابرة · الرياض',
                 ),
-                Container(
-                  // alignment: Alignment.bottomCenter,
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text("للتواصل مع الدعم؟"),
-                          IconButton(
-                            onPressed: () async {
-                              if (await canLaunchUrl(
-                                  Uri.parse("https://wa.me/+966574195965"))) {
-                                await launchUrl(
-                                    Uri.parse("https://wa.me/+966574195965"),
-                                    mode: LaunchMode.externalApplication);
-                              } else {
-                                messageSnackBar("حدث خطأ، اعد المحاولة");
-                              }
-                            },
-                            icon: const Icon(Icons.phone),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        // alignment: Alignment.bottomCenter,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: GestureDetector(
-                          onTap: () async {
-                            if (versionController
-                                .versionData.value.isUpdateAvailable) {
-                              if (await canLaunchUrl(Uri.parse(
-                                  versionController.versionData.value.url))) {
-                                await launchUrl(
-                                    Uri.parse(versionController
-                                        .versionData.value.url),
-                                    mode: LaunchMode.externalApplication);
-                              }
-                            }
-                          },
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Obx(() => Text(
-                                    "الإصدار الحالي: ${versionController.currentVersion.value}",
-                                    style: TextStyle(
-                                      color: versionController.versionData.value
-                                              .isUpdateAvailable
-                                          ? Colors.blue
-                                          : Colors.black,
-                                      fontWeight: versionController.versionData
-                                              .value.isUpdateAvailable
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
-                                    ),
-                                  )),
-                              Obx(() {
-                                if (versionController
-                                    .versionData.value.isUpdateAvailable) {
-                                  return Icon(
-                                    Icons.update,
-                                    color: Colors.red,
-                                  );
-                                }
-                                return SizedBox();
-                              }),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              const JSectionHeader(title: 'أقسام الإدارة'),
+              GridView.count(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisCount: 2,
+                crossAxisSpacing: AppSpacing.sm,
+                mainAxisSpacing: AppSpacing.sm,
+                childAspectRatio: 0.98,
+                children: [
+                  JStatTile(
+                    title: 'الحلقات',
+                    icon: Icons.hub_outlined,
+                    unit: 'إدارة الحلقات والطلاب',
+                    onTap: () => Get.to(() => Groups()),
                   ),
+                  JStatTile(
+                    title: 'المعلمين',
+                    icon: Icons.menu_book_rounded,
+                    tone: JTone.gold,
+                    unit: 'البيانات والحضور والرواتب',
+                    onTap: () => Get.to(() => TeachersPanelPage()),
+                  ),
+                  JStatTile(
+                    title: 'الطلاب',
+                    icon: Icons.school_outlined,
+                    unit: 'بيانات الطلاب',
+                    onTap: () => Get.to(() => Panel_Students()),
+                  ),
+                  JStatTile(
+                    title: 'التقارير',
+                    icon: Icons.insert_chart_outlined_rounded,
+                    tone: JTone.danger,
+                    unit: 'تقارير الأداء والحضور',
+                    onTap: () => Get.to(() => Reports()),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: () => _showNotificationDialog(context),
+          icon: const Icon(Icons.notifications_active_outlined),
+          label: const Text('إرسال إشعار'),
+        ),
+      ),
+    );
+  }
+
+  static String _greeting(String name) {
+    final trimmed = name.trim();
+    return trimmed.isEmpty
+        ? 'السلام عليكم ورحمة الله'
+        : 'السلام عليكم، $trimmed';
+  }
+
+  void _showNotificationDialog(BuildContext context) {
+    final formKey = GlobalKey<FormState>();
+
+    showJDialog(
+      context: context,
+      dialog: Obx(
+        () => JDialog(
+          title: 'إرسال إشعار للمعلمين',
+          icon: Icons.notifications_active_outlined,
+          confirmLabel: 'إرسال',
+          loading: notificationController.isLoading.value,
+          loadingLabel: 'جاري الارسال...',
+          onConfirm: () {
+            if (formKey.currentState!.validate()) {
+              notificationController.sendNotification();
+            }
+          },
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: notificationController.titleController,
+                  decoration: const InputDecoration(labelText: 'العنوان'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'يجب إدخال عنوان الاشعار';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                TextFormField(
+                  controller: notificationController.bodyController,
+                  minLines: 2,
+                  maxLines: 4,
+                  decoration: const InputDecoration(labelText: 'النص'),
                 ),
               ],
             ),
           ),
         ),
-        body: Stack(
-          fit: StackFit.expand,
-          alignment: Alignment.center,
-          children: [
-            Align(
-              child: Opacity(
-                opacity: 0.2,
-                child: Image.asset(
-                  'assets/background12.png',
-                  height: double.infinity,
-                  width: 500,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(top: 100),
-              alignment: Alignment.topCenter,
-              child: const Text(
-                "القوائم",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 40,
-                  color: Colors.black,
-                ),
-              ),
-            ),
-            Center(
-              child: SizedBox(
-                width: 400,
-                height: 400,
-                child: GridView(
-                  padding: const EdgeInsets.all(10),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, // Number of columns
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 1,
-                  ),
-                  children: [
-                    _buildCard(
-                        context: context,
-                        title: "المعلمين",
-                        icon: Icons.person,
-                        color: Colors.blue,
-                        route: () => TeachersPanelPage()),
-                    _buildCard(
-                        context: context,
-                        title: "الحلقات",
-                        icon: Icons.group,
-                        color: Colors.red,
-                        route: () => Groups()),
-                    _buildCard(
-                        context: context,
-                        title: "التقارير",
-                        icon: Icons.report,
-                        color: Colors.green,
-                        route: () => Reports()),
-                    _buildCard(
-                        context: context,
-                        title: "الطلاب",
-                        icon: Icons.school,
-                        color: Colors.orange,
-                        route: () => Panel_Students()),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.extended(
-          onPressed: () {
-            final formKey = GlobalKey<FormState>();
-
-            showDialog(
-              context: context,
-              builder: (BuildContext context) {
-                return AlertDialog(
-                  title: const Text('إرسال إشعار للمعلمين'),
-                  content: Form(
-                    key: formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextFormField(
-                          controller: notificationController.titleController,
-                          decoration: const InputDecoration(
-                              labelText: 'العنوان',
-                              border: OutlineInputBorder()),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'يجب إدخال عنوان الاشعار';
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 10),
-                        TextFormField(
-                          controller: notificationController.bodyController,
-                          decoration: const InputDecoration(
-                              labelText: 'النص', border: OutlineInputBorder()),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Get.back();
-                      },
-                      child: const Text('إلغاء'),
-                    ),
-                    TextButton(
-                      onPressed: () async {
-                        if (formKey.currentState!.validate()) {
-                          notificationController.sendNotification();
-                        }
-                      },
-                      child: Obx(() => Text(
-                          notificationController.isLoading.value
-                              ? 'جاري الارسال...'
-                              : 'إرسال')),
-                    ),
-                  ],
-                );
-              },
-            );
-          },
-          icon: const Icon(
-            Icons.notification_add,
-            color: Colors.black,
-          ),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-          label:
-              const Text("ارسال اشعار", style: TextStyle(color: Colors.black)),
-        ),
       ),
     );
   }
-}
-
-Widget _buildCard({
-  required BuildContext context,
-  required String title,
-  required IconData icon,
-  required Color color,
-  required Widget Function() route,
-}) {
-  return GestureDetector(
-    onTap: () {
-      Get.to(route);
-    },
-    child: Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 8,
-      shadowColor: color.withValues(alpha: 0.5),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 50, color: color),
-            const SizedBox(height: 20),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                fontFamily: 'GE_SS_Two',
-              ),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
 }

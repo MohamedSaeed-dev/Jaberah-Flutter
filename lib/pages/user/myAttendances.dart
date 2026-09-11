@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/myAttendancesController.dart';
 import 'package:jaberah/helpers/timeHelpers.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class MyAttendances extends StatelessWidget {
   final controller = Get.put(MyAttendancesController());
@@ -13,7 +14,7 @@ class MyAttendances extends StatelessWidget {
     return Obx(() => Scaffold(
       appBar: AppBar(
         title: const Text('حضوري'),
-        backgroundColor: const Color(0xFF3FB56C),
+        backgroundColor: AppColors.primary,
         elevation: 2,
         actions: [
           Obx(() {
@@ -24,7 +25,7 @@ class MyAttendances extends StatelessWidget {
                 sel.day == today.day;
 
             return IconButton(
-              icon: const Icon(Icons.today, color: Colors.black),
+              icon: const Icon(Icons.today, color: AppColors.onPrimary),
               onPressed: isTodaySelected ? null : () => controller.goToToday(),
               tooltip: 'العودة إلى اليوم',
             );
@@ -68,7 +69,7 @@ class MyAttendances extends StatelessWidget {
     return Obx(() => Container(
           padding: const EdgeInsets.symmetric(vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF7F0),
+            color: AppColors.primaryTint,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -101,19 +102,19 @@ class MyAttendances extends StatelessWidget {
     } else {
       switch (status) {
         case 'Present':
-          color = Colors.green;
+          color = AppColors.primary;
           break;
         case 'Excused':
-          color = Colors.orange;
+          color = AppColors.gold;
           break;
         case 'Late':
-          color = Colors.amber;
+          color = AppColors.gold;
           break;
         case 'Absent':
-          color = Colors.red;
+          color = AppColors.danger;
           break;
         default:
-          color = Colors.grey.shade300;
+          color = AppColors.line;
       }
     }
     return SizedBox(
@@ -124,7 +125,7 @@ class MyAttendances extends StatelessWidget {
           shape: BoxShape.circle,
           color: color,
           border: isToday
-              ? Border.all(color: Colors.black87, width: 2)
+              ? Border.all(color: AppColors.ink, width: 2)
               : null,
         ),
         alignment: Alignment.center,
@@ -133,7 +134,7 @@ class MyAttendances extends StatelessWidget {
           child: Text(
             '${controller.getHijriDay(date)}',
             style: TextStyle(
-              color: selectedColor != null ? Colors.white : Colors.black,
+              color: selectedColor != null ? AppColors.onPrimary : AppColors.ink,
               fontSize: 16,
             ),
           ),
@@ -173,7 +174,7 @@ class MyAttendances extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: (i == 5 || i == 6) ? Colors.red : Colors.black,
+                    color: (i == 5 || i == 6) ? AppColors.danger : AppColors.ink,
                   ),
                 ),
               ),
@@ -198,7 +199,7 @@ class MyAttendances extends StatelessWidget {
                                     (cell.date!.year == sel.year &&
                                             cell.date!.month == sel.month &&
                                             cell.date!.day == sel.day)
-                                        ? Colors.blue.shade700
+                                        ? AppColors.primaryDark
                                         : null,
                                     cell.date!.year == today.year &&
                                         cell.date!.month == today.month &&
@@ -233,14 +234,14 @@ class MyAttendances extends StatelessWidget {
   static Color _statusColor(String status) {
     switch (status) {
       case 'Present':
-        return Colors.green;
+        return AppColors.primary;
       case 'Excused':
-        return Colors.orange;
+        return AppColors.gold;
       case 'Late':
-        return Colors.amber;
+        return AppColors.gold;
       case 'Absent':
       default:
-        return Colors.red;
+        return AppColors.danger;
     }
   }
 
@@ -253,12 +254,12 @@ class MyAttendances extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.onPrimary,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          border: Border.all(color: AppColors.line),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: AppColors.inkFaint.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -269,14 +270,14 @@ class MyAttendances extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Icon(Icons.calendar_today, size: 18, color: Colors.blueGrey),
+                const Icon(Icons.calendar_today, size: 18, color: AppColors.inkMuted),
                 const SizedBox(width: 8),
                 Text(
                   controller.formatDateHijri(date),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: AppColors.ink,
                   ),
                 ),
               ],
@@ -285,7 +286,7 @@ class MyAttendances extends StatelessWidget {
             if (dayItems.isEmpty)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 8),
-                child: Text('لا توجد بيانات حضور لهذا اليوم', style: TextStyle(color: Colors.grey)),
+                child: Text('لا توجد بيانات حضور لهذا اليوم', style: TextStyle(color: AppColors.inkFaint)),
               )
             else
               ...dayItems.map((item) {
@@ -342,7 +343,7 @@ class MyAttendances extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF3FB56C),
+                                  color: AppColors.primary,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -357,11 +358,11 @@ class MyAttendances extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.login_rounded, size: 18, color: Colors.grey.shade600),
+                                Icon(Icons.login_rounded, size: 18, color: AppColors.inkMuted),
                                 const SizedBox(width: 6),
                                 Text(
                                   'حضور',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                  style: TextStyle(fontSize: 12, color: AppColors.inkMuted),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -375,11 +376,11 @@ class MyAttendances extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.logout_rounded, size: 18, color: Colors.grey.shade600),
+                                Icon(Icons.logout_rounded, size: 18, color: AppColors.inkMuted),
                                 const SizedBox(width: 6),
                                 Text(
                                   'انصراف',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                  style: TextStyle(fontSize: 12, color: AppColors.inkMuted),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -403,8 +404,8 @@ class MyAttendances extends StatelessWidget {
                                 icon: const Icon(Icons.fingerprint, size: 18),
                                 label: const Text('تسجيل الحضور'),
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF3FB56C),
-                                  foregroundColor: Colors.white,
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: AppColors.onPrimary,
                                   padding: const EdgeInsets.symmetric(vertical: 14),
                                 ),
                               ),

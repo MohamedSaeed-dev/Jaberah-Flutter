@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/pages/user/followStudents/groups_followStudents.dart';
+import 'package:jaberah/theme/theme.dart';
 
 
 class FollowStudents extends StatelessWidget {
@@ -12,10 +13,8 @@ class FollowStudents extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           'المتابعة اليومية',
-          style:
-              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
         ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+        backgroundColor: AppColors.primary,
       ),
       body: Padding(
         padding: const EdgeInsets.all(10.0),
@@ -28,7 +27,7 @@ class FollowStudents extends StatelessWidget {
               context: context,
               title: 'تحضير الطلاب',
               icon: Icons.calendar_month,
-              color: Colors.green,
+              color: AppColors.primary,
               onTap: () {
                 Get.to(() => null);
               },
@@ -37,7 +36,7 @@ class FollowStudents extends StatelessWidget {
               context: context,
               title: 'تسميع الطلاب',
               icon: Icons.calendar_view_month,
-              color: Colors.blue,
+              color: AppColors.primary,
               onTap: () {
                 Get.to(() => GroupsFollowStudents());
               },
@@ -75,7 +74,6 @@ class FollowStudents extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'GE_SS_Two',
                 ),
               ),
             ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/editFollowStudentController.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class EditFollowStudent extends StatelessWidget {
   final controller = Get.put(EditFollowStudentController());
@@ -14,7 +15,7 @@ class EditFollowStudent extends StatelessWidget {
           child: FloatingActionButton.extended(
             icon: Icon(
               Icons.save,
-              color: Colors.black,
+              color: AppColors.onPrimary,
             ),
             onPressed: () async {
               if (formKey.currentState!.validate()) {
@@ -24,20 +25,16 @@ class EditFollowStudent extends StatelessWidget {
             label: Obx(() => Text(
                   controller.isLoading.value ? "جاري الحفظ..." : "حـفـظ",
                   style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
+                      color: AppColors.onPrimary, fontWeight: FontWeight.bold),
                 )),
-            backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+            backgroundColor: AppColors.primary,
           ),
         ),
         appBar: AppBar(
           title: Text(
             'تعديل بيانات التسميع',
-            style: TextStyle(
-              fontFamily: 'GE_SS_Two',
-              fontWeight: FontWeight.bold,
-            ),
           ),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+          backgroundColor: AppColors.primary,
         ),
         body: Container(
           alignment: Alignment.centerRight,
@@ -431,14 +428,14 @@ class EditFollowStudent extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          color: const Color.fromARGB(255, 63, 181, 108),
+                          color: AppColors.primary,
                           padding: EdgeInsets.symmetric(vertical: 15),
                           child: Obx(() => Text(
                                 controller.isLoading.value
                                     ? "جاري التحديث..."
                                     : "تحديث الحضور والسلوك",
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: AppColors.ink,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),

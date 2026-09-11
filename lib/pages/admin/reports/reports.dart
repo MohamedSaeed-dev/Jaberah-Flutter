@@ -6,124 +6,66 @@ import 'package:jaberah/pages/admin/reports/cleaningLogReport.dart';
 import 'package:jaberah/pages/admin/reports/prayersReport.dart';
 import 'package:jaberah/pages/admin/reports/semesterReports.dart';
 import 'package:jaberah/pages/admin/teachers/reportTeachersAttendances.dart';
+import 'package:jaberah/theme/theme.dart';
+import 'package:jaberah/widgets/ds/ds.dart';
 
 class Reports extends StatelessWidget {
   const Reports({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'التقارير',
-          style:
-              TextStyle(fontFamily: 'GE_SS_Two', fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: const Color.fromARGB(255, 63, 181, 108),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(10.0),
+    return JScaffold(
+      title: 'التقارير',
+      subtitle: 'أداء مسجد جابرة',
+      body: SafeArea(
+        top: false,
         child: GridView.count(
+          padding: const EdgeInsets.all(AppSpacing.md),
           crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 0.82,
+          crossAxisSpacing: AppSpacing.sm,
+          mainAxisSpacing: AppSpacing.sm,
+          childAspectRatio: 0.9,
           children: [
-            _buildCard(
-              context: context,
+            JStatTile(
               title: 'التقرير الفصلي',
-              icon: Icons.calendar_month,
-              color: Colors.blue,
-              onTap: () {
-                Get.to(() => SemesterReportPage());
-              },
+              icon: Icons.calendar_month_outlined,
+              unit: 'أداء الفصل الدراسي',
+              onTap: () => Get.to(() => SemesterReportPage()),
             ),
-            _buildCard(
-              context: context,
+            JStatTile(
               title: 'التقرير الشهري',
-              icon: Icons.calendar_view_month,
-              color: Colors.green,
-              onTap: () {
-                Get.to(() => MonthlyReportPage());
-              },
+              icon: Icons.calendar_view_month_outlined,
+              tone: JTone.gold,
+              unit: 'أداء الشهر',
+              onTap: () => Get.to(() => MonthlyReportPage()),
             ),
-            _buildCard(
-              context: context,
-              title: 'تقرير كشف الصلوات',
-              icon: Icons.mosque,
-              color: Colors.orange,
-              onTap: () {
-                Get.to(() => PrayersReportPage());
-              },
+            JStatTile(
+              title: 'كشف الصلوات',
+              icon: Icons.mosque_outlined,
+              unit: 'متابعة الصلوات',
+              onTap: () => Get.to(() => PrayersReportPage()),
             ),
-            _buildCard(
-              context: context,
-              title: 'تقرير الاختبارات الجزئية الشهري',
+            JStatTile(
+              title: 'الاختبارات الجزئية',
               icon: Icons.quiz_outlined,
-              color: Colors.amber,
-              onTap: () {
-                Get.to(() => MonthlyPartialExamReportPage());
-              },
+              tone: JTone.gold,
+              unit: 'التقرير الشهري',
+              onTap: () => Get.to(() => MonthlyPartialExamReportPage()),
             ),
-            _buildCard(
-              context: context,
-              title: 'تقرير حضور المعلمين',
-              icon: Icons.assessment,
-              color: Colors.teal,
-              onTap: () {
-                Get.to(() => TeachersAttendanceReport());
-              },
+            JStatTile(
+              title: 'حضور المعلمين',
+              icon: Icons.how_to_reg_outlined,
+              unit: 'سجل الحضور',
+              onTap: () => Get.to(() => TeachersAttendanceReport()),
             ),
-            _buildCard(
-              context: context,
-              title: 'تقرير كشف النظافة',
-              icon: Icons.cleaning_services,
-              color: Colors.indigo,
-              onTap: () {
-                Get.to(() => CleaningLogReportPage());
-              },
+            JStatTile(
+              title: 'كشف النظافة',
+              icon: Icons.cleaning_services_outlined,
+              tone: JTone.danger,
+              unit: 'متابعة النظافة',
+              onTap: () => Get.to(() => CleaningLogReportPage()),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  // Function to build each card
-  Widget _buildCard({
-    required BuildContext context,
-    required String title,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 8,
-        shadowColor: color.withOpacity(0.5),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 50, color: color),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                maxLines: 3,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'GE_SS_Two',
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/monthlyStudentsReports.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class MonthlyStudentsReports extends StatelessWidget {
   final MonthlyStudentsReportsController controller =
@@ -25,28 +26,28 @@ class MonthlyStudentsReports extends StatelessWidget {
                     label: const Text(
                       "عـرض الـتـقـريـر",
                       style: TextStyle(
-                        color: Colors.black,
+                        color: AppColors.onPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     icon: const Icon(
                       Icons.document_scanner_outlined,
-                      color: Colors.black,
+                      color: AppColors.onPrimary,
                     ),
-                    backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+                    backgroundColor: AppColors.primary,
                   ),
                 )),
           ]),
         ),
         appBar: AppBar(
           title: const Text('التقرير الشهري'),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+          backgroundColor: AppColors.primary,
           actions: [
             Obx(() => IconButton(
                   icon: Icon(
                     Icons.menu_book_rounded,
-                    color: Colors.black,
+                    color: AppColors.onPrimary,
                   ),
                   onPressed: controller.isLoading.value ||
                           controller.selectedGroupId.value == 0
@@ -112,7 +113,7 @@ class MonthlyStudentsReports extends StatelessWidget {
                 if (books.isEmpty)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Text("لا توجد كتب", style: TextStyle(color: Colors.grey)),
+                    child: Text("لا توجد كتب", style: TextStyle(color: AppColors.inkFaint)),
                   )
                 else
                   ConstrainedBox(
@@ -282,7 +283,7 @@ class MonthlyStudentsReports extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24, // Smaller for cleaner appearance
               fontWeight: FontWeight.w600, // Slightly bold for emphasis
               letterSpacing: 1.2, // Adds a modern touch with spaced letters
@@ -293,8 +294,8 @@ class MonthlyStudentsReports extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: AppColors.primary, // Blue accent for primary color
+      backgroundColor: AppColors.bgElev, // Light background for contrast
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedDate.value,
@@ -521,7 +522,7 @@ class MonthlyStudentsReports extends StatelessWidget {
               valueStyle: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: AppColors.primary,
               ),
             ),
           ],
@@ -587,7 +588,7 @@ class MonthlyStudentsReports extends StatelessWidget {
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: Colors.grey,
+        color: AppColors.inkFaint,
       ),
     );
   }

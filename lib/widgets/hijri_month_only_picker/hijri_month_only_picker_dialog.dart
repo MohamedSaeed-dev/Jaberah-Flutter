@@ -4,6 +4,7 @@ import 'package:jhijri/jHijri.dart';
 
 import '../hijri_year_only_picker/hijri_year_only_picker_dialog.dart';
 import 'hijri_month_only_picker_controller.dart';
+import 'package:jaberah/theme/theme.dart';
 
 typedef HijriMonthConfirmed = void Function(int hijriYear, int hijriMonth);
 
@@ -47,7 +48,7 @@ class HijriMonthOnlyPickerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = Get.find<HijriMonthOnlyPickerController>(tag: tag);
-    const primary = Color(0xFF3FB56C);
+    const primary = AppColors.primary;
 
     final h = MediaQuery.sizeOf(context).height;
     final gridHeight = (h * 0.52).clamp(380.0, 520.0);
@@ -73,7 +74,7 @@ class HijriMonthOnlyPickerDialog extends StatelessWidget {
                 padding:
                     const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFE8F5E9),
+                  color: AppColors.primaryTint,
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Row(
@@ -148,7 +149,7 @@ class HijriMonthOnlyPickerDialog extends StatelessWidget {
                         JHijri(fYear: year, fMonth: month, fDay: 1).monthName;
                     return Material(
                       elevation: selected ? 4 : 1,
-                      shadowColor: Colors.black26,
+                      shadowColor: AppColors.shadow,
                       borderRadius: BorderRadius.circular(16),
                       color: Colors.transparent,
                       child: InkWell(
@@ -158,12 +159,12 @@ class HijriMonthOnlyPickerDialog extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: selected
                                 ? primary
-                                : Colors.white,
+                                : AppColors.onPrimary,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: selected
                                   ? primary
-                                  : const Color(0xFFE0E0E0),
+                                  : AppColors.line,
                               width: selected ? 2 : 1.2,
                             ),
                           ),
@@ -183,8 +184,8 @@ class HijriMonthOnlyPickerDialog extends StatelessWidget {
                                       ? FontWeight.w800
                                       : FontWeight.w600,
                                   color: selected
-                                      ? Colors.white
-                                      : const Color(0xFF1B1B1B),
+                                      ? AppColors.onPrimary
+                                      : AppColors.ink,
                                 ),
                               ),
                             ),

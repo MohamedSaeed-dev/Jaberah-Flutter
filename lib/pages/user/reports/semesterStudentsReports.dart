@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:jaberah/controllers/user/semesterStudentsReportsController.dart';
 import 'package:jhijri/_src/_jHijri.dart';
 import 'package:jhijri_picker/_src/_jWidgets.dart';
+import 'package:jaberah/theme/theme.dart';
 
 class SemesterStudentsReports extends StatelessWidget {
   final SemesterStudentsReportsController controller =
@@ -25,16 +26,16 @@ class SemesterStudentsReports extends StatelessWidget {
                     label: const Text(
                       "عـرض الـتـقـريـر",
                       style: TextStyle(
-                        color: Colors.black,
+                        color: AppColors.onPrimary,
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     icon: const Icon(
                       Icons.document_scanner_outlined,
-                      color: Colors.black,
+                      color: AppColors.onPrimary,
                     ),
-                    backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+                    backgroundColor: AppColors.primary,
                   ),
                 )
             ),
@@ -42,7 +43,7 @@ class SemesterStudentsReports extends StatelessWidget {
         ),
         appBar: AppBar(
           title: const Text('التقارير الفصلية'),
-          backgroundColor: const Color.fromARGB(255, 63, 181, 108),
+          backgroundColor: AppColors.primary,
         ),
         body: Padding(
           padding: const EdgeInsets.all(12.0),
@@ -131,7 +132,7 @@ class SemesterStudentsReports extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24, // Smaller for cleaner appearance
               fontWeight: FontWeight.w600, // Slightly bold for emphasis
               letterSpacing: 1.2, // Adds a modern touch with spaced letters
@@ -142,8 +143,8 @@ class SemesterStudentsReports extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: AppColors.primary, // Blue accent for primary color
+      backgroundColor: AppColors.bgElev, // Light background for contrast
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedFromDate.value,
@@ -191,7 +192,7 @@ class SemesterStudentsReports extends StatelessWidget {
           child: Text(
             "التقويم الهجري",
             style: TextStyle(
-              color: Colors.white,
+              color: AppColors.onPrimary,
               fontSize: 24, // Smaller for cleaner appearance
               fontWeight: FontWeight.w600, // Slightly bold for emphasis
               letterSpacing: 1.2, // Adds a modern touch with spaced letters
@@ -202,8 +203,8 @@ class SemesterStudentsReports extends StatelessWidget {
       locale: const Locale("ar", "SA"),
       context: context,
       pickerType: PickerType.JHijri,
-      primaryColor: const Color(0xFF1976D2), // Blue accent for primary color
-      backgroundColor: Colors.white, // Light background for contrast
+      primaryColor: AppColors.primary, // Blue accent for primary color
+      backgroundColor: AppColors.bgElev, // Light background for contrast
       cancelButtonText: "إلغاء",
       okButtonText: "تأكيد",
       selectedDate: controller.selectedToDate.value,
@@ -435,7 +436,7 @@ class SemesterStudentsReports extends StatelessWidget {
               valueStyle: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: AppColors.primary,
               ),
             ),
           ],
@@ -477,7 +478,7 @@ class SemesterStudentsReports extends StatelessWidget {
       style: const TextStyle(
         fontSize: 16,
         fontWeight: FontWeight.bold,
-        color: Colors.grey,
+        color: AppColors.inkFaint,
       ),
     );
   }
