@@ -159,7 +159,7 @@ class HijriMonthOnlyPickerDialog extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: selected
                                 ? primary
-                                : AppColors.onPrimary,
+                                : AppColors.bgElev,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
                               color: selected

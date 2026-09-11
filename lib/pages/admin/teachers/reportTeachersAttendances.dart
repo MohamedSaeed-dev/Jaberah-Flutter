@@ -83,7 +83,7 @@ class TeachersAttendanceReport extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            color: AppColors.onPrimary,
+            color: AppColors.bgElev,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: _buildHijriDatePicker(context, "اليوم:"),
@@ -127,7 +127,7 @@ class TeachersAttendanceReport extends StatelessWidget {
       elevation: 4,
       shadowColor: AppColors.shadow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: AppColors.onPrimary,
+      color: AppColors.bgElev,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
         child: Column(
@@ -321,7 +321,7 @@ class TeachersAttendanceReport extends StatelessWidget {
       elevation: 3,
       shadowColor: AppColors.shadow,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-      color: AppColors.onPrimary,
+      color: AppColors.bgElev,
       margin: const EdgeInsets.symmetric(vertical: 6),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -560,7 +560,7 @@ class TeachersAttendanceReport extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
-            color: AppColors.onPrimary,
+            color: AppColors.bgElev,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: _buildHijriMonthDatePicker(context, "الشهر:"),

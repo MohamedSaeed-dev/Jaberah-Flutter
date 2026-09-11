@@ -452,7 +452,7 @@ class StudentsPartialExams extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppColors.onPrimary,
+        color: AppColors.bgElev,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: AppColors.line),
       ),
@@ -796,9 +796,9 @@ class StudentsPartialExams extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 10, horizontal: 4),
       decoration: BoxDecoration(
-        color: AppColors.onPrimary,
+        color: AppColors.bgElev,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: AppColors.inkFaint),
+        border: Border.all(color: AppColors.line),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

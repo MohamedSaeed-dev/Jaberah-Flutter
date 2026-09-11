@@ -27,7 +27,7 @@ class TeachersSalaries extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              color: AppColors.onPrimary,
+              color: AppColors.bgElev,
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: _buildHijriMonthDatePicker(context, "الشهر:"),

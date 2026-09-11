@@ -254,7 +254,7 @@ class MyAttendances extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 0),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.onPrimary,
+          color: AppColors.bgElev,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: AppColors.line),
           boxShadow: [
